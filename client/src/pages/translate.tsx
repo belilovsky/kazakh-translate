@@ -42,7 +42,7 @@ interface TranslateResponse {
 }
 
 // Kazakh ornament SVG logo
-function TilmashLogo() {
+function KaztilshiLogo() {
   return (
     <svg
       width="32"
@@ -50,17 +50,18 @@ function TilmashLogo() {
       viewBox="0 0 32 32"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
-      aria-label="Тілмаш логотип"
+      aria-label="Қазтілші логотип"
       className="shrink-0"
     >
       {/* Background circle with primary color */}
       <circle cx="16" cy="16" r="15" fill="hsl(var(--primary))" />
-      {/* Stylized Т letter */}
-      <rect x="8" y="9" width="16" height="2.5" rx="1.25" fill="white" />
-      <rect x="14.25" y="9" width="3.5" height="14" rx="1.75" fill="white" />
+      {/* Stylized Қ letter */}
+      <rect x="8" y="9" width="2.5" height="14" rx="1.25" fill="white" />
+      <line x1="10.5" y1="16" x2="20" y2="9" stroke="white" strokeWidth="2.5" strokeLinecap="round" />
+      <line x1="10.5" y1="16" x2="20" y2="23" stroke="white" strokeWidth="2.5" strokeLinecap="round" />
       {/* Small ornament dots */}
-      <circle cx="9.5" cy="22" r="1.2" fill="white" opacity="0.6" />
-      <circle cx="22.5" cy="22" r="1.2" fill="white" opacity="0.6" />
+      <circle cx="22.5" cy="8.5" r="1.2" fill="white" opacity="0.6" />
+      <circle cx="22.5" cy="23.5" r="1.2" fill="white" opacity="0.6" />
     </svg>
   );
 }
@@ -158,8 +159,8 @@ export default function TranslatePage() {
         <div className="max-w-4xl mx-auto px-4 h-14 flex items-center justify-between">
           {/* Logo + Name */}
           <Link href="/" className="flex items-center gap-2.5 hover:opacity-80 transition-opacity">
-            <TilmashLogo />
-            <span className="font-semibold text-base tracking-tight">Тілмаш</span>
+            <KaztilshiLogo />
+            <span className="font-semibold text-base tracking-tight">Қазтілші</span>
           </Link>
 
           {/* Right side controls */}

@@ -28,7 +28,7 @@ COPY --from=builder /app/dist ./dist
 
 # SQLite data directory (mount as volume for persistence)
 RUN mkdir -p /app/data
-ENV DB_PATH=/app/data/tilmash.db
+ENV DB_PATH=/app/data/kaztilshi.db
 
 EXPOSE 5000
 
