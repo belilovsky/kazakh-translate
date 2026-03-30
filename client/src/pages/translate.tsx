@@ -4,7 +4,7 @@ import { Link } from "wouter";
 import {
   Sun, Moon, Copy, Check, ThumbsUp, ThumbsDown,
   ChevronDown, ChevronUp, History, X, ArrowRightLeft,
-  Sparkles, Clock, Loader2,
+  Sparkles, Clock, Loader2, Mic, MicOff, Volume2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -81,6 +81,91 @@ export default function TranslatePage() {
   const [result, setResult] = useState<TranslateResponse | null>(null);
   const [variantsOpen, setVariantsOpen] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+
+  // Voice input
+  const [isListening, setIsListening] = useState(false);
+  const recognitionRef = useRef<any>(null);
+
+  const speechSupported = typeof window !== "undefined" &&
+    ("SpeechRecognition" in window || "webkitSpeechRecognition" in window);
+
+  const LANG_CODES: Record<SourceLang, string> = {
+    ru: "ru-RU",
+    en: "en-US",
+  };
+
+  const toggleListening = () => {
+    if (isListening) {
+      recognitionRef.current?.stop();
+      setIsListening(false);
+      return;
+    }
+
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      toast({ title: "Браузер дауыстық енгізуді қолдамайды", variant: "destructive" });
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.lang = LANG_CODES[sourceLang];
+    recognition.interimResults = true;
+    recognition.continuous = true;
+    recognition.maxAlternatives = 1;
+
+    let finalTranscript = sourceText;
+
+    recognition.onresult = (event: any) => {
+      let interim = "";
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const transcript = event.results[i][0].transcript;
+        if (event.results[i].isFinal) {
+          finalTranscript += (finalTranscript ? " " : "") + transcript;
+          setSourceText(finalTranscript);
+        } else {
+          interim += transcript;
+        }
+      }
+      // Show interim results
+      if (interim) {
+        setSourceText(finalTranscript + (finalTranscript ? " " : "") + interim);
+      }
+    };
+
+    recognition.onerror = (event: any) => {
+      console.error("Speech recognition error:", event.error);
+      if (event.error !== "aborted") {
+        toast({ title: "Дауыстық енгізу қатесі", description: event.error, variant: "destructive" });
+      }
+      setIsListening(false);
+    };
+
+    recognition.onend = () => {
+      setIsListening(false);
+    };
+
+    recognitionRef.current = recognition;
+    recognition.start();
+    setIsListening(true);
+  };
+
+  // TTS — read translation aloud
+  const handleSpeak = (text: string) => {
+    if (!text || !window.speechSynthesis) return;
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    // Try Kazakh, fall back to Russian (closer pronunciation)
+    utterance.lang = "kk-KZ";
+    utterance.rate = 0.9;
+    window.speechSynthesis.speak(utterance);
+  };
+
+  // Cleanup recognition on unmount
+  useEffect(() => {
+    return () => {
+      recognitionRef.current?.stop();
+    };
+  }, []);
 
   const translateMutation = useMutation({
     mutationFn: async (payload: { text: string; sourceLang: string; targetLang: string }) => {
@@ -282,6 +367,28 @@ export default function TranslatePage() {
                     <TooltipContent>Тазарту</TooltipContent>
                   </Tooltip>
                 )}
+                {speechSupported && (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={toggleListening}
+                        className={`h-8 w-8 ${
+                          isListening
+                            ? "text-destructive animate-pulse"
+                            : "text-muted-foreground"
+                        }`}
+                        data-testid="voice-input"
+                      >
+                        {isListening ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      {isListening ? "Тоқтату" : "Дауыспен енгізу"}
+                    </TooltipContent>
+                  </Tooltip>
+                )}
               </div>
 
               <div className="flex items-center gap-3">
@@ -370,6 +477,22 @@ export default function TranslatePage() {
                         </Button>
                       </TooltipTrigger>
                       <TooltipContent>Көшіру</TooltipContent>
+                    </Tooltip>
+
+                    {/* Listen */}
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleSpeak(displayedText)}
+                          className="h-8 w-8 text-muted-foreground"
+                          data-testid="speak-translation"
+                        >
+                          <Volume2 className="h-4 w-4" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>Тыңдау</TooltipContent>
                     </Tooltip>
 
                     {/* Rating */}
