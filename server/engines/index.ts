@@ -1,18 +1,20 @@
 import { openaiEngine } from "./openai.js";
 import { tilmashEngine } from "./tilmash.js";
+import { geminiEngine } from "./gemini.js";
 import { deeplEngine } from "./deepl.js";
 import { yandexEngine } from "./yandex.js";
 import type { TranslationEngine, TranslationResult } from "./types.js";
 
-// Priority order: openai > tilmash > deepl > yandex
+// Priority order: openai > gemini > tilmash > deepl > yandex
 export const engines: TranslationEngine[] = [
   openaiEngine,
+  geminiEngine,
   tilmashEngine,
   deeplEngine,
   yandexEngine,
 ];
 
-const PRIORITY_ORDER = ["openai", "tilmash", "deepl", "yandex"];
+const PRIORITY_ORDER = ["openai", "gemini", "tilmash", "deepl", "yandex"];
 
 /**
  * Run all engines in parallel and return results sorted by priority/confidence.
@@ -68,7 +70,7 @@ export async function translateWithAll(
  * Falls back to the first result if all have errors.
  */
 export function selectBest(results: TranslationResult[]): TranslationResult {
-  // Try priority order: openai > tilmash > deepl > yandex
+  // Try priority order: openai > gemini > tilmash > deepl > yandex
   for (const engineName of PRIORITY_ORDER) {
     const result = results.find((r) => r.engine === engineName && !r.error && r.text);
     if (result) return result;

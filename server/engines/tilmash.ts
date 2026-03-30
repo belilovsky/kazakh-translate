@@ -1,13 +1,13 @@
 import type { TranslationEngine, TranslationResult } from "./types.js";
 
-const LANG_MAP: Record<string, string> = {
-  ru: "rus_Cyrl",
-  en: "eng_Latn",
-};
+const HF_CHAT_URL = "https://router.huggingface.co/v1/chat/completions";
+const HF_MODEL = "Qwen/Qwen2.5-72B-Instruct";
+const TIMEOUT_MS = 30000;
 
-const TARGET_LANG = "kaz_Cyrl";
-const HF_MODEL_URL = "https://router.huggingface.co/models/issai/tilmash";
-const TIMEOUT_MS = 15000;
+const LANG_NAMES: Record<string, string> = {
+  ru: "русского",
+  en: "английского",
+};
 
 export const tilmashEngine: TranslationEngine = {
   name: "tilmash",
@@ -20,13 +20,13 @@ export const tilmashEngine: TranslationEngine = {
       return {
         engine: "tilmash",
         text: "",
-        error: "HUGGINGFACE_API_KEY is required to use the Tilmash engine",
+        error: "HUGGINGFACE_API_KEY is required",
         latencyMs: Date.now() - start,
       };
     }
 
-    const srcLang = LANG_MAP[sourceLang];
-    if (!srcLang) {
+    const langName = LANG_NAMES[sourceLang];
+    if (!langName) {
       return {
         engine: "tilmash",
         text: "",
@@ -39,18 +39,26 @@ export const tilmashEngine: TranslationEngine = {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), TIMEOUT_MS);
 
-      const response = await fetch(HF_MODEL_URL, {
+      const response = await fetch(HF_CHAT_URL, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${apiKey}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          inputs: text,
-          parameters: {
-            src_lang: srcLang,
-            tgt_lang: TARGET_LANG,
-          },
+          model: HF_MODEL,
+          messages: [
+            {
+              role: "system",
+              content: `Сен кәсіби қазақ тілі аудармашысысың. Берілген мәтінді ${langName} тілінен қазақ тіліне (қазақша) аудар. Аударманы ғана жаз, басқа ештеңе жазба. Түпнұсқаның мағынасы мен стилін сақта.`,
+            },
+            {
+              role: "user",
+              content: text,
+            },
+          ],
+          max_tokens: 2000,
+          temperature: 0.3,
         }),
         signal: controller.signal,
       });
@@ -68,20 +76,13 @@ export const tilmashEngine: TranslationEngine = {
       }
 
       const data = await response.json() as any;
+      const translatedText = data?.choices?.[0]?.message?.content?.trim() ?? "";
 
-      // HF inference API returns [{ translation_text: "..." }] for translation models
-      let translatedText = "";
-      if (Array.isArray(data) && data.length > 0 && data[0].translation_text) {
-        translatedText = data[0].translation_text;
-      } else if (data?.translation_text) {
-        translatedText = data.translation_text;
-      } else if (typeof data === "string") {
-        translatedText = data;
-      } else {
+      if (!translatedText) {
         return {
           engine: "tilmash",
           text: "",
-          error: `Unexpected response format: ${JSON.stringify(data)}`,
+          error: "Empty response from model",
           latencyMs: Date.now() - start,
         };
       }
@@ -89,7 +90,7 @@ export const tilmashEngine: TranslationEngine = {
       return {
         engine: "tilmash",
         text: translatedText,
-        confidence: 0.85,
+        confidence: 0.88,
         latencyMs: Date.now() - start,
       };
     } catch (err: any) {
@@ -97,7 +98,7 @@ export const tilmashEngine: TranslationEngine = {
       return {
         engine: "tilmash",
         text: "",
-        error: isTimeout ? "Request timed out after 15s" : (err?.message ?? "Unknown error"),
+        error: isTimeout ? "Request timed out after 30s" : (err?.message ?? "Unknown error"),
         latencyMs: Date.now() - start,
       };
     }

@@ -138,6 +138,10 @@ export async function registerRoutes(
           keyEnvVar = "HUGGINGFACE_API_KEY";
           hasApiKey = Boolean(process.env.HUGGINGFACE_API_KEY);
           break;
+        case "gemini":
+          keyEnvVar = "GEMINI_API_KEY";
+          hasApiKey = Boolean(process.env.GEMINI_API_KEY);
+          break;
         case "deepl":
           keyEnvVar = "DEEPL_API_KEY";
           hasApiKey = Boolean(process.env.DEEPL_API_KEY);
