@@ -8,13 +8,28 @@ import { selfEvaluateAndImprove } from "./self-eval.js";
 import type { TranslationEngine, TranslationResult } from "./types.js";
 
 // Priority order: ensemble > openai > gemini > tilmash > deepl > yandex
-export const engines: TranslationEngine[] = [
+// Only include engines whose API keys are configured
+const allEngines: TranslationEngine[] = [
   openaiEngine,
   geminiEngine,
   tilmashEngine,
   deeplEngine,
   yandexEngine,
 ];
+
+const ENGINE_ENV_KEYS: Record<string, string> = {
+  deepl: "DEEPL_API_KEY",
+  yandex: "YANDEX_API_KEY",
+};
+
+export const engines: TranslationEngine[] = allEngines.filter((e) => {
+  const envKey = ENGINE_ENV_KEYS[e.name];
+  if (envKey && !process.env[envKey]) {
+    console.log(`Skipping ${e.name}: ${envKey} not set`);
+    return false;
+  }
+  return true;
+});
 
 const PRIORITY_ORDER = ["ensemble", "openai", "gemini", "tilmash", "deepl", "yandex"];
 
@@ -94,8 +109,10 @@ export async function translateWithAll(
       return PRIORITY_ORDER.indexOf(a.engine) - PRIORITY_ORDER.indexOf(b.engine);
     });
 
+  // Only include errors that are NOT about missing API keys (no point showing those)
   const failed = rawResults
     .filter((r) => r.error || !r.text)
+    .filter((r) => !r.error?.toLowerCase().includes("key is not set") && !r.error?.toLowerCase().includes("api_key"))
     .sort(
       (a, b) => PRIORITY_ORDER.indexOf(a.engine) - PRIORITY_ORDER.indexOf(b.engine)
     );
