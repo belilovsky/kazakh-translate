@@ -1,0 +1,23 @@
+{
+  "name": "Қазтілші — AI қазақ тілі аудармашысы",
+  "short_name": "Қазтілші",
+  "description": "AI негізіндегі қазақ тіліне аудару сервисі",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#faf5ec",
+  "theme_color": "#c89b37",
+  "icons": [
+    {
+      "src": "/favicon.png",
+      "sizes": "32x32",
+      "type": "image/png"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ],
+  "lang": "kk",
+  "categories": ["utilities", "productivity"]
+}

@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://kmt.qdev.run/sitemap.xml
