@@ -6,7 +6,7 @@ const LANG_MAP: Record<string, string> = {
 };
 
 const TARGET_LANG = "kaz_Cyrl";
-const HF_MODEL_URL = "https://api-inference.huggingface.co/models/issai/tilmash";
+const HF_MODEL_URL = "https://router.huggingface.co/models/issai/tilmash";
 const TIMEOUT_MS = 15000;
 
 export const tilmashEngine: TranslationEngine = {
