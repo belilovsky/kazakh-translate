@@ -117,7 +117,7 @@ function QualityBadge({ score }: { score: number }) {
         </span>
       </TooltipTrigger>
       <TooltipContent>
-        Аударма сапасы: {score >= 9 ? "жоғары" : score >= 7 ? "орташа" : "жақсарту қажет"}
+        Качество перевода: {score >= 9 ? "высокое" : score >= 7 ? "среднее" : "требует улучшения"}
       </TooltipContent>
     </Tooltip>
   );
@@ -156,7 +156,7 @@ export default function TranslatePage() {
 
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (!SpeechRecognition) {
-      toast({ title: "Браузер дауыстық енгізуді қолдамайды", variant: "destructive" });
+      toast({ title: "Браузер не поддерживает голосовой ввод", variant: "destructive" });
       return;
     }
 
@@ -187,7 +187,7 @@ export default function TranslatePage() {
     recognition.onerror = (event: any) => {
       console.error("Speech recognition error:", event.error);
       if (event.error !== "aborted") {
-        toast({ title: "Дауыстық енгізу қатесі", description: event.error, variant: "destructive" });
+        toast({ title: "Ошибка голосового ввода", description: event.error, variant: "destructive" });
       }
       setIsListening(false);
     };
@@ -228,7 +228,7 @@ export default function TranslatePage() {
     },
     onError: (err: Error) => {
       toast({
-        title: "Қате",
+        title: "Ошибка",
         description: err.message,
         variant: "destructive",
       });
@@ -241,7 +241,7 @@ export default function TranslatePage() {
       return res.json();
     },
     onSuccess: () => {
-      toast({ title: "Бағалау сақталды" });
+      toast({ title: "Оценка сохранена" });
     },
   });
 
@@ -263,7 +263,7 @@ export default function TranslatePage() {
       setCopiedId(id);
       setTimeout(() => setCopiedId(null), 2000);
     } catch {
-      toast({ title: "Көшіру сәтсіз", variant: "destructive" });
+      toast({ title: "Не удалось скопировать", variant: "destructive" });
     }
   };
 
@@ -294,9 +294,9 @@ export default function TranslatePage() {
   const maxChars = 5000;
   const isLoading = translateMutation.isPending;
 
-  const langOptions: { value: SourceLang; label: string; flag: string }[] = [
-    { value: "ru", label: "Русский", flag: "🇷🇺" },
-    { value: "en", label: "English", flag: "🇬🇧" },
+  const langOptions: { value: SourceLang; label: string }[] = [
+    { value: "ru", label: "Русский" },
+    { value: "en", label: "English" },
   ];
 
   const engineResults = result?.allResults?.filter((r) => r.engine !== "ensemble") ?? [];
@@ -313,7 +313,7 @@ export default function TranslatePage() {
             <KaztilshiLogo size={32} />
             <div className="flex flex-col">
               <span className="font-bold text-base tracking-tight leading-none">Қазтілші</span>
-              <span className="text-[10px] text-muted-foreground leading-tight hidden sm:block">AI аудармашы</span>
+              <span className="text-[10px] text-muted-foreground leading-tight hidden sm:block">AI-переводчик</span>
             </div>
           </div>
 
@@ -321,7 +321,7 @@ export default function TranslatePage() {
             <Button variant="ghost" size="sm" asChild className="text-muted-foreground">
               <Link href="/history" data-testid="history-link">
                 <History className="h-4 w-4 mr-1.5" />
-                <span className="hidden sm:inline">Тарих</span>
+                <span className="hidden sm:inline">История</span>
               </Link>
             </Button>
             <Tooltip>
@@ -336,7 +336,7 @@ export default function TranslatePage() {
                   {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
                 </Button>
               </TooltipTrigger>
-              <TooltipContent>{theme === "dark" ? "Жарық тема" : "Қараңғы тема"}</TooltipContent>
+              <TooltipContent>{theme === "dark" ? "Светлая тема" : "Тёмная тема"}</TooltipContent>
             </Tooltip>
           </div>
         </div>
@@ -359,8 +359,7 @@ export default function TranslatePage() {
                     : "text-muted-foreground hover:text-foreground"
                 }`}
               >
-                <span className="text-base leading-none">{opt.flag}</span>
-                <span className="hidden sm:inline">{opt.label}</span>
+                <span>{opt.label}</span>
                 {sourceLang === opt.value && (
                   <span className="absolute bottom-0 left-2 right-2 h-[2px] bg-primary rounded-full" />
                 )}
@@ -381,9 +380,7 @@ export default function TranslatePage() {
               className="flex items-center gap-1.5 px-3 sm:px-5 py-3 text-sm font-medium text-primary relative whitespace-nowrap"
               data-testid="lang-kk"
             >
-              <span className="text-base leading-none">🇰🇿</span>
-              <span className="hidden sm:inline">Қазақша</span>
-              <span className="sm:hidden">ҚАЗ</span>
+              <span>Қазақша</span>
               <span className="absolute bottom-0 left-2 right-2 h-[2px] bg-primary rounded-full" />
             </button>
           </div>
@@ -398,10 +395,10 @@ export default function TranslatePage() {
               value={sourceText}
               onChange={(e) => setSourceText(e.target.value.slice(0, maxChars))}
               onKeyDown={handleKeyDown}
-              placeholder="Мәтінді енгізіңіз..."
+              placeholder="Введите текст..."
               className="w-full resize-none bg-transparent text-base leading-relaxed p-4 sm:p-5 pb-14 outline-none placeholder:text-muted-foreground/50 min-h-[180px]"
               data-testid="source-textarea"
-              aria-label="Бастапқы мәтін"
+              aria-label="Исходный текст"
             />
 
             {/* Source panel footer */}
@@ -420,7 +417,7 @@ export default function TranslatePage() {
                         <X className="h-4 w-4" />
                       </Button>
                     </TooltipTrigger>
-                    <TooltipContent>Тазарту</TooltipContent>
+                    <TooltipContent>Очистить</TooltipContent>
                   </Tooltip>
                 )}
                 {speechSupported && (
@@ -441,7 +438,7 @@ export default function TranslatePage() {
                       </Button>
                     </TooltipTrigger>
                     <TooltipContent>
-                      {isListening ? "Тоқтату" : "Дауыспен енгізу"}
+                      {isListening ? "Остановить" : "Голосовой ввод"}
                     </TooltipContent>
                   </Tooltip>
                 )}
@@ -467,14 +464,14 @@ export default function TranslatePage() {
                   {isLoading ? (
                     <>
                       <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                      <span className="hidden sm:inline">Аударылуда...</span>
+                      <span className="hidden sm:inline">Перевод...</span>
                       <span className="sm:hidden">...</span>
                     </>
                   ) : (
                     <>
                       <Languages className="h-3.5 w-3.5 sm:hidden" />
-                      <span className="hidden sm:inline">Аудару</span>
-                      <span className="sm:hidden">Аудару</span>
+                      <span className="hidden sm:inline">Перевести</span>
+                      <span className="sm:hidden">Перевести</span>
                     </>
                   )}
                 </Button>
@@ -493,7 +490,7 @@ export default function TranslatePage() {
                     <span className="absolute -top-0.5 -right-0.5 h-2 w-2 bg-primary rounded-full animate-ping" />
                   </div>
                   <span className="text-sm text-muted-foreground">
-                    Аудармашылар жұмыс істеуде...
+                    Переводчики работают...
                   </span>
                 </div>
                 <Skeleton className="h-4 w-full bg-muted/60" />
@@ -524,7 +521,7 @@ export default function TranslatePage() {
                     )}
                     {result.meta?.evalIterations !== undefined && result.meta.evalIterations > 1 && (
                       <span className="text-[11px] text-muted-foreground">
-                        +{result.meta.evalIterations - 1} итерация
+                        +{result.meta.evalIterations - 1} итераций улучшения
                       </span>
                     )}
                   </div>
@@ -550,7 +547,7 @@ export default function TranslatePage() {
                           )}
                         </Button>
                       </TooltipTrigger>
-                      <TooltipContent>Көшіру</TooltipContent>
+                      <TooltipContent>Копировать</TooltipContent>
                     </Tooltip>
 
                     {/* Listen */}
@@ -566,7 +563,7 @@ export default function TranslatePage() {
                           <Volume2 className="h-4 w-4" />
                         </Button>
                       </TooltipTrigger>
-                      <TooltipContent>Тыңдау</TooltipContent>
+                      <TooltipContent>Прослушать</TooltipContent>
                     </Tooltip>
 
                     {/* Rating */}
@@ -583,7 +580,7 @@ export default function TranslatePage() {
                           <ThumbsUp className="h-4 w-4" />
                         </Button>
                       </TooltipTrigger>
-                      <TooltipContent>Жақсы аударма</TooltipContent>
+                      <TooltipContent>Хороший перевод</TooltipContent>
                     </Tooltip>
 
                     <Tooltip>
@@ -599,7 +596,7 @@ export default function TranslatePage() {
                           <ThumbsDown className="h-4 w-4" />
                         </Button>
                       </TooltipTrigger>
-                      <TooltipContent>Нашар аударма</TooltipContent>
+                      <TooltipContent>Плохой перевод</TooltipContent>
                     </Tooltip>
                   </div>
 
@@ -615,7 +612,7 @@ export default function TranslatePage() {
               <div className="flex items-center justify-center flex-1 p-5">
                 <div className="text-center">
                   <Languages className="h-8 w-8 text-muted-foreground/25 mx-auto mb-2" />
-                  <p className="text-sm text-muted-foreground/40">Аударма</p>
+                  <p className="text-sm text-muted-foreground/40">Перевод</p>
                 </div>
               </div>
             )}
@@ -628,7 +625,7 @@ export default function TranslatePage() {
             <kbd className="px-1.5 py-0.5 bg-muted/50 border border-border rounded text-[10px]">Ctrl</kbd>
             {" + "}
             <kbd className="px-1.5 py-0.5 bg-muted/50 border border-border rounded text-[10px]">Enter</kbd>
-            {" — жылдам аудару"}
+            {" — быстрый перевод"}
           </div>
         )}
 
@@ -645,7 +642,7 @@ export default function TranslatePage() {
               ) : (
                 <ChevronDown className="h-4 w-4" />
               )}
-              <span>Барлық нұсқалар ({engineResults.length})</span>
+              <span>Все варианты ({engineResults.length})</span>
             </button>
 
             {variantsOpen && (
@@ -713,7 +710,7 @@ export default function TranslatePage() {
             <div className="flex items-center gap-2 mb-2">
               <Shield className="h-4 w-4 text-amber-500" />
               <span className="text-sm font-medium text-amber-700 dark:text-amber-400">
-                Сапа бағалау ескертулері
+                Замечания по качеству
               </span>
             </div>
             <ul className="text-xs text-muted-foreground space-y-1">
@@ -731,7 +728,7 @@ export default function TranslatePage() {
       {/* Footer */}
       <footer className="border-t border-border/50 py-3 text-center">
         <p className="text-[11px] text-muted-foreground/40">
-          Қазтілші — AI негізіндегі қазақ тілі аудармашысы
+          Қазтілші — AI-переводчик на казахский язык
         </p>
       </footer>
     </div>
