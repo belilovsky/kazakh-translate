@@ -30,6 +30,7 @@ export const yandexEngine: TranslationEngine = {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
+          folderId: process.env.YANDEX_FOLDER_ID || "",
           texts: [text],
           sourceLanguageCode: sourceLang, // "ru" or "en"
           targetLanguageCode: "kk",
