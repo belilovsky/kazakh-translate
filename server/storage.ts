@@ -14,6 +14,26 @@ const dbPath = process.env.DB_PATH || "data.db";
 const sqlite = new Database(dbPath);
 sqlite.pragma("journal_mode = WAL");
 
+// Auto-create tables if they don't exist
+sqlite.exec(`
+  CREATE TABLE IF NOT EXISTS users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT NOT NULL UNIQUE,
+    password TEXT NOT NULL
+  );
+  CREATE TABLE IF NOT EXISTS translations (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    source_text TEXT NOT NULL,
+    translated_text TEXT NOT NULL,
+    source_lang TEXT NOT NULL,
+    target_lang TEXT NOT NULL,
+    engine TEXT NOT NULL,
+    all_results TEXT NOT NULL,
+    rating INTEGER,
+    created_at TEXT NOT NULL
+  );
+`);
+
 export const db = drizzle(sqlite);
 
 export interface IStorage {
