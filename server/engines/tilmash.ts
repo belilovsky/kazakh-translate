@@ -1,13 +1,9 @@
 import type { TranslationEngine, TranslationResult } from "./types.js";
+import { getSystemPromptKazakh } from "./kazakh-rules.js";
 
 const HF_CHAT_URL = "https://router.huggingface.co/v1/chat/completions";
 const HF_MODEL = "Qwen/Qwen2.5-72B-Instruct";
 const TIMEOUT_MS = 30000;
-
-const LANG_NAMES: Record<string, string> = {
-  ru: "русского",
-  en: "английского",
-};
 
 export const tilmashEngine: TranslationEngine = {
   name: "tilmash",
@@ -25,8 +21,7 @@ export const tilmashEngine: TranslationEngine = {
       };
     }
 
-    const langName = LANG_NAMES[sourceLang];
-    if (!langName) {
+    if (!["ru", "en"].includes(sourceLang)) {
       return {
         engine: "tilmash",
         text: "",
@@ -39,6 +34,11 @@ export const tilmashEngine: TranslationEngine = {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), TIMEOUT_MS);
 
+      // Use the Kazakh-language system prompt for Qwen
+      // (Qwen handles Kazakh better when instructions are in Kazakh/Russian)
+      const systemPrompt = getSystemPromptKazakh(sourceLang);
+      const langLabel = sourceLang === "ru" ? "орыс" : "ағылшын";
+
       const response = await fetch(HF_CHAT_URL, {
         method: "POST",
         headers: {
@@ -50,15 +50,15 @@ export const tilmashEngine: TranslationEngine = {
           messages: [
             {
               role: "system",
-              content: `Сен кәсіби қазақ тілі аудармашысысың. Берілген мәтінді ${langName} тілінен қазақ тіліне (қазақша) аудар. Аударманы ғана жаз, басқа ештеңе жазба. Түпнұсқаның мағынасы мен стилін сақта.`,
+              content: systemPrompt,
             },
             {
               role: "user",
-              content: text,
+              content: `Мына ${langLabel} тіліндегі мәтінді қазақшаға аудар:\n\n${text}`,
             },
           ],
           max_tokens: 2000,
-          temperature: 0.3,
+          temperature: 0.2,
         }),
         signal: controller.signal,
       });

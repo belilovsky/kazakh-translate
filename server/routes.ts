@@ -27,7 +27,7 @@ export async function registerRoutes(
   /**
    * POST /api/translate
    * Body: { text, sourceLang, targetLang }
-   * Returns: { id, bestTranslation, allResults, sourceLang, targetLang }
+   * Returns: { id, bestTranslation, allResults, sourceLang, targetLang, meta }
    */
   app.post("/api/translate", async (req, res) => {
     const parsed = translateBodySchema.safeParse(req.body);
@@ -41,7 +41,7 @@ export async function registerRoutes(
     const { text, sourceLang, targetLang } = parsed.data;
 
     try {
-      const allResults = await translateWithAll(text, sourceLang, targetLang);
+      const { results: allResults, meta } = await translateWithAll(text, sourceLang, targetLang);
       const best = selectBest(allResults);
 
       const saved = await storage.saveTranslation({
@@ -64,6 +64,7 @@ export async function registerRoutes(
         allResults,
         sourceLang,
         targetLang,
+        meta,
       });
     } catch (err: any) {
       console.error("Translation error:", err);

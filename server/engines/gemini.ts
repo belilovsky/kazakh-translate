@@ -1,12 +1,8 @@
 import type { TranslationEngine, TranslationResult } from "./types.js";
+import { getSystemPrompt } from "./kazakh-rules.js";
 
 const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent";
 const TIMEOUT_MS = 20000;
-
-const LANG_LABELS: Record<string, string> = {
-  ru: "Russian",
-  en: "English",
-};
 
 export const geminiEngine: TranslationEngine = {
   name: "gemini",
@@ -24,8 +20,8 @@ export const geminiEngine: TranslationEngine = {
       };
     }
 
-    const srcLabel = LANG_LABELS[sourceLang];
-    if (!srcLabel) {
+    const srcLabel = sourceLang === "ru" ? "Russian" : "English";
+    if (!["ru", "en"].includes(sourceLang)) {
       return {
         engine: "gemini",
         text: "",
@@ -38,21 +34,26 @@ export const geminiEngine: TranslationEngine = {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), TIMEOUT_MS);
 
+      const systemPrompt = getSystemPrompt(sourceLang, "detailed");
+
       const response = await fetch(`${GEMINI_API_URL}?key=${apiKey}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          systemInstruction: {
+            parts: [{ text: systemPrompt }],
+          },
           contents: [
             {
               parts: [
                 {
-                  text: `You are an expert Kazakh language translator. Translate the following ${srcLabel} text to Kazakh (Қазақ тілі). Provide ONLY the translation, no explanations. Ensure grammatically correct, natural-sounding Kazakh that a native speaker would approve of. Pay attention to proper agglutinative morphology, correct word order (SOV), and appropriate register.\n\nTranslate:\n${text}`,
+                  text: `Translate the following ${srcLabel} text to Kazakh:\n\n${text}`,
                 },
               ],
             },
           ],
           generationConfig: {
-            temperature: 0.3,
+            temperature: 0.2,
             maxOutputTokens: 2048,
           },
         }),

@@ -1,8 +1,6 @@
 import OpenAI from "openai";
 import type { TranslationEngine, TranslationResult } from "./types.js";
-
-const SYSTEM_PROMPT =
-  "You are an expert Kazakh language translator. Translate the following text to Kazakh (Қазақ тілі). Provide ONLY the translation, no explanations. Ensure grammatically correct, natural-sounding Kazakh that a native speaker would approve of. Pay attention to proper agglutinative morphology, correct word order (SOV), and appropriate register.";
+import { getSystemPrompt } from "./kazakh-rules.js";
 
 const TIMEOUT_MS = 15000;
 
@@ -26,17 +24,18 @@ export const openaiEngine: TranslationEngine = {
       const client = new OpenAI({ apiKey, timeout: TIMEOUT_MS });
 
       const srcLabel = sourceLang === "ru" ? "Russian" : "English";
+      const systemPrompt = getSystemPrompt(sourceLang, "detailed");
 
       const response = await client.chat.completions.create({
         model: "gpt-4o",
         messages: [
-          { role: "system", content: SYSTEM_PROMPT },
+          { role: "system", content: systemPrompt },
           {
             role: "user",
             content: `Translate the following ${srcLabel} text to Kazakh:\n\n${text}`,
           },
         ],
-        temperature: 0.3,
+        temperature: 0.2,
         max_tokens: 2048,
       });
 

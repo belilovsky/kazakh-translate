@@ -3,8 +3,9 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link } from "wouter";
 import {
   Sun, Moon, Copy, Check, ThumbsUp, ThumbsDown,
-  ChevronDown, ChevronUp, History, X, ArrowRightLeft,
+  ChevronDown, ChevronUp, History, X, ArrowRight,
   Sparkles, Clock, Loader2, Mic, MicOff, Volume2,
+  Shield, Languages,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -28,6 +29,12 @@ interface EngineResult {
   latencyMs?: number;
 }
 
+interface TranslationMeta {
+  evalScore?: number;
+  evalIterations?: number;
+  evalIssues?: string[];
+}
+
 interface TranslateResponse {
   id: number;
   bestTranslation: {
@@ -37,36 +44,82 @@ interface TranslateResponse {
   allResults: EngineResult[];
   sourceLang: string;
   targetLang: string;
+  meta?: TranslationMeta;
 }
 
 const ENGINE_LABELS: Record<string, string> = {
-  ensemble: "Ensemble",
+  ensemble: "Ensemble AI",
   openai: "GPT-4o",
-  gemini: "Gemini",
+  gemini: "Gemini 2.5",
   tilmash: "Qwen 72B",
   deepl: "DeepL",
   yandex: "Yandex",
 };
 
-// Kazakh ornament SVG logo
-function KaztilshiLogo({ size = 28 }: { size?: number }) {
+// Kazakh shanyrak (шаңырақ) inspired logo — the crown of the yurt
+function KaztilshiLogo({ size = 32 }: { size?: number }) {
   return (
     <svg
       width={size}
       height={size}
-      viewBox="0 0 32 32"
+      viewBox="0 0 40 40"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       aria-label="Қазтілші логотип"
       className="shrink-0"
     >
-      <circle cx="16" cy="16" r="15" fill="hsl(var(--primary))" />
-      <rect x="8" y="9" width="2.5" height="14" rx="1.25" fill="white" />
-      <line x1="10.5" y1="16" x2="20" y2="9" stroke="white" strokeWidth="2.5" strokeLinecap="round" />
-      <line x1="10.5" y1="16" x2="20" y2="23" stroke="white" strokeWidth="2.5" strokeLinecap="round" />
-      <circle cx="22.5" cy="8.5" r="1.2" fill="white" opacity="0.6" />
-      <circle cx="22.5" cy="23.5" r="1.2" fill="white" opacity="0.6" />
+      {/* Outer circle — sun/shanyrak */}
+      <circle cx="20" cy="20" r="18" stroke="hsl(var(--primary))" strokeWidth="2.5" fill="none" />
+      {/* Inner diamond — ornamental */}
+      <path
+        d="M20 6L30 20L20 34L10 20Z"
+        stroke="hsl(var(--primary))"
+        strokeWidth="2"
+        fill="hsl(var(--primary))"
+        fillOpacity="0.12"
+      />
+      {/* Cross beams like shanyrak */}
+      <line x1="8" y1="20" x2="32" y2="20" stroke="hsl(var(--primary))" strokeWidth="1.5" />
+      <line x1="20" y1="8" x2="20" y2="32" stroke="hsl(var(--primary))" strokeWidth="1.5" />
+      {/* Center dot */}
+      <circle cx="20" cy="20" r="3" fill="hsl(var(--primary))" />
+      {/* Қ letter hint */}
+      <text
+        x="20"
+        y="22"
+        textAnchor="middle"
+        dominantBaseline="central"
+        fill="hsl(var(--primary-foreground))"
+        fontSize="5"
+        fontWeight="700"
+        fontFamily="sans-serif"
+      >
+        Қ
+      </text>
     </svg>
+  );
+}
+
+function QualityBadge({ score }: { score: number }) {
+  const color =
+    score >= 9
+      ? "text-emerald-600 dark:text-emerald-400"
+      : score >= 7
+      ? "text-amber-600 dark:text-amber-400"
+      : "text-red-500 dark:text-red-400";
+
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <span className={`inline-flex items-center gap-1 text-xs font-medium ${color}`}>
+          <Shield className="h-3 w-3" />
+          {score}/10
+        </span>
+      </TooltipTrigger>
+      <TooltipContent>
+        Аударма сапасы: {score >= 9 ? "жоғары" : score >= 7 ? "орташа" : "жақсарту қажет"}
+      </TooltipContent>
+    </Tooltip>
   );
 }
 
@@ -126,7 +179,6 @@ export default function TranslatePage() {
           interim += transcript;
         }
       }
-      // Show interim results
       if (interim) {
         setSourceText(finalTranscript + (finalTranscript ? " " : "") + interim);
       }
@@ -149,18 +201,16 @@ export default function TranslatePage() {
     setIsListening(true);
   };
 
-  // TTS — read translation aloud
+  // TTS
   const handleSpeak = (text: string) => {
     if (!text || !window.speechSynthesis) return;
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
-    // Try Kazakh, fall back to Russian (closer pronunciation)
     utterance.lang = "kk-KZ";
     utterance.rate = 0.9;
     window.speechSynthesis.speak(utterance);
   };
 
-  // Cleanup recognition on unmount
   useEffect(() => {
     return () => {
       recognitionRef.current?.stop();
@@ -236,7 +286,7 @@ export default function TranslatePage() {
     const el = textareaRef.current;
     if (el) {
       el.style.height = "auto";
-      el.style.height = Math.max(200, Math.min(el.scrollHeight, 400)) + "px";
+      el.style.height = Math.max(180, Math.min(el.scrollHeight, 400)) + "px";
     }
   }, [sourceText]);
 
@@ -244,15 +294,13 @@ export default function TranslatePage() {
   const maxChars = 5000;
   const isLoading = translateMutation.isPending;
 
-  const langOptions: { value: SourceLang; label: string }[] = [
-    { value: "ru", label: "Русский" },
-    { value: "en", label: "English" },
+  const langOptions: { value: SourceLang; label: string; flag: string }[] = [
+    { value: "ru", label: "Русский", flag: "🇷🇺" },
+    { value: "en", label: "English", flag: "🇬🇧" },
   ];
 
-  // Get individual engine results (excluding ensemble)
   const engineResults = result?.allResults?.filter((r) => r.engine !== "ensemble") ?? [];
   const ensembleResult = result?.allResults?.find((r) => r.engine === "ensemble");
-  // The displayed translation is ensemble if available, otherwise bestTranslation
   const displayedText = ensembleResult?.text ?? result?.bestTranslation?.text ?? "";
   const displayedEngine = ensembleResult ? "ensemble" : result?.bestTranslation?.engine ?? "";
 
@@ -260,17 +308,20 @@ export default function TranslatePage() {
     <div className="min-h-screen bg-background text-foreground flex flex-col">
       {/* Header */}
       <header className="border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
-        <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
+        <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <KaztilshiLogo size={28} />
-            <span className="font-semibold text-base tracking-tight">Қазтілші</span>
+            <KaztilshiLogo size={32} />
+            <div className="flex flex-col">
+              <span className="font-bold text-base tracking-tight leading-none">Қазтілші</span>
+              <span className="text-[10px] text-muted-foreground leading-tight hidden sm:block">AI аудармашы</span>
+            </div>
           </div>
 
           <div className="flex items-center gap-1">
             <Button variant="ghost" size="sm" asChild className="text-muted-foreground">
               <Link href="/history" data-testid="history-link">
                 <History className="h-4 w-4 mr-1.5" />
-                Тарих
+                <span className="hidden sm:inline">Тарих</span>
               </Link>
             </Button>
             <Tooltip>
@@ -291,66 +342,71 @@ export default function TranslatePage() {
         </div>
       </header>
 
-      {/* Main Translation Area */}
-      <main className="flex-1 max-w-6xl mx-auto w-full px-4 py-6">
-        {/* Language bar */}
-        <div className="flex items-center gap-0 mb-0 rounded-t-lg border border-b-0 border-border bg-muted/30 overflow-hidden">
+      {/* Main */}
+      <main className="flex-1 max-w-5xl mx-auto w-full px-3 sm:px-4 py-4 sm:py-6">
+        {/* Language selector bar */}
+        <div className="flex items-center gap-0 mb-0 rounded-t-xl border border-b-0 border-border bg-card/50 overflow-hidden">
           {/* Source language tabs */}
-          <div className="flex items-center flex-1">
+          <div className="flex items-center flex-1 min-w-0">
             {langOptions.map((opt) => (
               <button
                 key={opt.value}
                 onClick={() => setSourceLang(opt.value)}
                 data-testid={`lang-${opt.value}`}
-                className={`px-5 py-3 text-sm font-medium transition-colors relative ${
+                className={`flex items-center gap-1.5 px-3 sm:px-5 py-3 text-sm font-medium transition-all relative whitespace-nowrap ${
                   sourceLang === opt.value
                     ? "text-primary"
                     : "text-muted-foreground hover:text-foreground"
                 }`}
               >
-                {opt.label}
+                <span className="text-base leading-none">{opt.flag}</span>
+                <span className="hidden sm:inline">{opt.label}</span>
                 {sourceLang === opt.value && (
-                  <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-primary" />
+                  <span className="absolute bottom-0 left-2 right-2 h-[2px] bg-primary rounded-full" />
                 )}
               </button>
             ))}
           </div>
 
-          {/* Arrow divider */}
-          <div className="flex items-center px-3">
-            <ArrowRightLeft className="h-4 w-4 text-muted-foreground" />
+          {/* Arrow */}
+          <div className="flex items-center px-2 sm:px-4">
+            <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center">
+              <ArrowRight className="h-3 w-3 text-primary" />
+            </div>
           </div>
 
           {/* Target language */}
-          <div className="flex items-center flex-1">
+          <div className="flex items-center flex-1 min-w-0 justify-end sm:justify-start">
             <button
-              className="px-5 py-3 text-sm font-medium text-primary relative"
+              className="flex items-center gap-1.5 px-3 sm:px-5 py-3 text-sm font-medium text-primary relative whitespace-nowrap"
               data-testid="lang-kk"
             >
-              Қазақша
-              <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-primary" />
+              <span className="text-base leading-none">🇰🇿</span>
+              <span className="hidden sm:inline">Қазақша</span>
+              <span className="sm:hidden">ҚАЗ</span>
+              <span className="absolute bottom-0 left-2 right-2 h-[2px] bg-primary rounded-full" />
             </button>
           </div>
         </div>
 
         {/* Two-panel translation area */}
-        <div className="grid grid-cols-1 md:grid-cols-2 border border-border rounded-b-lg overflow-hidden" data-testid="translation-panels">
+        <div className="grid grid-cols-1 md:grid-cols-2 border border-border rounded-b-xl overflow-hidden shadow-sm" data-testid="translation-panels">
           {/* LEFT PANEL — Source */}
-          <div className="relative bg-background border-r-0 md:border-r border-border flex flex-col">
+          <div className="relative bg-background border-b md:border-b-0 md:border-r border-border flex flex-col">
             <textarea
               ref={textareaRef}
               value={sourceText}
               onChange={(e) => setSourceText(e.target.value.slice(0, maxChars))}
               onKeyDown={handleKeyDown}
               placeholder="Мәтінді енгізіңіз..."
-              className="w-full resize-none bg-transparent text-base leading-relaxed p-5 pb-12 outline-none placeholder:text-muted-foreground/60 min-h-[200px]"
+              className="w-full resize-none bg-transparent text-base leading-relaxed p-4 sm:p-5 pb-14 outline-none placeholder:text-muted-foreground/50 min-h-[180px]"
               data-testid="source-textarea"
               aria-label="Бастапқы мәтін"
             />
 
             {/* Source panel footer */}
-            <div className="absolute bottom-0 left-0 right-0 flex items-center justify-between px-4 py-2.5 bg-background/80 backdrop-blur-sm">
-              <div className="flex items-center gap-1">
+            <div className="absolute bottom-0 left-0 right-0 flex items-center justify-between px-3 sm:px-4 py-2 bg-background/90 backdrop-blur-sm border-t border-border/50">
+              <div className="flex items-center gap-0.5">
                 {sourceText && (
                   <Tooltip>
                     <TooltipTrigger asChild>
@@ -391,30 +447,35 @@ export default function TranslatePage() {
                 )}
               </div>
 
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 sm:gap-3">
                 <span
-                  className={`text-xs tabular-nums ${
+                  className={`text-[11px] tabular-nums ${
                     charCount > maxChars * 0.9
                       ? "text-destructive"
-                      : "text-muted-foreground/60"
+                      : "text-muted-foreground/50"
                   }`}
                 >
-                  {charCount.toLocaleString()} / {maxChars.toLocaleString()}
+                  {charCount.toLocaleString()}/{maxChars.toLocaleString()}
                 </span>
                 <Button
                   onClick={handleTranslate}
                   disabled={isLoading || !sourceText.trim()}
                   size="sm"
-                  className="font-medium gap-1.5"
+                  className="font-medium gap-1.5 px-4 sm:px-5 rounded-lg"
                   data-testid="translate-button"
                 >
                   {isLoading ? (
                     <>
                       <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                      Аудару...
+                      <span className="hidden sm:inline">Аударылуда...</span>
+                      <span className="sm:hidden">...</span>
                     </>
                   ) : (
-                    "Аудару"
+                    <>
+                      <Languages className="h-3.5 w-3.5 sm:hidden" />
+                      <span className="hidden sm:inline">Аудару</span>
+                      <span className="sm:hidden">Аудару</span>
+                    </>
                   )}
                 </Button>
               </div>
@@ -422,17 +483,22 @@ export default function TranslatePage() {
           </div>
 
           {/* RIGHT PANEL — Translation Result */}
-          <div className="relative bg-muted/20 flex flex-col min-h-[200px]">
+          <div className="relative bg-card/30 flex flex-col min-h-[180px]">
             {/* Loading state */}
             {isLoading && (
-              <div className="p-5 space-y-3" data-testid="loading-skeleton">
-                <div className="flex items-center gap-2 mb-2">
-                  <Loader2 className="h-4 w-4 animate-spin text-primary" />
-                  <span className="text-sm text-muted-foreground">Аудармашылар жұмыс істеуде...</span>
+              <div className="p-4 sm:p-5 space-y-3" data-testid="loading-skeleton">
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="relative">
+                    <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                    <span className="absolute -top-0.5 -right-0.5 h-2 w-2 bg-primary rounded-full animate-ping" />
+                  </div>
+                  <span className="text-sm text-muted-foreground">
+                    Аудармашылар жұмыс істеуде...
+                  </span>
                 </div>
-                <Skeleton className="h-4 w-full" />
-                <Skeleton className="h-4 w-5/6" />
-                <Skeleton className="h-4 w-4/6" />
+                <Skeleton className="h-4 w-full bg-muted/60" />
+                <Skeleton className="h-4 w-5/6 bg-muted/60" />
+                <Skeleton className="h-4 w-4/6 bg-muted/60" />
               </div>
             )}
 
@@ -440,25 +506,33 @@ export default function TranslatePage() {
             {result && !isLoading && (
               <div className="flex flex-col flex-1">
                 {/* Translation text */}
-                <div className="flex-1 p-5 pb-12">
+                <div className="flex-1 p-4 sm:p-5 pb-14">
                   <p className="text-base leading-relaxed text-foreground" data-testid="best-translation-text">
                     {displayedText}
                   </p>
 
-                  {/* Ensemble badge */}
-                  {displayedEngine === "ensemble" && (
-                    <div className="mt-3 flex items-center gap-1.5">
-                      <Sparkles className="h-3.5 w-3.5 text-primary" />
-                      <span className="text-xs text-primary font-medium">
-                        Ensemble — барлық аудармашылардың ең жақсы нұсқасы
+                  {/* Quality and engine info */}
+                  <div className="mt-3 flex items-center flex-wrap gap-2">
+                    {displayedEngine === "ensemble" && (
+                      <span className="inline-flex items-center gap-1 text-xs text-primary font-medium">
+                        <Sparkles className="h-3 w-3" />
+                        Ensemble
                       </span>
-                    </div>
-                  )}
+                    )}
+                    {result.meta?.evalScore !== undefined && result.meta.evalScore > 0 && (
+                      <QualityBadge score={result.meta.evalScore} />
+                    )}
+                    {result.meta?.evalIterations !== undefined && result.meta.evalIterations > 1 && (
+                      <span className="text-[11px] text-muted-foreground">
+                        +{result.meta.evalIterations - 1} итерация
+                      </span>
+                    )}
+                  </div>
                 </div>
 
                 {/* Result panel footer */}
-                <div className="absolute bottom-0 left-0 right-0 flex items-center justify-between px-4 py-2.5 bg-muted/20">
-                  <div className="flex items-center gap-1">
+                <div className="absolute bottom-0 left-0 right-0 flex items-center justify-between px-3 sm:px-4 py-2 bg-card/50 backdrop-blur-sm border-t border-border/50">
+                  <div className="flex items-center gap-0.5">
                     {/* Copy */}
                     <Tooltip>
                       <TooltipTrigger asChild>
@@ -470,7 +544,7 @@ export default function TranslatePage() {
                           data-testid="copy-best-translation"
                         >
                           {copiedId === "best" ? (
-                            <Check className="h-4 w-4 text-green-500" />
+                            <Check className="h-4 w-4 text-emerald-500" />
                           ) : (
                             <Copy className="h-4 w-4" />
                           )}
@@ -504,7 +578,7 @@ export default function TranslatePage() {
                           onClick={() => rateMutation.mutate({ id: result.id, rating: 5 })}
                           disabled={rateMutation.isPending}
                           data-testid="rate-thumbs-up"
-                          className="h-8 w-8 text-muted-foreground hover:text-green-600"
+                          className="h-8 w-8 text-muted-foreground hover:text-emerald-600"
                         >
                           <ThumbsUp className="h-4 w-4" />
                         </Button>
@@ -529,7 +603,7 @@ export default function TranslatePage() {
                     </Tooltip>
                   </div>
 
-                  <Badge variant="outline" className="text-xs text-muted-foreground">
+                  <Badge variant="outline" className="text-[11px] text-muted-foreground font-normal">
                     {ENGINE_LABELS[displayedEngine] ?? displayedEngine}
                   </Badge>
                 </div>
@@ -539,7 +613,10 @@ export default function TranslatePage() {
             {/* Empty state */}
             {!result && !isLoading && (
               <div className="flex items-center justify-center flex-1 p-5">
-                <p className="text-sm text-muted-foreground/50">Аударма</p>
+                <div className="text-center">
+                  <Languages className="h-8 w-8 text-muted-foreground/25 mx-auto mb-2" />
+                  <p className="text-sm text-muted-foreground/40">Аударма</p>
+                </div>
               </div>
             )}
           </div>
@@ -547,17 +624,17 @@ export default function TranslatePage() {
 
         {/* Keyboard hint */}
         {!result && !isLoading && (
-          <div className="text-center text-muted-foreground/50 text-xs py-3">
-            <kbd className="px-1.5 py-0.5 bg-muted border border-border rounded text-[10px]">Ctrl</kbd>
+          <div className="text-center text-muted-foreground/40 text-xs py-3 hidden sm:block">
+            <kbd className="px-1.5 py-0.5 bg-muted/50 border border-border rounded text-[10px]">Ctrl</kbd>
             {" + "}
-            <kbd className="px-1.5 py-0.5 bg-muted border border-border rounded text-[10px]">Enter</kbd>
+            <kbd className="px-1.5 py-0.5 bg-muted/50 border border-border rounded text-[10px]">Enter</kbd>
             {" — жылдам аудару"}
           </div>
         )}
 
         {/* All variants collapsible */}
         {result && !isLoading && engineResults.length > 0 && (
-          <div className="mt-4">
+          <div className="mt-3 sm:mt-4">
             <button
               onClick={() => setVariantsOpen((v) => !v)}
               className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors w-full py-2"
@@ -576,15 +653,15 @@ export default function TranslatePage() {
                 {engineResults.map((er, idx) => (
                   <div
                     key={`${er.engine}-${idx}`}
-                    className={`rounded-lg border p-4 ${
+                    className={`rounded-xl border p-3 sm:p-4 ${
                       er.error
                         ? "border-destructive/20 bg-destructive/5"
-                        : "border-border bg-card"
+                        : "border-border bg-card/50"
                     }`}
                     data-testid={`engine-result-${idx}`}
                   >
                     <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 flex-wrap">
                         <Badge
                           variant={er.error ? "destructive" : "secondary"}
                           className="text-xs"
@@ -608,10 +685,10 @@ export default function TranslatePage() {
                           variant="ghost"
                           size="icon"
                           onClick={() => handleCopy(er.text!, `engine-${idx}`)}
-                          className="h-7 w-7 text-muted-foreground"
+                          className="h-7 w-7 text-muted-foreground shrink-0"
                         >
                           {copiedId === `engine-${idx}` ? (
-                            <Check className="h-3 w-3 text-green-500" />
+                            <Check className="h-3 w-3 text-emerald-500" />
                           ) : (
                             <Copy className="h-3 w-3" />
                           )}
@@ -629,7 +706,34 @@ export default function TranslatePage() {
             )}
           </div>
         )}
+
+        {/* Self-eval issues (shown when expanded) */}
+        {result && !isLoading && variantsOpen && result.meta?.evalIssues && result.meta.evalIssues.length > 0 && (
+          <div className="mt-3 rounded-xl border border-amber-500/20 bg-amber-500/5 p-3 sm:p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <Shield className="h-4 w-4 text-amber-500" />
+              <span className="text-sm font-medium text-amber-700 dark:text-amber-400">
+                Сапа бағалау ескертулері
+              </span>
+            </div>
+            <ul className="text-xs text-muted-foreground space-y-1">
+              {result.meta.evalIssues.map((issue, i) => (
+                <li key={i} className="flex items-start gap-1.5">
+                  <span className="text-amber-500 mt-0.5">•</span>
+                  {issue}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </main>
+
+      {/* Footer */}
+      <footer className="border-t border-border/50 py-3 text-center">
+        <p className="text-[11px] text-muted-foreground/40">
+          Қазтілші — AI негізіндегі қазақ тілі аудармашысы
+        </p>
+      </footer>
     </div>
   );
 }

@@ -4,6 +4,7 @@ import { geminiEngine } from "./gemini.js";
 import { deeplEngine } from "./deepl.js";
 import { yandexEngine } from "./yandex.js";
 import { postEditTranslation } from "./postprocess.js";
+import { selfEvaluateAndImprove } from "./self-eval.js";
 import type { TranslationEngine, TranslationResult } from "./types.js";
 
 // Priority order: ensemble > openai > gemini > tilmash > deepl > yandex
@@ -17,15 +18,22 @@ export const engines: TranslationEngine[] = [
 
 const PRIORITY_ORDER = ["ensemble", "openai", "gemini", "tilmash", "deepl", "yandex"];
 
+export interface TranslationMeta {
+  evalScore?: number;
+  evalIterations?: number;
+  evalIssues?: string[];
+}
+
 /**
  * Run all engines in parallel, then post-edit with ensemble if 2+ succeeded.
- * Returns all individual results + ensemble result at position 0.
+ * Then self-evaluate and iteratively improve if score is below threshold.
+ * Returns all individual results + ensemble result at position 0, plus metadata.
  */
 export async function translateWithAll(
   text: string,
   sourceLang: string,
   targetLang: string
-): Promise<TranslationResult[]> {
+): Promise<{ results: TranslationResult[]; meta: TranslationMeta }> {
   // Phase 1: Run all engines in parallel
   const settled = await Promise.allSettled(
     engines.map((engine) => engine.translate(text, sourceLang, targetLang))
@@ -44,7 +52,35 @@ export async function translateWithAll(
   });
 
   // Phase 2: Post-edit ensemble — compare all variants and synthesize the best
-  const ensembleResult = await postEditTranslation(text, sourceLang, rawResults);
+  let ensembleResult = await postEditTranslation(text, sourceLang, rawResults);
+
+  // Phase 3: Self-evaluation loop — evaluate and iteratively improve
+  let meta: TranslationMeta = {};
+  if (ensembleResult && ensembleResult.text) {
+    try {
+      const evalResult = await selfEvaluateAndImprove(
+        text,
+        sourceLang,
+        ensembleResult.text
+      );
+      
+      meta.evalScore = evalResult.evalScore;
+      meta.evalIterations = evalResult.iterations;
+      meta.evalIssues = evalResult.issues;
+
+      // If self-eval improved the text, update ensemble result
+      if (evalResult.finalText !== ensembleResult.text) {
+        ensembleResult = {
+          ...ensembleResult,
+          text: evalResult.finalText,
+          confidence: Math.min(0.99, (ensembleResult.confidence ?? 0.98) + 0.01),
+          latencyMs: ensembleResult.latencyMs + (Date.now() - Date.now()), // will be recalculated
+        };
+      }
+    } catch (err: any) {
+      console.error("Self-evaluation failed:", err?.message);
+    }
+  }
 
   // Sort raw results: successful by confidence desc, then failed by priority
   const successful = rawResults
@@ -71,7 +107,7 @@ export async function translateWithAll(
   }
   allResults.push(...successful, ...failed);
 
-  return allResults;
+  return { results: allResults, meta };
 }
 
 /**
