@@ -3,9 +3,10 @@ import { tilmashEngine } from "./tilmash.js";
 import { geminiEngine } from "./gemini.js";
 import { deeplEngine } from "./deepl.js";
 import { yandexEngine } from "./yandex.js";
+import { postEditTranslation } from "./postprocess.js";
 import type { TranslationEngine, TranslationResult } from "./types.js";
 
-// Priority order: openai > gemini > tilmash > deepl > yandex
+// Priority order: ensemble > openai > gemini > tilmash > deepl > yandex
 export const engines: TranslationEngine[] = [
   openaiEngine,
   geminiEngine,
@@ -14,26 +15,26 @@ export const engines: TranslationEngine[] = [
   yandexEngine,
 ];
 
-const PRIORITY_ORDER = ["openai", "gemini", "tilmash", "deepl", "yandex"];
+const PRIORITY_ORDER = ["ensemble", "openai", "gemini", "tilmash", "deepl", "yandex"];
 
 /**
- * Run all engines in parallel and return results sorted by priority/confidence.
- * Never throws — each engine catches its own errors.
+ * Run all engines in parallel, then post-edit with ensemble if 2+ succeeded.
+ * Returns all individual results + ensemble result at position 0.
  */
 export async function translateWithAll(
   text: string,
   sourceLang: string,
   targetLang: string
 ): Promise<TranslationResult[]> {
+  // Phase 1: Run all engines in parallel
   const settled = await Promise.allSettled(
     engines.map((engine) => engine.translate(text, sourceLang, targetLang))
   );
 
-  const results: TranslationResult[] = settled.map((outcome, i) => {
+  const rawResults: TranslationResult[] = settled.map((outcome, i) => {
     if (outcome.status === "fulfilled") {
       return outcome.value;
     }
-    // Should not normally reach here since engines catch internally, but just in case
     return {
       engine: engines[i].name,
       text: "",
@@ -42,39 +43,44 @@ export async function translateWithAll(
     };
   });
 
-  // Sort: successful results first by confidence (desc), then failed results by priority
-  const successful = results
+  // Phase 2: Post-edit ensemble — compare all variants and synthesize the best
+  const ensembleResult = await postEditTranslation(text, sourceLang, rawResults);
+
+  // Sort raw results: successful by confidence desc, then failed by priority
+  const successful = rawResults
     .filter((r) => !r.error && r.text)
     .sort((a, b) => {
-      // Sort by confidence if both have it
       if (a.confidence !== undefined && b.confidence !== undefined) {
         return b.confidence - a.confidence;
       }
       if (a.confidence !== undefined) return -1;
       if (b.confidence !== undefined) return 1;
-      // Fall back to priority order
       return PRIORITY_ORDER.indexOf(a.engine) - PRIORITY_ORDER.indexOf(b.engine);
     });
 
-  const failed = results
+  const failed = rawResults
     .filter((r) => r.error || !r.text)
     .sort(
       (a, b) => PRIORITY_ORDER.indexOf(a.engine) - PRIORITY_ORDER.indexOf(b.engine)
     );
 
-  return [...successful, ...failed];
+  // Ensemble goes first if successful
+  const allResults: TranslationResult[] = [];
+  if (ensembleResult) {
+    allResults.push(ensembleResult);
+  }
+  allResults.push(...successful, ...failed);
+
+  return allResults;
 }
 
 /**
- * Select the best (first non-error) result by priority order.
- * Falls back to the first result if all have errors.
+ * Select the best result: ensemble first, then by priority order.
  */
 export function selectBest(results: TranslationResult[]): TranslationResult {
-  // Try priority order: openai > gemini > tilmash > deepl > yandex
   for (const engineName of PRIORITY_ORDER) {
     const result = results.find((r) => r.engine === engineName && !r.error && r.text);
     if (result) return result;
   }
-  // All engines failed — return the first result (whatever it is)
   return results[0];
 }

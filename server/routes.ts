@@ -125,39 +125,32 @@ export async function registerRoutes(
    * Returns: list of available engines with status
    */
   app.get("/api/engines", (_req, res) => {
+    const KEY_MAP: Record<string, string> = {
+      openai: "OPENAI_API_KEY",
+      tilmash: "HUGGINGFACE_API_KEY",
+      gemini: "GEMINI_API_KEY",
+      deepl: "DEEPL_API_KEY",
+      yandex: "YANDEX_API_KEY",
+    };
+
     const engineStatuses = engines.map((engine) => {
-      let hasApiKey = false;
-      let keyEnvVar = "";
-
-      switch (engine.name) {
-        case "openai":
-          keyEnvVar = "OPENAI_API_KEY";
-          hasApiKey = Boolean(process.env.OPENAI_API_KEY);
-          break;
-        case "tilmash":
-          keyEnvVar = "HUGGINGFACE_API_KEY";
-          hasApiKey = Boolean(process.env.HUGGINGFACE_API_KEY);
-          break;
-        case "gemini":
-          keyEnvVar = "GEMINI_API_KEY";
-          hasApiKey = Boolean(process.env.GEMINI_API_KEY);
-          break;
-        case "deepl":
-          keyEnvVar = "DEEPL_API_KEY";
-          hasApiKey = Boolean(process.env.DEEPL_API_KEY);
-          break;
-        case "yandex":
-          keyEnvVar = "YANDEX_API_KEY";
-          hasApiKey = Boolean(process.env.YANDEX_API_KEY);
-          break;
-      }
-
+      const keyEnvVar = KEY_MAP[engine.name] ?? "";
+      const hasApiKey = keyEnvVar ? Boolean(process.env[keyEnvVar]) : false;
       return {
         name: engine.name,
         status: hasApiKey ? "available" : "no_api_key",
         keyEnvVar,
         hasApiKey,
       };
+    });
+
+    // Add ensemble (always available if 2+ engines have keys)
+    const availableCount = engineStatuses.filter((e) => e.hasApiKey).length;
+    engineStatuses.unshift({
+      name: "ensemble",
+      status: availableCount >= 2 ? "available" : "no_api_key",
+      keyEnvVar: "(auto)",
+      hasApiKey: availableCount >= 2,
     });
 
     return res.json({ engines: engineStatuses });

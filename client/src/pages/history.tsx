@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
 import { ArrowLeft, ChevronDown, ChevronUp, Clock, Sun, Moon } from "lucide-react";
+import { apiRequest } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -150,8 +151,7 @@ export default function HistoryPage() {
   const { data, isLoading, error } = useQuery<Translation[]>({
     queryKey: ["/api/translations"],
     queryFn: async () => {
-      const res = await fetch("/api/translations?limit=50");
-      if (!res.ok) throw new Error(`${res.status}: ${res.statusText}`);
+      const res = await apiRequest("GET", "/api/translations?limit=50");
       return res.json();
     },
   });
