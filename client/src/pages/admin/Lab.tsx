@@ -81,10 +81,10 @@ export default function LabPage() {
       <div className="space-y-6">
         <div>
           <h1 className="text-xl font-bold text-foreground" data-testid="text-page-title">
-            Translation Lab
+            Лаборатория
           </h1>
           <p className="text-sm text-muted-foreground mt-0.5">
-            Compare all engine outputs side-by-side
+            Сравнение всех движков бок о бок
           </p>
         </div>
 
@@ -94,7 +94,7 @@ export default function LabPage() {
             <div className="flex items-end gap-3 flex-wrap">
               <div className="flex-1 min-w-[250px]">
                 <Textarea
-                  placeholder="Enter text to translate..."
+                  placeholder="Введите текст для перевода..."
                   value={text}
                   onChange={(e) => setText(e.target.value)}
                   rows={3}
@@ -104,21 +104,21 @@ export default function LabPage() {
               </div>
               <div className="flex items-end gap-2">
                 <div>
-                  <label className="text-xs text-muted-foreground mb-1 block">From</label>
+                  <label className="text-xs text-muted-foreground mb-1 block">Из</label>
                   <Select value={sourceLang} onValueChange={setSourceLang}>
                     <SelectTrigger className="w-[120px] h-9" data-testid="select-lab-source-lang">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="ru">Russian</SelectItem>
+                      <SelectItem value="ru">Русский</SelectItem>
                       <SelectItem value="en">English</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
                 <div>
-                  <label className="text-xs text-muted-foreground mb-1 block">To</label>
+                  <label className="text-xs text-muted-foreground mb-1 block">На</label>
                   <div className="h-9 px-3 flex items-center border rounded-md bg-muted text-sm text-muted-foreground">
-                    Kazakh
+                    Қазақша
                   </div>
                 </div>
                 <Button
@@ -130,12 +130,12 @@ export default function LabPage() {
                   {translateMutation.isPending ? (
                     <>
                       <Loader2 className="h-4 w-4 mr-1.5 animate-spin" />
-                      Translating...
+                      Перевод...
                     </>
                   ) : (
                     <>
                       <FlaskConical className="h-4 w-4 mr-1.5" />
-                      Test Translate
+                      Перевести
                     </>
                   )}
                 </Button>
@@ -159,7 +159,7 @@ export default function LabPage() {
             <CardContent className="p-4 flex items-start gap-2">
               <AlertTriangle className="h-4 w-4 text-destructive shrink-0 mt-0.5" />
               <p className="text-sm text-destructive">
-                {translateMutation.error?.message ?? "Translation failed"}
+                {translateMutation.error?.message ?? "Ошибка перевода"}
               </p>
             </CardContent>
           </Card>
@@ -178,7 +178,7 @@ export default function LabPage() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1 flex-wrap">
                       <p className="text-xs font-semibold text-primary uppercase tracking-wider">
-                        Best Translation
+                        Лучший перевод
                       </p>
                       <Badge variant="secondary" className="text-[10px]">
                         {ENGINE_LABELS[result.bestTranslation.engine] || result.bestTranslation.engine}
@@ -217,7 +217,7 @@ export default function LabPage() {
             {/* All engine results grid */}
             <div>
               <h2 className="text-sm font-semibold text-foreground mb-3">
-                All Engine Results ({successResults.length} successful, {errorResults.length} failed)
+                Результаты движков ({successResults.length} успешно, {errorResults.length} ошибок)
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 {successResults.map((r, i) => {
@@ -262,7 +262,7 @@ export default function LabPage() {
             {errorResults.length > 0 && (
               <div>
                 <h2 className="text-sm font-semibold text-foreground mb-3">
-                  Failed Engines
+                  Ошибки движков
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   {errorResults.map((r, i) => (

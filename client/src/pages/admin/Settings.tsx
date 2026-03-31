@@ -51,10 +51,10 @@ export default function SettingsPage() {
       <div className="space-y-6 max-w-2xl">
         <div>
           <h1 className="text-xl font-bold text-foreground" data-testid="text-page-title">
-            Settings
+            Настройки
           </h1>
           <p className="text-sm text-muted-foreground mt-0.5">
-            Application configuration (read-only)
+            Конфигурация приложения (только чтение)
           </p>
         </div>
 
@@ -71,13 +71,13 @@ export default function SettingsPage() {
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-semibold flex items-center gap-2">
                   <Cpu className="h-4 w-4 text-primary" />
-                  Self-Evaluation Settings
+                  Самооценка
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <p className="text-xs text-muted-foreground">Quality Threshold</p>
+                    <p className="text-xs text-muted-foreground">Порог качества</p>
                     <div className="flex items-center gap-2 mt-1">
                       <span
                         className="text-2xl font-bold text-foreground"
@@ -88,11 +88,11 @@ export default function SettingsPage() {
                       <span className="text-sm text-muted-foreground">/ 10</span>
                     </div>
                     <p className="text-[10px] text-muted-foreground mt-1">
-                      Translations scoring below this trigger iterative improvement
+                      Переводы с оценкой ниже порога улучшаются итеративно
                     </p>
                   </div>
                   <div>
-                    <p className="text-xs text-muted-foreground">Max Iterations</p>
+                    <p className="text-xs text-muted-foreground">Макс. итераций</p>
                     <div className="flex items-center gap-2 mt-1">
                       <span
                         className="text-2xl font-bold text-foreground"
@@ -102,7 +102,7 @@ export default function SettingsPage() {
                       </span>
                     </div>
                     <p className="text-[10px] text-muted-foreground mt-1">
-                      Maximum self-eval improvement cycles per translation
+                      Максимальное количество циклов улучшения
                     </p>
                   </div>
                 </div>
@@ -114,13 +114,13 @@ export default function SettingsPage() {
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-semibold flex items-center gap-2">
                   <SettingsIcon className="h-4 w-4 text-primary" />
-                  Engine Priority Order
+                  Приоритет движков
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-xs text-muted-foreground mb-3">
-                  Engines are tried in this order when selecting the best translation.
-                  Ensemble is always preferred if available.
+                  Движки проверяются в этом порядке при выборе лучшего перевода.
+                  Ensemble всегда приоритетнее, если доступен.
                 </p>
                 <div className="space-y-1">
                   {data.enginePriority.map((engine, i) => (
@@ -140,7 +140,7 @@ export default function SettingsPage() {
                       </span>
                       {i === 0 && (
                         <Badge variant="secondary" className="text-[10px]">
-                          Preferred
+                          Приоритет
                         </Badge>
                       )}
                     </div>
@@ -154,19 +154,19 @@ export default function SettingsPage() {
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-semibold flex items-center gap-2">
                   <Info className="h-4 w-4 text-primary" />
-                  Application Info
+                  О приложении
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <p className="text-xs text-muted-foreground">Version</p>
+                    <p className="text-xs text-muted-foreground">Версия</p>
                     <p className="text-sm font-mono font-medium text-foreground mt-0.5" data-testid="text-version">
                       v{data.version}
                     </p>
                   </div>
                   <div>
-                    <p className="text-xs text-muted-foreground">Uptime</p>
+                    <p className="text-xs text-muted-foreground">Аптайм</p>
                     <p className="text-sm font-medium text-foreground mt-0.5 flex items-center gap-1.5" data-testid="text-uptime">
                       <Clock className="h-3.5 w-3.5 text-muted-foreground" />
                       {formatUptime(data.uptime)}

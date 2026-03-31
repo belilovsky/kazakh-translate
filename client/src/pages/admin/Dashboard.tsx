@@ -158,29 +158,29 @@ export default function DashboardPage() {
       <div className="space-y-6">
         <div>
           <h1 className="text-xl font-bold text-foreground" data-testid="text-page-title">
-            Dashboard
+            Обзор
           </h1>
           <p className="text-sm text-muted-foreground mt-0.5">
-            Translation service overview
+            Статистика сервиса переводов
           </p>
         </div>
 
         {/* Stats cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <StatCard
-            title="Total Translations"
+            title="Всего переводов"
             value={stats?.totalCount ?? 0}
             icon={FileText}
             loading={statsLoading}
           />
           <StatCard
-            title="Today"
+            title="Сегодня"
             value={stats?.todayCount ?? 0}
             icon={Calendar}
             loading={statsLoading}
           />
           <StatCard
-            title="Top Engine"
+            title="Лучший движок"
             value={
               bestCountData.length > 0
                 ? bestCountData[0].engine
@@ -188,14 +188,14 @@ export default function DashboardPage() {
             }
             subtitle={
               bestCountData.length > 0
-                ? `Selected ${bestCountData[0].count} times`
+                ? `Выбран ${bestCountData[0].count} раз`
                 : undefined
             }
             icon={Trophy}
             loading={statsLoading}
           />
           <StatCard
-            title="Fastest Engine"
+            title="Самый быстрый"
             value={
               latencyData.length > 0
                 ? latencyData[0].engine
@@ -203,7 +203,7 @@ export default function DashboardPage() {
             }
             subtitle={
               latencyData.length > 0
-                ? `${latencyData[0].latency}ms avg`
+                ? `${latencyData[0].latency}мс средн.`
                 : undefined
             }
             icon={Clock}
@@ -216,14 +216,14 @@ export default function DashboardPage() {
           {/* Engine Performance Chart */}
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-semibold">Engine Win Rate</CardTitle>
+              <CardTitle className="text-sm font-semibold">Рейтинг движков</CardTitle>
             </CardHeader>
             <CardContent>
               {statsLoading ? (
                 <Skeleton className="h-[250px] w-full" />
               ) : bestCountData.length === 0 ? (
                 <div className="h-[250px] flex items-center justify-center text-sm text-muted-foreground">
-                  No translation data yet
+                  Нет данных
                 </div>
               ) : (
                 <ResponsiveContainer width="100%" height={250}>
@@ -265,14 +265,14 @@ export default function DashboardPage() {
           {/* Average Latency Chart */}
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-semibold">Avg Latency per Engine (ms)</CardTitle>
+              <CardTitle className="text-sm font-semibold">Средняя латентность (мс)</CardTitle>
             </CardHeader>
             <CardContent>
               {engineLoading ? (
                 <Skeleton className="h-[250px] w-full" />
               ) : latencyData.length === 0 ? (
                 <div className="h-[250px] flex items-center justify-center text-sm text-muted-foreground">
-                  No engine data yet
+                  Нет данных
                 </div>
               ) : (
                 <ResponsiveContainer width="100%" height={250}>
@@ -298,7 +298,7 @@ export default function DashboardPage() {
                         borderRadius: "6px",
                         fontSize: "12px",
                       }}
-                      formatter={(value: number) => [`${value}ms`, "Avg Latency"]}
+                      formatter={(value: number) => [`${value}мс`, "Латентность"]}
                     />
                     <Bar dataKey="latency" radius={[4, 4, 0, 0]} fill="hsl(185, 55%, 38%)">
                       {latencyData.map((_, i) => (
@@ -315,7 +315,7 @@ export default function DashboardPage() {
         {/* Recent Translations */}
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-semibold">Recent Translations</CardTitle>
+            <CardTitle className="text-sm font-semibold">Последние переводы</CardTitle>
           </CardHeader>
           <CardContent>
             {recentLoading ? (
@@ -326,7 +326,7 @@ export default function DashboardPage() {
               </div>
             ) : !recentData?.data?.length ? (
               <p className="text-sm text-muted-foreground py-8 text-center">
-                No translations yet
+                Переводов пока нет
               </p>
             ) : (
               <div className="divide-y divide-border">

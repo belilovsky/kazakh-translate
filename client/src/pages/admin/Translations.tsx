@@ -119,7 +119,7 @@ export default function TranslationsPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/translations"] });
       queryClient.invalidateQueries({ queryKey: ["/api/admin/stats"] });
-      toast({ title: "Translation deleted" });
+      toast({ title: "Перевод удалён" });
     },
     onError: (err: Error) => {
       toast({ title: "Error", description: err.message, variant: "destructive" });
@@ -141,7 +141,7 @@ export default function TranslationsPage() {
   const formatDate = (iso: string) => {
     try {
       const d = new Date(iso);
-      return d.toLocaleDateString("en-US", {
+      return d.toLocaleDateString("ru-RU", {
         month: "short",
         day: "numeric",
         hour: "2-digit",
@@ -158,10 +158,10 @@ export default function TranslationsPage() {
         <div className="flex items-center justify-between gap-4 flex-wrap">
           <div>
             <h1 className="text-xl font-bold text-foreground" data-testid="text-page-title">
-              Translations
+              Переводы
             </h1>
             <p className="text-sm text-muted-foreground mt-0.5">
-              {data ? `${data.total} total` : "Loading..."}
+              {data ? `Всего: ${data.total}` : "Загрузка..."}
             </p>
           </div>
           <Button
@@ -171,7 +171,7 @@ export default function TranslationsPage() {
             data-testid="button-export-csv"
           >
             <Download className="h-4 w-4 mr-1.5" />
-            Export CSV
+            Экспорт CSV
           </Button>
         </div>
 
@@ -180,7 +180,7 @@ export default function TranslationsPage() {
           <div className="relative flex-1 min-w-[200px] max-w-sm">
             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search translations..."
+              placeholder="Поиск переводов..."
               value={search}
               onChange={(e) => handleSearch(e.target.value)}
               className="pl-8 h-9"
@@ -198,8 +198,8 @@ export default function TranslationsPage() {
               <SelectValue placeholder="Source Lang" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Languages</SelectItem>
-              <SelectItem value="ru">Russian</SelectItem>
+              <SelectItem value="all">Все языки</SelectItem>
+              <SelectItem value="ru">Русский</SelectItem>
               <SelectItem value="en">English</SelectItem>
             </SelectContent>
           </Select>
@@ -214,7 +214,7 @@ export default function TranslationsPage() {
               <SelectValue placeholder="Engine" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Engines</SelectItem>
+              <SelectItem value="all">Все движки</SelectItem>
               {Object.entries(ENGINE_LABELS).map(([key, label]) => (
                 <SelectItem key={key} value={key}>
                   {label}
@@ -235,7 +235,7 @@ export default function TranslationsPage() {
               </div>
             ) : !data?.data?.length ? (
               <div className="py-12 text-center text-sm text-muted-foreground">
-                No translations found
+                Переводы не найдены
               </div>
             ) : (
               <div className="overflow-x-auto">
@@ -243,11 +243,11 @@ export default function TranslationsPage() {
                   <TableHeader>
                     <TableRow>
                       <TableHead className="w-10">#</TableHead>
-                      <TableHead>Source</TableHead>
-                      <TableHead>Translation</TableHead>
-                      <TableHead className="w-20">Lang</TableHead>
-                      <TableHead className="w-28">Engine</TableHead>
-                      <TableHead className="w-28">Date</TableHead>
+                      <TableHead>Исходник</TableHead>
+                      <TableHead>Перевод</TableHead>
+                      <TableHead className="w-20">Язык</TableHead>
+                      <TableHead className="w-28">Движок</TableHead>
+                      <TableHead className="w-28">Дата</TableHead>
                       <TableHead className="w-16"></TableHead>
                     </TableRow>
                   </TableHeader>
@@ -324,11 +324,11 @@ export default function TranslationsPage() {
                               <TableCell colSpan={7} className="bg-muted/30 p-4">
                                 <div className="space-y-2">
                                   <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                                    All Engine Results
+                                    Все результаты движков
                                   </p>
                                   {results.length === 0 ? (
                                     <p className="text-sm text-muted-foreground">
-                                      No detailed results available
+                                      Детальные результаты недоступны
                                     </p>
                                   ) : (
                                     <div className="grid gap-2">
@@ -380,7 +380,7 @@ export default function TranslationsPage() {
         {data && data.totalPages > 1 && (
           <div className="flex items-center justify-between">
             <p className="text-xs text-muted-foreground">
-              Page {data.page} of {data.totalPages}
+              Страница {data.page} из {data.totalPages}
             </p>
             <div className="flex items-center gap-1">
               <Button

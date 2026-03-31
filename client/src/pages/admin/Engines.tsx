@@ -82,10 +82,10 @@ export default function EnginesPage() {
       <div className="space-y-6">
         <div>
           <h1 className="text-xl font-bold text-foreground" data-testid="text-page-title">
-            Engines
+            Движки
           </h1>
           <p className="text-sm text-muted-foreground mt-0.5">
-            Translation engine status and performance
+            Статус и производительность движков
           </p>
         </div>
 
@@ -96,7 +96,7 @@ export default function EnginesPage() {
             ))}
           </div>
         ) : mergedEngines.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No engines configured</p>
+          <p className="text-sm text-muted-foreground">Движки не настроены</p>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
             {mergedEngines.map((eng) => (
@@ -121,7 +121,7 @@ export default function EnginesPage() {
                           className="text-[10px] bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-0"
                         >
                           <CheckCircle2 className="h-3 w-3 mr-0.5" />
-                          Active
+                          Активен
                         </Badge>
                       ) : (
                         <Badge
@@ -129,7 +129,7 @@ export default function EnginesPage() {
                           className="text-[10px] bg-destructive/10 text-destructive border-0"
                         >
                           <XCircle className="h-3 w-3 mr-0.5" />
-                          No Key
+                          Нет ключа
                         </Badge>
                       )}
                     </div>
@@ -138,11 +138,11 @@ export default function EnginesPage() {
                   {/* Stats grid */}
                   <div className="grid grid-cols-3 gap-3">
                     <div>
-                      <p className="text-[10px] text-muted-foreground">Calls</p>
+                      <p className="text-[10px] text-muted-foreground">Вызовы</p>
                       <p className="text-lg font-bold text-foreground">{eng.totalCalls}</p>
                     </div>
                     <div>
-                      <p className="text-[10px] text-muted-foreground">Avg Latency</p>
+                      <p className="text-[10px] text-muted-foreground">Ср. латентность</p>
                       <p className="text-lg font-bold text-foreground">
                         {eng.avgLatencyMs > 0 ? `${eng.avgLatencyMs}` : "—"}
                         {eng.avgLatencyMs > 0 && (
@@ -151,7 +151,7 @@ export default function EnginesPage() {
                       </p>
                     </div>
                     <div>
-                      <p className="text-[10px] text-muted-foreground">Best Picks</p>
+                      <p className="text-[10px] text-muted-foreground">Лучший</p>
                       <p className="text-lg font-bold text-foreground">
                         {eng.bestCount > 0 ? eng.bestCount : "—"}
                       </p>
@@ -162,7 +162,7 @@ export default function EnginesPage() {
                   {eng.totalCalls > 0 && (
                     <div>
                       <div className="flex items-center justify-between mb-1">
-                        <p className="text-[10px] text-muted-foreground">Success Rate</p>
+                        <p className="text-[10px] text-muted-foreground">Успешность</p>
                         <p
                           className={`text-xs font-medium ${
                             eng.successRate >= 90
@@ -187,7 +187,7 @@ export default function EnginesPage() {
                     <Key className="h-3 w-3" />
                     <span className="font-mono">{eng.keyEnvVar}</span>
                     <span>—</span>
-                    <span>{eng.hasApiKey ? "Configured" : "Missing"}</span>
+                    <span>{eng.hasApiKey ? "Настроен" : "Отсутствует"}</span>
                   </div>
 
                   {/* Last error */}

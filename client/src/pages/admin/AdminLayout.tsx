@@ -16,11 +16,11 @@ import { useTheme } from "@/components/theme-provider";
 import { useState } from "react";
 
 const NAV_ITEMS = [
-  { title: "Dashboard", href: "/admin", icon: LayoutDashboard },
-  { title: "Translations", href: "/admin/translations", icon: FileText },
-  { title: "Engines", href: "/admin/engines", icon: Cpu },
-  { title: "Lab", href: "/admin/lab", icon: FlaskConical },
-  { title: "Settings", href: "/admin/settings", icon: Settings },
+  { title: "Обзор", href: "/admin", icon: LayoutDashboard },
+  { title: "Переводы", href: "/admin/translations", icon: FileText },
+  { title: "Движки", href: "/admin/engines", icon: Cpu },
+  { title: "Лаборатория", href: "/admin/lab", icon: FlaskConical },
+  { title: "Настройки", href: "/admin/settings", icon: Settings },
 ];
 
 function KaztilshiLogoSmall() {
@@ -98,7 +98,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <span className="text-sm font-semibold text-sidebar-foreground truncate">
               Қазтілші
             </span>
-            <span className="text-[10px] text-muted-foreground leading-none">Admin Panel</span>
+            <span className="text-[10px] text-muted-foreground leading-none">Админ-панель</span>
           </div>
           <Button
             variant="ghost"
@@ -146,7 +146,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               data-testid="nav-back-to-app"
             >
               <ArrowLeft className="h-4 w-4" />
-              <span>Back to Translator</span>
+              <span>К переводчику</span>
             </button>
           </Link>
         </div>
