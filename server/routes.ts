@@ -7,7 +7,7 @@ import { translateWithAll, selectBest, engines } from "./engines/index.js";
 // --- Validation schemas ---
 
 const translateBodySchema = z.object({
-  text: z.string().min(1, "text is required"),
+  text: z.string().min(1, "text is required").max(5000, "text exceeds 5000 character limit"),
   sourceLang: z.enum(["ru", "en"], {
     errorMap: () => ({ message: 'sourceLang must be "ru" or "en"' }),
   }),
@@ -128,8 +128,13 @@ export async function registerRoutes(
   app.get("/api/engines", (_req, res) => {
     const KEY_MAP: Record<string, string> = {
       openai: "OPENAI_API_KEY",
+      claude: "CLAUDE_API_KEY",
       tilmash: "HUGGINGFACE_API_KEY",
       gemini: "GEMINI_API_KEY",
+      deepseek: "DEEPSEEK_API_KEY",
+      grok: "GROK_API_KEY",
+      mistral: "MISTRAL_API_KEY",
+      perplexity: "PERPLEXITY_API_KEY",
       deepl: "DEEPL_API_KEY",
       yandex: "YANDEX_API_KEY",
     };

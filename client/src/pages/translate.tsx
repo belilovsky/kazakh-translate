@@ -50,8 +50,13 @@ interface TranslateResponse {
 const ENGINE_LABELS: Record<string, string> = {
   ensemble: "Ensemble AI",
   openai: "GPT-4o",
+  claude: "Claude Sonnet",
   gemini: "Gemini 2.5",
+  deepseek: "DeepSeek",
+  grok: "Grok",
   tilmash: "Qwen 72B",
+  mistral: "Mistral",
+  perplexity: "Perplexity",
   deepl: "DeepL",
   yandex: "Yandex",
 };

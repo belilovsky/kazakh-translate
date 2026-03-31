@@ -1,18 +1,28 @@
 import { openaiEngine } from "./openai.js";
+import { claudeEngine } from "./claude.js";
+import { deepseekEngine } from "./deepseek.js";
+import { grokEngine } from "./grok.js";
 import { tilmashEngine } from "./tilmash.js";
 import { geminiEngine } from "./gemini.js";
+import { mistralEngine } from "./mistral.js";
+import { perplexityEngine } from "./perplexity.js";
 import { deeplEngine } from "./deepl.js";
 import { yandexEngine } from "./yandex.js";
 import { postEditTranslation } from "./postprocess.js";
 import { selfEvaluateAndImprove } from "./self-eval.js";
 import type { TranslationEngine, TranslationResult } from "./types.js";
 
-// Priority order: ensemble > openai > gemini > tilmash > deepl > yandex
+// Priority order: ensemble > openai > claude > gemini > deepseek > grok > tilmash > mistral > perplexity > deepl > yandex
 // Only include engines whose API keys are configured
 const allEngines: TranslationEngine[] = [
   openaiEngine,
+  claudeEngine,
   geminiEngine,
+  deepseekEngine,
+  grokEngine,
   tilmashEngine,
+  mistralEngine,
+  perplexityEngine,
   deeplEngine,
   yandexEngine,
 ];
@@ -20,6 +30,11 @@ const allEngines: TranslationEngine[] = [
 const ENGINE_ENV_KEYS: Record<string, string> = {
   deepl: "DEEPL_API_KEY",
   yandex: "YANDEX_API_KEY",
+  claude: "CLAUDE_API_KEY",
+  deepseek: "DEEPSEEK_API_KEY",
+  grok: "GROK_API_KEY",
+  mistral: "MISTRAL_API_KEY",
+  perplexity: "PERPLEXITY_API_KEY",
 };
 
 export const engines: TranslationEngine[] = allEngines.filter((e) => {
@@ -31,7 +46,7 @@ export const engines: TranslationEngine[] = allEngines.filter((e) => {
   return true;
 });
 
-const PRIORITY_ORDER = ["ensemble", "openai", "gemini", "tilmash", "deepl", "yandex"];
+const PRIORITY_ORDER = ["ensemble", "openai", "claude", "gemini", "deepseek", "grok", "tilmash", "mistral", "perplexity", "deepl", "yandex"];
 
 export interface TranslationMeta {
   evalScore?: number;
@@ -89,7 +104,7 @@ export async function translateWithAll(
           ...ensembleResult,
           text: evalResult.finalText,
           confidence: Math.min(0.99, (ensembleResult.confidence ?? 0.98) + 0.01),
-          latencyMs: ensembleResult.latencyMs + (Date.now() - Date.now()), // will be recalculated
+          latencyMs: ensembleResult.latencyMs,
         };
       }
     } catch (err: any) {
