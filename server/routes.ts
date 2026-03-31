@@ -121,6 +121,133 @@ export async function registerRoutes(
     }
   });
 
+  // ===== ADMIN API ROUTES =====
+
+  /**
+   * GET /api/admin/stats
+   * Returns: dashboard statistics
+   */
+  app.get("/api/admin/stats", async (_req, res) => {
+    try {
+      const stats = await storage.getTranslationStats();
+      return res.json(stats);
+    } catch (err: any) {
+      console.error("Admin stats error:", err);
+      return res.status(500).json({ message: err?.message ?? "Internal server error" });
+    }
+  });
+
+  /**
+   * GET /api/admin/translations
+   * Query: ?page=1&limit=20&search=...&sourceLang=ru&engine=openai
+   */
+  app.get("/api/admin/translations", async (req, res) => {
+    const page = Math.max(1, parseInt(String(req.query.page || "1"), 10) || 1);
+    const limit = Math.min(100, Math.max(1, parseInt(String(req.query.limit || "20"), 10) || 20));
+    const search = req.query.search ? String(req.query.search) : undefined;
+    const sourceLang = req.query.sourceLang ? String(req.query.sourceLang) : undefined;
+    const engine = req.query.engine ? String(req.query.engine) : undefined;
+
+    try {
+      const result = await storage.getTranslationsPaginated(page, limit, {
+        search,
+        sourceLang,
+        engine,
+      });
+      return res.json(result);
+    } catch (err: any) {
+      console.error("Admin translations error:", err);
+      return res.status(500).json({ message: err?.message ?? "Internal server error" });
+    }
+  });
+
+  /**
+   * DELETE /api/admin/translations/:id
+   */
+  app.delete("/api/admin/translations/:id", async (req, res) => {
+    const id = parseInt(req.params.id, 10);
+    if (isNaN(id)) {
+      return res.status(400).json({ message: "Invalid translation id" });
+    }
+    try {
+      const deleted = await storage.deleteTranslation(id);
+      if (!deleted) {
+        return res.status(404).json({ message: "Translation not found" });
+      }
+      return res.json({ success: true });
+    } catch (err: any) {
+      console.error("Delete translation error:", err);
+      return res.status(500).json({ message: err?.message ?? "Internal server error" });
+    }
+  });
+
+  /**
+   * GET /api/admin/translations/export
+   * Returns: CSV file of all translations
+   */
+  app.get("/api/admin/translations/export", async (_req, res) => {
+    try {
+      const result = await storage.getTranslationsPaginated(1, 10000);
+      const rows = result.data;
+
+      const csvHeader = "ID,Source Text,Translated Text,Source Lang,Target Lang,Engine,Rating,Created At";
+      const csvRows = rows.map((r) => {
+        const escape = (s: string) => `"${s.replace(/"/g, '""')}"`;
+        return [
+          r.id,
+          escape(r.sourceText),
+          escape(r.translatedText),
+          r.sourceLang,
+          r.targetLang,
+          r.engine,
+          r.rating ?? "",
+          r.createdAt,
+        ].join(",");
+      });
+
+      const csv = [csvHeader, ...csvRows].join("\n");
+      res.setHeader("Content-Type", "text/csv");
+      res.setHeader("Content-Disposition", "attachment; filename=translations.csv");
+      return res.send(csv);
+    } catch (err: any) {
+      console.error("Export error:", err);
+      return res.status(500).json({ message: err?.message ?? "Internal server error" });
+    }
+  });
+
+  /**
+   * GET /api/admin/engine-stats
+   * Returns: per-engine performance statistics
+   */
+  app.get("/api/admin/engine-stats", async (_req, res) => {
+    try {
+      const stats = await storage.getEngineStats();
+      return res.json(stats);
+    } catch (err: any) {
+      console.error("Engine stats error:", err);
+      return res.status(500).json({ message: err?.message ?? "Internal server error" });
+    }
+  });
+
+  /**
+   * GET /api/admin/settings
+   * Returns: current app settings (read-only for now)
+   */
+  app.get("/api/admin/settings", (_req, res) => {
+    return res.json({
+      selfEvalThreshold: 8,
+      maxIterations: 2,
+      enginePriority: [
+        "ensemble", "openai", "claude", "gemini", "deepseek",
+        "grok", "tilmash", "mistral", "perplexity", "deepl", "yandex",
+      ],
+      version: "1.0.0",
+      uptime: Math.floor(process.uptime()),
+    });
+  });
+
+  // ===== END ADMIN ROUTES =====
+
   /**
    * GET /api/engines
    * Returns: list of available engines with status

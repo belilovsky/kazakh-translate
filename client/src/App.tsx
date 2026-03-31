@@ -8,12 +8,22 @@ import { ThemeProvider } from "@/components/theme-provider";
 import NotFound from "@/pages/not-found";
 import TranslatePage from "@/pages/translate";
 import HistoryPage from "@/pages/history";
+import AdminDashboard from "@/pages/admin/Dashboard";
+import AdminTranslations from "@/pages/admin/Translations";
+import AdminEngines from "@/pages/admin/Engines";
+import AdminLab from "@/pages/admin/Lab";
+import AdminSettings from "@/pages/admin/Settings";
 
 function AppRouter() {
   return (
     <Switch>
       <Route path="/" component={TranslatePage} />
       <Route path="/history" component={HistoryPage} />
+      <Route path="/admin" component={AdminDashboard} />
+      <Route path="/admin/translations" component={AdminTranslations} />
+      <Route path="/admin/engines" component={AdminEngines} />
+      <Route path="/admin/lab" component={AdminLab} />
+      <Route path="/admin/settings" component={AdminSettings} />
       <Route component={NotFound} />
     </Switch>
   );
