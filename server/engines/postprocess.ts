@@ -3,15 +3,70 @@ import type { TranslationResult } from "./types.js";
 import { KAZAKH_GRAMMAR_RULES } from "./kazakh-rules.js";
 
 const TIMEOUT_MS = 25000;
+const CRITIC_TIMEOUT_MS = 12000;
 
 /**
- * Ensemble post-editing: takes all successful translation variants,
- * compares them, and produces a refined "best" translation that
- * fixes grammar, morphology, and naturalness issues.
+ * Smart Ensemble with Critic:
+ * 1. A fast critic model (Gemini) reviews all variants and identifies issues
+ * 2. GPT-4o synthesizes the best translation using both variants AND the critique
  *
- * Uses GPT-4o as the referee/editor model with detailed Kazakh rules
- * and few-shot examples of good vs bad corrections.
+ * This "Council of Models" approach catches errors that individual models miss.
  */
+
+/**
+ * Fast critic: Gemini reviews all variants and returns a brief critique.
+ * Runs in parallel-friendly timeout — if it fails, ensemble proceeds without it.
+ */
+async function getCritique(
+  sourceText: string,
+  sourceLang: string,
+  variants: TranslationResult[]
+): Promise<string | null> {
+  const geminiKey = process.env.GEMINI_API_KEY;
+  if (!geminiKey) return null;
+
+  const srcLabel = sourceLang === "ru" ? "орыс" : "ағылшын";
+  const variantsBlock = variants
+    .filter((v) => !v.error && v.text)
+    .map((v, i) => `[${v.engine}]: ${v.text}`)
+    .join("\n");
+
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), CRITIC_TIMEOUT_MS);
+
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${geminiKey}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          systemInstruction: {
+            parts: [{
+              text: `Сен — қазақ тілінің сарапшысысың. Аударма нұсқаларын тексеріп, қысқа сын жаз. Тек нақты қателерді көрсет: сингармонизм, калька, сөз тәртібі, морфология. Жақсы нұсқаларды да атап өт. 3-4 сөйлем жеткілікті.`,
+            }],
+          },
+          contents: [{
+            parts: [{
+              text: `Бастапқы мәтін (${srcLabel}):\n«${sourceText}»\n\nНұсқалар:\n${variantsBlock}\n\nҚысқа сын:`,
+            }],
+          }],
+          generationConfig: { temperature: 0.1, maxOutputTokens: 300 },
+        }),
+        signal: controller.signal,
+      }
+    );
+
+    clearTimeout(timeoutId);
+    if (!response.ok) return null;
+
+    const data = (await response.json()) as any;
+    return data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || null;
+  } catch {
+    return null; // Critic failure is non-fatal
+  }
+}
+
 export async function postEditTranslation(
   sourceText: string,
   sourceLang: string,
@@ -22,16 +77,21 @@ export async function postEditTranslation(
 
   const successful = variants.filter((v) => !v.error && v.text);
   if (successful.length < 2) {
-    // Not enough variants to ensemble — skip post-editing
     return null;
   }
 
   const start = Date.now();
   const srcLabel = sourceLang === "ru" ? "русского" : "английского";
 
+  // Run critic in parallel — don't block if it's slow
+  const critiquePromise = getCritique(sourceText, sourceLang, variants);
+
   const variantsBlock = successful
     .map((v, i) => `[Вариант ${i + 1} — ${v.engine}]:\n${v.text}`)
     .join("\n\n");
+
+  // Wait for critique (with timeout already built in)
+  const critique = await critiquePromise;
 
   const systemPrompt = `Сен — қазақ тілінің жоғары білікті редакторы мен лингвистсің. Сенің міндетің — бірнеше аударма нұсқаларын салыстырып, олардың ішінен ең жақсы элементтерін біріктіріп, мінсіз аударма жасау.
 
@@ -67,12 +127,16 @@ ${KAZAKH_GRAMMAR_RULES}
 
 Тек жақсартылған аударманы ғана жаз. Ешқандай түсіндірме, ескерту немесе тырнақша жазба.`;
 
+  const critiqueSection = critique
+    ? `\n\n## СЫН (осы нұсқаларды басқа AI модель бағалады):\n${critique}`
+    : "";
+
   const userPrompt = `Бастапқы мәтін (${srcLabel} тілінен):
 «${sourceText}»
 
-${variantsBlock}
+${variantsBlock}${critiqueSection}
 
-Осы нұсқаларды салыстырып, ең жақсы элементтерін біріктіріп, жоғарыдағы ережелерге сүйеніп, грамматикалық, морфологиялық және стилистикалық тұрғыдан мінсіз қазақша аударма жаз.`;
+Осы нұсқаларды және сынды ескеріп, ең жақсы элементтерін біріктіріп, грамматикалық, морфологиялық және стилистикалық тұрғыдан мінсіз қазақша аударма жаз.`;
 
   try {
     const client = new OpenAI({ apiKey, timeout: TIMEOUT_MS });
