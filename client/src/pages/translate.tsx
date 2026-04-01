@@ -148,6 +148,11 @@ export default function TranslatePage() {
   const [isLoading, setIsLoading] = useState(false);
   const [pipelinePhase, setPipelinePhase] = useState<string>("");
   const [engineStatuses, setEngineStatuses] = useState<Record<string, { status: string; latencyMs?: number }>>({});
+  // Detailed pipeline diagnostics
+  const [engineTexts, setEngineTexts] = useState<Record<string, string>>({});
+  const [critiqueText, setCritiqueText] = useState<string>("");
+  const [ensembleText, setEnsembleText] = useState<string>("");
+  const [evalDetails, setEvalDetails] = useState<{ score?: number; issues?: string[]; improved?: boolean; text?: string }>({});
 
   // Voice input
   const [isListening, setIsListening] = useState(false);
@@ -240,6 +245,10 @@ export default function TranslatePage() {
     setTotalTimeMs(null);
     setPipelinePhase("engines");
     setEngineStatuses({});
+    setEngineTexts({});
+    setCritiqueText("");
+    setEnsembleText("");
+    setEvalDetails({});
     translateStartTimeRef.current = Date.now();
 
     try {
@@ -281,6 +290,27 @@ export default function TranslatePage() {
                   ...prev,
                   [data.engine]: { status: data.status, latencyMs: data.latencyMs },
                 }));
+              }
+              // Capture engine translation texts
+              if (data.engine && data.text && data.phase === "engines") {
+                setEngineTexts((prev) => ({ ...prev, [data.engine]: data.text }));
+              }
+              // Capture critique
+              if (data.critique) {
+                setCritiqueText(data.critique);
+              }
+              // Capture ensemble output
+              if (data.phase === "ensemble" && data.text) {
+                setEnsembleText(data.text);
+              }
+              // Capture self-eval details
+              if (data.phase === "selfeval" && (data.evalScore !== undefined || data.evalIssues)) {
+                setEvalDetails({
+                  score: data.evalScore,
+                  issues: data.evalIssues,
+                  improved: data.evalImproved,
+                  text: data.text,
+                });
               }
             } else if (eventType === "result") {
               setTotalTimeMs(Date.now() - translateStartTimeRef.current);
@@ -720,6 +750,10 @@ export default function TranslatePage() {
             phase={pipelinePhase}
             engineStatuses={engineStatuses}
             engineLabels={ENGINE_LABELS}
+            engineTexts={engineTexts}
+            critiqueText={critiqueText}
+            ensembleText={ensembleText}
+            evalDetails={evalDetails}
           />
         )}
 

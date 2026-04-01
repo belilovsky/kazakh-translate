@@ -70,14 +70,15 @@ async function getCritique(
 export async function postEditTranslation(
   sourceText: string,
   sourceLang: string,
-  variants: TranslationResult[]
-): Promise<TranslationResult | null> {
+  variants: TranslationResult[],
+  emit?: (event: any) => void
+): Promise<{ result: TranslationResult | null; critique: string | null }> {
   const apiKey = process.env.OPENAI_API_KEY;
-  if (!apiKey) return null;
+  if (!apiKey) return { result: null, critique: null };
 
   const successful = variants.filter((v) => !v.error && v.text);
   if (successful.length < 2) {
-    return null;
+    return { result: null, critique: null };
   }
 
   const start = Date.now();
@@ -153,19 +154,22 @@ ${variantsBlock}${critiqueSection}
 
     const refined = response.choices[0]?.message?.content?.trim() ?? "";
 
-    if (!refined) return null;
+    if (!refined) return { result: null, critique: critique };
 
     // Strip quotation marks if the model wrapped the output
     const cleaned = refined.replace(/^[«"„""]|[»"""]$/g, "").trim();
 
     return {
-      engine: "ensemble",
-      text: cleaned,
-      confidence: 0.98,
-      latencyMs: Date.now() - start,
+      result: {
+        engine: "ensemble",
+        text: cleaned,
+        confidence: 0.98,
+        latencyMs: Date.now() - start,
+      },
+      critique: critique,
     };
   } catch (err: any) {
     console.error("Post-editing error:", err?.message);
-    return null;
+    return { result: null, critique: critique };
   }
 }

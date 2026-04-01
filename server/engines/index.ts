@@ -68,6 +68,14 @@ export type ProgressCallback = (event: {
   status?: "running" | "done" | "error";
   latencyMs?: number;
   detail?: string;
+  /** Extended pipeline data for diagnostics */
+  text?: string;
+  critique?: string;
+  evalScore?: number;
+  evalIssues?: string[];
+  evalImproved?: boolean;
+  inputCount?: number;
+  outputLength?: number;
 }) => void;
 
 export async function translateWithAll(
@@ -86,7 +94,14 @@ export async function translateWithAll(
     emit({ phase: "engines", engine: engine.name, status: "running" });
     try {
       const result = await engine.translate(text, sourceLang, targetLang);
-      emit({ phase: "engines", engine: engine.name, status: result.error ? "error" : "done", latencyMs: result.latencyMs });
+      // Send engine text for diagnostics
+      emit({
+        phase: "engines",
+        engine: engine.name,
+        status: result.error ? "error" : "done",
+        latencyMs: result.latencyMs,
+        text: result.error ? result.error : result.text,
+      });
       return result;
     } catch (err: any) {
       const result: TranslationResult = {
@@ -95,7 +110,7 @@ export async function translateWithAll(
         error: err?.message ?? "Engine threw unexpectedly",
         latencyMs: 0,
       };
-      emit({ phase: "engines", engine: engine.name, status: "error" });
+      emit({ phase: "engines", engine: engine.name, status: "error", text: result.error });
       return result;
     }
   });
@@ -107,14 +122,32 @@ export async function translateWithAll(
     }
   }
 
+  const successCount = rawResults.filter(r => !r.error && r.text).length;
+
   // Phase 2: Critic + Ensemble
-  emit({ phase: "critic", detail: "Критик Gemini анализирует варианты..." });
-  emit({ phase: "ensemble", detail: "Ensemble GPT-4o синтезирует лучший перевод..." });
-  let ensembleResult = await postEditTranslation(text, sourceLang, rawResults);
+  emit({ phase: "critic", detail: "Критик Gemini анализирует варианты...", inputCount: successCount });
+  emit({ phase: "ensemble", detail: "Ensemble GPT-4o синтезирует лучший перевод...", inputCount: successCount });
+  const { result: ensembleRes, critique: critiqueText } = await postEditTranslation(text, sourceLang, rawResults, emit);
+  let ensembleResult = ensembleRes;
+
+  // Emit critic result
+  if (critiqueText) {
+    emit({ phase: "critic", detail: "Критик завершил анализ", critique: critiqueText });
+  }
+  // Emit ensemble result
+  if (ensembleResult) {
+    emit({
+      phase: "ensemble",
+      detail: "Ensemble завершён",
+      text: ensembleResult.text,
+      outputLength: ensembleResult.text.length,
+    });
+  }
 
   // Phase 3: Self-evaluation loop
   let meta: TranslationMeta = {};
   if (ensembleResult && ensembleResult.text) {
+    const textBeforeEval = ensembleResult.text;
     emit({ phase: "selfeval", detail: "Самооценка качества перевода..." });
     try {
       const evalResult = await selfEvaluateAndImprove(
@@ -127,7 +160,9 @@ export async function translateWithAll(
       meta.evalIterations = evalResult.iterations;
       meta.evalIssues = evalResult.issues;
 
-      if (evalResult.finalText !== ensembleResult.text) {
+      const wasImproved = evalResult.finalText !== textBeforeEval;
+
+      if (wasImproved) {
         ensembleResult = {
           ...ensembleResult,
           text: evalResult.finalText,
@@ -135,8 +170,19 @@ export async function translateWithAll(
           latencyMs: ensembleResult.latencyMs,
         };
       }
+
+      // Emit self-eval details
+      emit({
+        phase: "selfeval",
+        detail: wasImproved ? "Текст улучшен" : "Текст не изменён",
+        evalScore: evalResult.evalScore,
+        evalIssues: evalResult.issues,
+        evalImproved: wasImproved,
+        text: wasImproved ? evalResult.finalText : undefined,
+      });
     } catch (err: any) {
       console.error("Self-evaluation failed:", err?.message);
+      emit({ phase: "selfeval", detail: `Ошибка: ${err?.message}`, evalScore: 0 });
     }
   }
 
