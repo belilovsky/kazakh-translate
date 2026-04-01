@@ -61,6 +61,20 @@ const ENGINE_LABELS: Record<string, string> = {
   yandex: "Yandex",
 };
 
+// Typical latency in ms for each engine (used for progress simulation)
+const ENGINE_TYPICAL_LATENCY: Record<string, number> = {
+  yandex: 300,
+  openai: 2000,
+  deepseek: 2000,
+  perplexity: 1800,
+  tilmash: 2500,
+  gemini: 3000,
+  grok: 5000,
+};
+
+// Engines to show in the progress panel (excluding ensemble)
+const PROGRESS_ENGINES = ["yandex", "openai", "gemini", "deepseek", "tilmash", "perplexity", "grok"];
+
 // Kazakh shanyrak (шаңырақ) inspired logo — the crown of the yurt
 function KaztilshiLogo({ size = 32 }: { size?: number }) {
   return (
@@ -139,6 +153,11 @@ export default function TranslatePage() {
   const [result, setResult] = useState<TranslateResponse | null>(null);
   const [variantsOpen, setVariantsOpen] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+
+  // Elapsed time tracking during translation
+  const [elapsedMs, setElapsedMs] = useState(0);
+  const translateStartTimeRef = useRef<number | null>(null);
+  const [totalTimeMs, setTotalTimeMs] = useState<number | null>(null);
 
   // Voice input
   const [isListening, setIsListening] = useState(false);
@@ -228,6 +247,10 @@ export default function TranslatePage() {
       return res.json() as Promise<TranslateResponse>;
     },
     onSuccess: (data) => {
+      const endTime = Date.now();
+      if (translateStartTimeRef.current !== null) {
+        setTotalTimeMs(endTime - translateStartTimeRef.current);
+      }
       setResult(data);
       queryClient.invalidateQueries({ queryKey: ["/api/translations"] });
     },
@@ -239,6 +262,17 @@ export default function TranslatePage() {
       });
     },
   });
+
+  const isLoading = translateMutation.isPending;
+
+  // Timer effect: increments elapsedMs every 100ms while isLoading is true
+  useEffect(() => {
+    if (!isLoading) return;
+    const interval = setInterval(() => {
+      setElapsedMs((prev) => prev + 100);
+    }, 100);
+    return () => clearInterval(interval);
+  }, [isLoading]);
 
   const rateMutation = useMutation({
     mutationFn: async ({ id, rating }: { id: number; rating: number }) => {
@@ -255,6 +289,10 @@ export default function TranslatePage() {
     if (!trimmed) return;
     setResult(null);
     setVariantsOpen(false);
+    // Reset elapsed time and record start time
+    setElapsedMs(0);
+    setTotalTimeMs(null);
+    translateStartTimeRef.current = Date.now();
     translateMutation.mutate({
       text: trimmed,
       sourceLang,
@@ -283,21 +321,12 @@ export default function TranslatePage() {
     setSourceText("");
     setResult(null);
     setVariantsOpen(false);
+    setTotalTimeMs(null);
     textareaRef.current?.focus();
   };
 
-  // Auto-resize textarea
-  useEffect(() => {
-    const el = textareaRef.current;
-    if (el) {
-      el.style.height = "auto";
-      el.style.height = Math.max(180, Math.min(el.scrollHeight, 400)) + "px";
-    }
-  }, [sourceText]);
-
   const charCount = sourceText.length;
   const maxChars = 5000;
-  const isLoading = translateMutation.isPending;
 
   const langOptions: { value: SourceLang; label: string }[] = [
     { value: "ru", label: "Русский" },
@@ -308,6 +337,9 @@ export default function TranslatePage() {
   const ensembleResult = result?.allResults?.find((r) => r.engine === "ensemble");
   const displayedText = ensembleResult?.text ?? result?.bestTranslation?.text ?? "";
   const displayedEngine = ensembleResult ? "ensemble" : result?.bestTranslation?.engine ?? "";
+
+  // Format elapsed time as seconds string
+  const formatSec = (ms: number) => (ms / 1000).toFixed(1) + "с";
 
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">
@@ -401,7 +433,7 @@ export default function TranslatePage() {
               onChange={(e) => setSourceText(e.target.value.slice(0, maxChars))}
               onKeyDown={handleKeyDown}
               placeholder="Введите текст..."
-              className="w-full resize-none bg-transparent text-base leading-relaxed p-4 sm:p-5 pb-14 outline-none placeholder:text-muted-foreground/50 min-h-[180px]"
+              className="w-full resize-none bg-transparent text-[13px] leading-relaxed p-4 sm:p-5 pb-14 outline-none placeholder:text-muted-foreground/50 min-h-[300px] overflow-y-auto max-h-[500px]"
               data-testid="source-textarea"
               aria-label="Исходный текст"
             />
@@ -485,22 +517,53 @@ export default function TranslatePage() {
           </div>
 
           {/* RIGHT PANEL — Translation Result */}
-          <div className="relative bg-card/30 flex flex-col min-h-[180px]">
-            {/* Loading state */}
+          <div className="relative bg-card/30 flex flex-col min-h-[300px]">
+            {/* Loading state — engine progress panel */}
             {isLoading && (
-              <div className="p-4 sm:p-5 space-y-3" data-testid="loading-skeleton">
-                <div className="flex items-center gap-2 mb-3">
+              <div className="p-4 sm:p-5" data-testid="loading-skeleton">
+                {/* Total elapsed timer */}
+                <div className="flex items-center gap-2 mb-4">
                   <div className="relative">
                     <Loader2 className="h-4 w-4 animate-spin text-primary" />
                     <span className="absolute -top-0.5 -right-0.5 h-2 w-2 bg-primary rounded-full animate-ping" />
                   </div>
-                  <span className="text-sm text-muted-foreground">
+                  <span className="text-sm text-muted-foreground font-medium">
                     Переводчики работают...
                   </span>
+                  <span className="ml-auto text-sm font-mono text-primary tabular-nums">
+                    ⏱ {formatSec(elapsedMs)}
+                  </span>
                 </div>
-                <Skeleton className="h-4 w-full bg-muted/60" />
-                <Skeleton className="h-4 w-5/6 bg-muted/60" />
-                <Skeleton className="h-4 w-4/6 bg-muted/60" />
+
+                {/* Per-engine progress rows */}
+                <div className="space-y-2">
+                  {PROGRESS_ENGINES.map((engine) => {
+                    const typicalMs = ENGINE_TYPICAL_LATENCY[engine] ?? 3000;
+                    const isDone = elapsedMs >= typicalMs;
+                    const label = ENGINE_LABELS[engine] ?? engine;
+                    return (
+                      <div key={engine} className="flex items-center gap-2 text-[13px]">
+                        {isDone ? (
+                          <Check className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
+                        ) : (
+                          <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground shrink-0" />
+                        )}
+                        <span className={isDone ? "text-foreground" : "text-muted-foreground"}>
+                          {label}
+                        </span>
+                        <span className="ml-auto font-mono tabular-nums text-[12px] text-muted-foreground">
+                          {isDone ? (
+                            <span className="text-emerald-600 dark:text-emerald-400">
+                              {formatSec(typicalMs)}
+                            </span>
+                          ) : (
+                            "..."
+                          )}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
             )}
 
@@ -508,10 +571,22 @@ export default function TranslatePage() {
             {result && !isLoading && (
               <div className="flex flex-col flex-1">
                 {/* Translation text */}
-                <div className="flex-1 p-4 sm:p-5 pb-14">
-                  <p className="text-base leading-relaxed text-foreground" data-testid="best-translation-text">
-                    {displayedText}
-                  </p>
+                <div className="flex-1 p-4 sm:p-5 pb-14 overflow-y-auto max-h-[500px]">
+                  <div
+                    className="text-[13px] leading-relaxed text-foreground space-y-2"
+                    data-testid="best-translation-text"
+                  >
+                    {displayedText.split("\n\n").map((para, pIdx) => (
+                      <p key={pIdx} className="mb-2">
+                        {para.split("\n").map((line, lIdx, arr) => (
+                          <span key={lIdx}>
+                            {line}
+                            {lIdx < arr.length - 1 && <br />}
+                          </span>
+                        ))}
+                      </p>
+                    ))}
+                  </div>
 
                   {/* Quality and engine info */}
                   <div className="mt-3 flex items-center flex-wrap gap-2">
@@ -535,25 +610,26 @@ export default function TranslatePage() {
                 {/* Result panel footer */}
                 <div className="absolute bottom-0 left-0 right-0 flex items-center justify-between px-3 sm:px-4 py-2 bg-card/50 backdrop-blur-sm border-t border-border/50">
                   <div className="flex items-center gap-0.5">
-                    {/* Copy */}
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleCopy(displayedText, "best")}
-                          className="h-8 w-8 text-muted-foreground"
-                          data-testid="copy-best-translation"
-                        >
-                          {copiedId === "best" ? (
-                            <Check className="h-4 w-4 text-emerald-500" />
-                          ) : (
-                            <Copy className="h-4 w-4" />
-                          )}
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>Копировать</TooltipContent>
-                    </Tooltip>
+                    {/* Prominent Copy button */}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleCopy(displayedText, "best")}
+                      className="h-8 gap-1.5 px-3 text-xs font-medium"
+                      data-testid="copy-best-translation"
+                    >
+                      {copiedId === "best" ? (
+                        <>
+                          <Check className="h-3.5 w-3.5 text-emerald-500" />
+                          <span className="text-emerald-600 dark:text-emerald-400">Скопировано!</span>
+                        </>
+                      ) : (
+                        <>
+                          <Copy className="h-3.5 w-3.5" />
+                          <span>Копировать всё</span>
+                        </>
+                      )}
+                    </Button>
 
                     {/* Listen */}
                     <Tooltip>
@@ -605,9 +681,17 @@ export default function TranslatePage() {
                     </Tooltip>
                   </div>
 
-                  <Badge variant="outline" className="text-[11px] text-muted-foreground font-normal">
-                    {ENGINE_LABELS[displayedEngine] ?? displayedEngine}
-                  </Badge>
+                  <div className="flex items-center gap-2">
+                    {/* Total time badge */}
+                    {totalTimeMs !== null && (
+                      <Badge variant="outline" className="text-[11px] text-primary font-mono tabular-nums font-normal">
+                        ⏱ {formatSec(totalTimeMs)}
+                      </Badge>
+                    )}
+                    <Badge variant="outline" className="text-[11px] text-muted-foreground font-normal">
+                      {ENGINE_LABELS[displayedEngine] ?? displayedEngine}
+                    </Badge>
+                  </div>
                 </div>
               </div>
             )}
