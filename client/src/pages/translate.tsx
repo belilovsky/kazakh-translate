@@ -544,74 +544,12 @@ export default function TranslatePage() {
 
           {/* RIGHT PANEL — Translation Result */}
           <div className="relative bg-card/30 flex flex-col min-h-[300px]">
-            {/* Loading state — real pipeline progress from SSE */}
+            {/* Loading state — simple skeleton in right panel */}
             {isLoading && (
-              <div className="p-4 sm:p-5" data-testid="loading-skeleton">
-                {/* Timer */}
-                <div className="flex items-center justify-between mb-4">
-                  <span className="text-lg font-mono font-bold text-primary tabular-nums">
-                    {(elapsedMs / 1000).toFixed(1)}с
-                  </span>
-                </div>
-
-                {/* Pipeline phases */}
-                <div className="space-y-3">
-                  {/* Phase 1: Engines */}
-                  <div>
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                        Этап 1 — Движки
-                      </span>
-                      {pipelinePhase === "engines" && <Loader2 className="h-3 w-3 animate-spin text-primary" />}
-                      {["critic","ensemble","selfeval","done"].includes(pipelinePhase) && <Check className="h-3 w-3 text-emerald-500" />}
-                    </div>
-                    <div className="grid grid-cols-2 gap-x-4 gap-y-1 pl-1">
-                      {Object.keys(ENGINE_LABELS).filter(k => k !== "ensemble" && k !== "deepl").map((eng) => {
-                        const st = engineStatuses[eng];
-                        const done = st?.status === "done";
-                        const err = st?.status === "error";
-                        const running = st?.status === "running";
-                        return (
-                          <div key={eng} className="flex items-center gap-1.5 text-[11px]">
-                            {done ? <Check className="h-3 w-3 text-emerald-500 shrink-0" />
-                              : err ? <X className="h-3 w-3 text-destructive shrink-0" />
-                              : running ? <Loader2 className="h-3 w-3 animate-spin text-primary shrink-0" />
-                              : <span className="h-3 w-3 rounded-full border border-border shrink-0" />}
-                            <span className={done ? "text-foreground" : err ? "text-destructive" : "text-muted-foreground"}>
-                              {ENGINE_LABELS[eng] ?? eng}
-                            </span>
-                            {done && st?.latencyMs != null && (
-                              <span className="ml-auto tabular-nums text-emerald-600 dark:text-emerald-400">
-                                {(st.latencyMs / 1000).toFixed(1)}с
-                              </span>
-                            )}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-
-                  {/* Phase 2: Critic + Ensemble */}
-                  {["critic","ensemble","selfeval","done"].includes(pipelinePhase) && (
-                    <div className="flex items-center gap-2">
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                        Этап 2 — Критик + Ensemble
-                      </span>
-                      {["critic","ensemble"].includes(pipelinePhase) && <Loader2 className="h-3 w-3 animate-spin text-primary" />}
-                      {["selfeval","done"].includes(pipelinePhase) && <Check className="h-3 w-3 text-emerald-500" />}
-                    </div>
-                  )}
-
-                  {/* Phase 3: Self-eval */}
-                  {["selfeval","done"].includes(pipelinePhase) && (
-                    <div className="flex items-center gap-2">
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                        Этап 3 — Самооценка
-                      </span>
-                      {pipelinePhase === "selfeval" && <Loader2 className="h-3 w-3 animate-spin text-primary" />}
-                      {pipelinePhase === "done" && <Check className="h-3 w-3 text-emerald-500" />}
-                    </div>
-                  )}
+              <div className="flex items-center justify-center flex-1 p-8">
+                <div className="text-center">
+                  <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto mb-3" />
+                  <p className="text-sm text-muted-foreground">Переводим...</p>
                 </div>
               </div>
             )}
@@ -756,6 +694,108 @@ export default function TranslatePage() {
             )}
           </div>
         </div>
+
+        {/* === PIPELINE VISUALIZATION === */}
+        {(isLoading || (result && pipelinePhase)) && (() => {
+          const enginesArr = Object.keys(ENGINE_LABELS).filter(k => k !== "ensemble" && k !== "deepl");
+          const doneEngines = Object.values(engineStatuses).filter(s => s.status === "done").length;
+          const totalEngines = enginesArr.length;
+          const phaseIdx = pipelinePhase === "engines" ? 0 : ["critic","ensemble"].includes(pipelinePhase) ? 1 : pipelinePhase === "selfeval" ? 2 : 3;
+
+          const phases = [
+            { id: "engines", label: `Движки (${doneEngines}/${totalEngines})`, icon: "\u2699" },
+            { id: "critic", label: "Критик + Ensemble", icon: "\u2696" },
+            { id: "selfeval", label: "Самооценка", icon: "\u2714" },
+            { id: "done", label: "Готово", icon: "\u2728" },
+          ];
+
+          return (
+            <div className="mt-3 rounded-xl border border-border bg-card/50 p-4 sm:p-5 overflow-hidden" data-testid="pipeline-viz">
+              {/* Timer */}
+              <div className="flex items-center justify-between mb-4">
+                <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Пайплайн перевода</span>
+                <span className="text-sm font-mono font-bold text-primary tabular-nums">
+                  {(isLoading ? elapsedMs : totalTimeMs ?? 0) / 1000 > 0 ? `${((isLoading ? elapsedMs : totalTimeMs ?? 0) / 1000).toFixed(1)}с` : ""}
+                </span>
+              </div>
+
+              {/* Phase progress bar */}
+              <div className="flex items-center gap-0 mb-5">
+                {phases.map((ph, i) => {
+                  const isActive = i === phaseIdx && isLoading;
+                  const isDone = i < phaseIdx || pipelinePhase === "done";
+                  return (
+                    <div key={ph.id} className="flex items-center flex-1 min-w-0">
+                      <div className={`
+                        relative flex items-center justify-center w-8 h-8 rounded-full text-sm shrink-0 transition-all duration-500
+                        ${isDone ? "bg-emerald-500 text-white shadow-lg shadow-emerald-500/30" : isActive ? "bg-primary text-primary-foreground shadow-lg shadow-primary/40 animate-pulse" : "bg-muted text-muted-foreground"}
+                      `}>
+                        {ph.icon}
+                      </div>
+                      {i < phases.length - 1 && (
+                        <div className="flex-1 h-1 mx-1 rounded-full overflow-hidden bg-muted">
+                          <div className={`h-full rounded-full transition-all duration-700 ease-out ${
+                            isDone ? "w-full bg-emerald-500" : isActive ? "w-1/2 bg-primary animate-pulse" : "w-0"
+                          }`} />
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Phase labels */}
+              <div className="flex gap-0 mb-4">
+                {phases.map((ph, i) => {
+                  const isActive = i === phaseIdx && isLoading;
+                  const isDone = i < phaseIdx || pipelinePhase === "done";
+                  return (
+                    <div key={ph.id} className="flex-1 text-center">
+                      <span className={`text-[10px] font-medium ${
+                        isDone ? "text-emerald-600 dark:text-emerald-400" : isActive ? "text-primary" : "text-muted-foreground/50"
+                      }`}>
+                        {ph.label}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Engine detail grid — shows during engines phase or after completion */}
+              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
+                {enginesArr.map((eng) => {
+                  const st = engineStatuses[eng];
+                  const done = st?.status === "done";
+                  const err = st?.status === "error";
+                  const running = st?.status === "running";
+                  return (
+                    <div key={eng} className={`
+                      flex flex-col items-center gap-1 p-2 rounded-lg text-center transition-all duration-300
+                      ${done ? "bg-emerald-500/10" : err ? "bg-destructive/10" : running ? "bg-primary/5" : "bg-muted/30"}
+                    `}>
+                      <div className={`
+                        w-6 h-6 rounded-full flex items-center justify-center text-[10px] transition-all duration-500
+                        ${done ? "bg-emerald-500 text-white" : err ? "bg-destructive text-white" : running ? "bg-primary/20 text-primary" : "bg-muted text-muted-foreground"}
+                      `}>
+                        {done ? "✓" : err ? "✗" : running ? <Loader2 className="h-3 w-3 animate-spin" /> : "•"}
+                      </div>
+                      <span className={`text-[10px] font-medium leading-tight ${
+                        done ? "text-foreground" : err ? "text-destructive" : "text-muted-foreground"
+                      }`}>
+                        {ENGINE_LABELS[eng]?.split(" ")[0] ?? eng}
+                      </span>
+                      {done && st?.latencyMs != null && (
+                        <span className="text-[9px] tabular-nums text-emerald-600 dark:text-emerald-400">
+                          {(st.latencyMs / 1000).toFixed(1)}с
+                        </span>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })()}
 
         {/* Keyboard hint */}
         {!result && !isLoading && (
