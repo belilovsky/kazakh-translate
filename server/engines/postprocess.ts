@@ -51,7 +51,7 @@ async function getCritique(
               text: `Бастапқы мәтін (${srcLabel}):\n«${sourceText}»\n\nНұсқалар:\n${variantsBlock}\n\nҚысқа сын:`,
             }],
           }],
-          generationConfig: { temperature: 0.1, maxOutputTokens: 300 },
+          generationConfig: { temperature: 0.1, maxOutputTokens: 800 },
         }),
         signal: controller.signal,
       }
