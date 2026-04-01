@@ -61,20 +61,6 @@ const ENGINE_LABELS: Record<string, string> = {
   yandex: "Yandex",
 };
 
-// Typical latency in ms for each engine (used for progress simulation)
-const ENGINE_TYPICAL_LATENCY: Record<string, number> = {
-  yandex: 300,
-  openai: 2000,
-  deepseek: 2000,
-  perplexity: 1800,
-  tilmash: 2500,
-  gemini: 3000,
-  grok: 5000,
-};
-
-// Engines to show in the progress panel (excluding ensemble)
-const PROGRESS_ENGINES = ["yandex", "openai", "gemini", "deepseek", "tilmash", "perplexity", "grok"];
-
 // Kazakh shanyrak (шаңырақ) inspired logo — the crown of the yurt
 function KaztilshiLogo({ size = 32 }: { size?: number }) {
   return (
@@ -154,10 +140,13 @@ export default function TranslatePage() {
   const [variantsOpen, setVariantsOpen] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
-  // Elapsed time tracking during translation
+  // Pipeline progress tracking
   const [elapsedMs, setElapsedMs] = useState(0);
-  const translateStartTimeRef = useRef<number | null>(null);
+  const translateStartTimeRef = useRef<number>(0);
   const [totalTimeMs, setTotalTimeMs] = useState<number | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [pipelinePhase, setPipelinePhase] = useState<string>("");
+  const [engineStatuses, setEngineStatuses] = useState<Record<string, { status: string; latencyMs?: number }>>({});
 
   // Voice input
   const [isListening, setIsListening] = useState(false);
@@ -241,35 +230,82 @@ export default function TranslatePage() {
     };
   }, []);
 
-  const translateMutation = useMutation({
-    mutationFn: async (payload: { text: string; sourceLang: string; targetLang: string }) => {
-      const res = await apiRequest("POST", "/api/translate", payload);
-      return res.json() as Promise<TranslateResponse>;
-    },
-    onSuccess: (data) => {
-      const endTime = Date.now();
-      if (translateStartTimeRef.current !== null) {
-        setTotalTimeMs(endTime - translateStartTimeRef.current);
-      }
-      setResult(data);
-      queryClient.invalidateQueries({ queryKey: ["/api/translations"] });
-    },
-    onError: (err: Error) => {
-      toast({
-        title: "Ошибка",
-        description: err.message,
-        variant: "destructive",
+  // SSE-based translation with live pipeline progress
+  const doTranslate = async (text: string, srcLang: string) => {
+    setIsLoading(true);
+    setResult(null);
+    setVariantsOpen(false);
+    setElapsedMs(0);
+    setTotalTimeMs(null);
+    setPipelinePhase("engines");
+    setEngineStatuses({});
+    translateStartTimeRef.current = Date.now();
+
+    try {
+      const resp = await fetch("/api/translate/stream", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text, sourceLang: srcLang, targetLang: "kk" }),
       });
-    },
-  });
 
-  const isLoading = translateMutation.isPending;
+      if (!resp.ok) {
+        throw new Error(`HTTP ${resp.status}`);
+      }
 
-  // Timer effect: increments elapsedMs every 100ms while isLoading is true
+      const reader = resp.body?.getReader();
+      if (!reader) throw new Error("No stream");
+
+      const decoder = new TextDecoder();
+      let buffer = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+
+        // Parse SSE events from buffer
+        const lines = buffer.split("\n");
+        buffer = lines.pop() ?? "";
+
+        let eventType = "";
+        for (const line of lines) {
+          if (line.startsWith("event: ")) {
+            eventType = line.slice(7);
+          } else if (line.startsWith("data: ") && eventType) {
+            try {
+              const data = JSON.parse(line.slice(6));
+              if (eventType === "progress") {
+                if (data.phase) setPipelinePhase(data.phase);
+                if (data.engine && data.status) {
+                  setEngineStatuses((prev) => ({
+                    ...prev,
+                    [data.engine]: { status: data.status, latencyMs: data.latencyMs },
+                  }));
+                }
+              } else if (eventType === "result") {
+                setTotalTimeMs(Date.now() - translateStartTimeRef.current);
+                setResult(data as TranslateResponse);
+                queryClient.invalidateQueries({ queryKey: ["/api/translations"] });
+              } else if (eventType === "error") {
+                toast({ title: "Ошибка", description: data.message, variant: "destructive" });
+              }
+            } catch {}
+            eventType = "";
+          }
+        }
+      }
+    } catch (err: any) {
+      toast({ title: "Ошибка", description: err?.message ?? "Ошибка перевода", variant: "destructive" });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Timer
   useEffect(() => {
     if (!isLoading) return;
     const interval = setInterval(() => {
-      setElapsedMs((prev) => prev + 100);
+      setElapsedMs(Date.now() - translateStartTimeRef.current);
     }, 100);
     return () => clearInterval(interval);
   }, [isLoading]);
@@ -287,17 +323,7 @@ export default function TranslatePage() {
   const handleTranslate = () => {
     const trimmed = sourceText.trim();
     if (!trimmed) return;
-    setResult(null);
-    setVariantsOpen(false);
-    // Reset elapsed time and record start time
-    setElapsedMs(0);
-    setTotalTimeMs(null);
-    translateStartTimeRef.current = Date.now();
-    translateMutation.mutate({
-      text: trimmed,
-      sourceLang,
-      targetLang: "kk",
-    });
+    doTranslate(trimmed, sourceLang);
   };
 
   const handleCopy = async (text: string, id: string) => {
@@ -339,7 +365,7 @@ export default function TranslatePage() {
   const displayedEngine = ensembleResult ? "ensemble" : result?.bestTranslation?.engine ?? "";
 
   // Format elapsed time as seconds string
-  const formatSec = (ms: number) => (ms / 1000).toFixed(1) + "с";
+
 
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">
@@ -518,51 +544,74 @@ export default function TranslatePage() {
 
           {/* RIGHT PANEL — Translation Result */}
           <div className="relative bg-card/30 flex flex-col min-h-[300px]">
-            {/* Loading state — engine progress panel */}
+            {/* Loading state — real pipeline progress from SSE */}
             {isLoading && (
               <div className="p-4 sm:p-5" data-testid="loading-skeleton">
-                {/* Total elapsed timer */}
-                <div className="flex items-center gap-2 mb-4">
-                  <div className="relative">
-                    <Loader2 className="h-4 w-4 animate-spin text-primary" />
-                    <span className="absolute -top-0.5 -right-0.5 h-2 w-2 bg-primary rounded-full animate-ping" />
-                  </div>
-                  <span className="text-sm text-muted-foreground font-medium">
-                    Переводчики работают...
-                  </span>
-                  <span className="ml-auto text-sm font-mono text-primary tabular-nums">
-                    ⏱ {formatSec(elapsedMs)}
+                {/* Timer */}
+                <div className="flex items-center justify-between mb-4">
+                  <span className="text-lg font-mono font-bold text-primary tabular-nums">
+                    {(elapsedMs / 1000).toFixed(1)}с
                   </span>
                 </div>
 
-                {/* Per-engine progress rows */}
-                <div className="space-y-2">
-                  {PROGRESS_ENGINES.map((engine) => {
-                    const typicalMs = ENGINE_TYPICAL_LATENCY[engine] ?? 3000;
-                    const isDone = elapsedMs >= typicalMs;
-                    const label = ENGINE_LABELS[engine] ?? engine;
-                    return (
-                      <div key={engine} className="flex items-center gap-2 text-[13px]">
-                        {isDone ? (
-                          <Check className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
-                        ) : (
-                          <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground shrink-0" />
-                        )}
-                        <span className={isDone ? "text-foreground" : "text-muted-foreground"}>
-                          {label}
-                        </span>
-                        <span className="ml-auto font-mono tabular-nums text-[12px] text-muted-foreground">
-                          {isDone ? (
-                            <span className="text-emerald-600 dark:text-emerald-400">
-                              {formatSec(typicalMs)}
+                {/* Pipeline phases */}
+                <div className="space-y-3">
+                  {/* Phase 1: Engines */}
+                  <div>
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                        Этап 1 — Движки
+                      </span>
+                      {pipelinePhase === "engines" && <Loader2 className="h-3 w-3 animate-spin text-primary" />}
+                      {["critic","ensemble","selfeval","done"].includes(pipelinePhase) && <Check className="h-3 w-3 text-emerald-500" />}
+                    </div>
+                    <div className="grid grid-cols-2 gap-x-4 gap-y-1 pl-1">
+                      {Object.keys(ENGINE_LABELS).filter(k => k !== "ensemble" && k !== "deepl").map((eng) => {
+                        const st = engineStatuses[eng];
+                        const done = st?.status === "done";
+                        const err = st?.status === "error";
+                        const running = st?.status === "running";
+                        return (
+                          <div key={eng} className="flex items-center gap-1.5 text-[11px]">
+                            {done ? <Check className="h-3 w-3 text-emerald-500 shrink-0" />
+                              : err ? <X className="h-3 w-3 text-destructive shrink-0" />
+                              : running ? <Loader2 className="h-3 w-3 animate-spin text-primary shrink-0" />
+                              : <span className="h-3 w-3 rounded-full border border-border shrink-0" />}
+                            <span className={done ? "text-foreground" : err ? "text-destructive" : "text-muted-foreground"}>
+                              {ENGINE_LABELS[eng] ?? eng}
                             </span>
-                          ) : (
-                            "..."
-                          )}
-                        </span>
-                      </div>
-                    );
-                  })}
+                            {done && st?.latencyMs != null && (
+                              <span className="ml-auto tabular-nums text-emerald-600 dark:text-emerald-400">
+                                {(st.latencyMs / 1000).toFixed(1)}с
+                              </span>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Phase 2: Critic + Ensemble */}
+                  {["critic","ensemble","selfeval","done"].includes(pipelinePhase) && (
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                        Этап 2 — Критик + Ensemble
+                      </span>
+                      {["critic","ensemble"].includes(pipelinePhase) && <Loader2 className="h-3 w-3 animate-spin text-primary" />}
+                      {["selfeval","done"].includes(pipelinePhase) && <Check className="h-3 w-3 text-emerald-500" />}
+                    </div>
+                  )}
+
+                  {/* Phase 3: Self-eval */}
+                  {["selfeval","done"].includes(pipelinePhase) && (
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                        Этап 3 — Самооценка
+                      </span>
+                      {pipelinePhase === "selfeval" && <Loader2 className="h-3 w-3 animate-spin text-primary" />}
+                      {pipelinePhase === "done" && <Check className="h-3 w-3 text-emerald-500" />}
+                    </div>
+                  )}
                 </div>
               </div>
             )}
@@ -685,7 +734,7 @@ export default function TranslatePage() {
                     {/* Total time badge */}
                     {totalTimeMs !== null && (
                       <Badge variant="outline" className="text-[11px] text-primary font-mono tabular-nums font-normal">
-                        ⏱ {formatSec(totalTimeMs)}
+                        ⏱ {(totalTimeMs / 1000).toFixed(1)}с
                       </Badge>
                     )}
                     <Badge variant="outline" className="text-[11px] text-muted-foreground font-normal">

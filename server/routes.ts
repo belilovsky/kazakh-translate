@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { z } from "zod";
 import { storage } from "./storage.js";
-import { translateWithAll, selectBest, engines } from "./engines/index.js";
+import { translateWithAll, selectBest, engines, type ProgressCallback } from "./engines/index.js";
 
 // --- Validation schemas ---
 
@@ -24,6 +24,63 @@ export async function registerRoutes(
   httpServer: Server,
   app: Express
 ): Promise<Server> {
+  /**
+   * POST /api/translate/stream
+   * SSE endpoint — streams pipeline progress events, then final result.
+   */
+  app.post("/api/translate/stream", async (req, res) => {
+    const parsed = translateBodySchema.safeParse(req.body);
+    if (!parsed.success) {
+      return res.status(400).json({ message: "Invalid request body", errors: parsed.error.errors });
+    }
+
+    const { text, sourceLang, targetLang } = parsed.data;
+
+    res.writeHead(200, {
+      "Content-Type": "text/event-stream",
+      "Cache-Control": "no-cache",
+      "Connection": "keep-alive",
+      "X-Accel-Buffering": "no",
+    });
+
+    const send = (event: string, data: any) => {
+      res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
+    };
+
+    const onProgress: ProgressCallback = (evt) => {
+      send("progress", evt);
+    };
+
+    try {
+      const { results: allResults, meta } = await translateWithAll(text, sourceLang, targetLang, onProgress);
+      const best = selectBest(allResults);
+
+      const saved = await storage.saveTranslation({
+        sourceText: text,
+        translatedText: best.text,
+        sourceLang,
+        targetLang,
+        engine: best.engine,
+        allResults: JSON.stringify(allResults),
+        rating: null,
+        createdAt: new Date().toISOString(),
+      });
+
+      send("result", {
+        id: saved.id,
+        bestTranslation: { engine: best.engine, text: best.text },
+        allResults,
+        sourceLang,
+        targetLang,
+        meta,
+      });
+    } catch (err: any) {
+      send("error", { message: err?.message ?? "Internal server error" });
+    }
+
+    res.end();
+  });
+
   /**
    * POST /api/translate
    * Body: { text, sourceLang, targetLang }

@@ -59,34 +59,63 @@ export interface TranslationMeta {
  * Then self-evaluate and iteratively improve if score is below threshold.
  * Returns all individual results + ensemble result at position 0, plus metadata.
  */
+/**
+ * Progress callback for streaming pipeline status to client.
+ */
+export type ProgressCallback = (event: {
+  phase: "engines" | "critic" | "ensemble" | "selfeval" | "done";
+  engine?: string;
+  status?: "running" | "done" | "error";
+  latencyMs?: number;
+  detail?: string;
+}) => void;
+
 export async function translateWithAll(
   text: string,
   sourceLang: string,
-  targetLang: string
+  targetLang: string,
+  onProgress?: ProgressCallback
 ): Promise<{ results: TranslationResult[]; meta: TranslationMeta }> {
-  // Phase 1: Run all engines in parallel
-  const settled = await Promise.allSettled(
-    engines.map((engine) => engine.translate(text, sourceLang, targetLang))
-  );
+  const emit = onProgress ?? (() => {});
 
-  const rawResults: TranslationResult[] = settled.map((outcome, i) => {
-    if (outcome.status === "fulfilled") {
-      return outcome.value;
+  // Phase 1: Run all engines in parallel, report each as it finishes
+  emit({ phase: "engines", detail: `Запуск ${engines.length} движков...` });
+
+  const rawResults: TranslationResult[] = [];
+  const promises = engines.map(async (engine) => {
+    emit({ phase: "engines", engine: engine.name, status: "running" });
+    try {
+      const result = await engine.translate(text, sourceLang, targetLang);
+      emit({ phase: "engines", engine: engine.name, status: result.error ? "error" : "done", latencyMs: result.latencyMs });
+      return result;
+    } catch (err: any) {
+      const result: TranslationResult = {
+        engine: engine.name,
+        text: "",
+        error: err?.message ?? "Engine threw unexpectedly",
+        latencyMs: 0,
+      };
+      emit({ phase: "engines", engine: engine.name, status: "error" });
+      return result;
     }
-    return {
-      engine: engines[i].name,
-      text: "",
-      error: outcome.reason?.message ?? "Engine threw unexpectedly",
-      latencyMs: 0,
-    };
   });
 
-  // Phase 2: Post-edit ensemble — compare all variants and synthesize the best
+  const settled = await Promise.allSettled(promises);
+  for (const outcome of settled) {
+    if (outcome.status === "fulfilled") {
+      rawResults.push(outcome.value);
+    }
+  }
+
+  // Phase 2: Critic + Ensemble
+  emit({ phase: "critic", detail: "Критик Gemini анализирует варианты..." });
+  emit({ phase: "ensemble", detail: "Ensemble GPT-4o синтезирует лучший перевод..." });
   let ensembleResult = await postEditTranslation(text, sourceLang, rawResults);
 
-  // Phase 3: Self-evaluation loop — evaluate and iteratively improve
+  // Phase 3: Self-evaluation loop
   let meta: TranslationMeta = {};
   if (ensembleResult && ensembleResult.text) {
+    emit({ phase: "selfeval", detail: "Самооценка качества перевода..." });
     try {
       const evalResult = await selfEvaluateAndImprove(
         text,
@@ -98,7 +127,6 @@ export async function translateWithAll(
       meta.evalIterations = evalResult.iterations;
       meta.evalIssues = evalResult.issues;
 
-      // If self-eval improved the text, update ensemble result
       if (evalResult.finalText !== ensembleResult.text) {
         ensembleResult = {
           ...ensembleResult,
@@ -111,6 +139,8 @@ export async function translateWithAll(
       console.error("Self-evaluation failed:", err?.message);
     }
   }
+
+  emit({ phase: "done", detail: "Перевод завершён" });
 
   // Sort raw results: successful by confidence desc, then failed by priority
   const successful = rawResults
