@@ -259,40 +259,55 @@ export default function TranslatePage() {
       const decoder = new TextDecoder();
       let buffer = "";
 
+      const processSSE = (text: string) => {
+        // Split into event blocks by double newline
+        const blocks = text.split("\n\n");
+        for (const block of blocks) {
+          if (!block.trim()) continue;
+          const lines = block.split("\n");
+          let eventType = "";
+          let eventData = "";
+          for (const line of lines) {
+            if (line.startsWith("event: ")) eventType = line.slice(7).trim();
+            else if (line.startsWith("data: ")) eventData = line.slice(6);
+          }
+          if (!eventType || !eventData) continue;
+          try {
+            const data = JSON.parse(eventData);
+            if (eventType === "progress") {
+              if (data.phase) setPipelinePhase(data.phase);
+              if (data.engine && data.status) {
+                setEngineStatuses((prev) => ({
+                  ...prev,
+                  [data.engine]: { status: data.status, latencyMs: data.latencyMs },
+                }));
+              }
+            } else if (eventType === "result") {
+              setTotalTimeMs(Date.now() - translateStartTimeRef.current);
+              setResult(data as TranslateResponse);
+              queryClient.invalidateQueries({ queryKey: ["/api/translations"] });
+            } else if (eventType === "error") {
+              toast({ title: "Ошибка", description: data.message, variant: "destructive" });
+            }
+          } catch {}
+        }
+      };
+
       while (true) {
         const { done, value } = await reader.read();
-        if (done) break;
+        if (done) {
+          // Process any remaining buffer
+          if (buffer.trim()) processSSE(buffer);
+          break;
+        }
         buffer += decoder.decode(value, { stream: true });
-
-        // Parse SSE events from buffer
-        const lines = buffer.split("\n");
-        buffer = lines.pop() ?? "";
-
-        let eventType = "";
-        for (const line of lines) {
-          if (line.startsWith("event: ")) {
-            eventType = line.slice(7);
-          } else if (line.startsWith("data: ") && eventType) {
-            try {
-              const data = JSON.parse(line.slice(6));
-              if (eventType === "progress") {
-                if (data.phase) setPipelinePhase(data.phase);
-                if (data.engine && data.status) {
-                  setEngineStatuses((prev) => ({
-                    ...prev,
-                    [data.engine]: { status: data.status, latencyMs: data.latencyMs },
-                  }));
-                }
-              } else if (eventType === "result") {
-                setTotalTimeMs(Date.now() - translateStartTimeRef.current);
-                setResult(data as TranslateResponse);
-                queryClient.invalidateQueries({ queryKey: ["/api/translations"] });
-              } else if (eventType === "error") {
-                toast({ title: "Ошибка", description: data.message, variant: "destructive" });
-              }
-            } catch {}
-            eventType = "";
-          }
+        
+        // Process complete event blocks (separated by \n\n)
+        const lastDoubleNewline = buffer.lastIndexOf("\n\n");
+        if (lastDoubleNewline !== -1) {
+          const complete = buffer.slice(0, lastDoubleNewline + 2);
+          buffer = buffer.slice(lastDoubleNewline + 2);
+          processSSE(complete);
         }
       }
     } catch (err: any) {

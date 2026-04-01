@@ -295,16 +295,66 @@ export default function PipelineViz({
           </div>
         )}
 
-        {/* Summary bar after completion */}
+        {/* Engine latency chart — mini bar chart after completion */}
+        {phase === "done" && !isRunning && doneCount > 0 && (
+          <div className="mt-3">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-[9px] font-semibold text-muted-foreground uppercase tracking-wider">Латентность движков</span>
+              <span className="text-[9px] text-muted-foreground">{doneCount} успешно · {errCount > 0 ? `${errCount} ошибок` : "0 ошибок"}</span>
+            </div>
+            <div className="space-y-1">
+              {enginesArr
+                .filter((eng) => engineStatuses[eng]?.status === "done" && engineStatuses[eng]?.latencyMs)
+                .sort((a, b) => (engineStatuses[a]?.latencyMs ?? 0) - (engineStatuses[b]?.latencyMs ?? 0))
+                .map((eng) => {
+                  const ms = engineStatuses[eng]?.latencyMs ?? 0;
+                  const maxMs = Math.max(...enginesArr.map((e) => engineStatuses[e]?.latencyMs ?? 0), 1);
+                  const pct = Math.max(8, (ms / maxMs) * 100);
+                  const isFast = ms < 1000;
+                  return (
+                    <div key={eng} className="flex items-center gap-2">
+                      <span className="text-[9px] font-medium text-muted-foreground w-16 text-right shrink-0">
+                        {engineLabels[eng]?.split(" ")[0] ?? eng}
+                      </span>
+                      <div className="flex-1 h-3 rounded-full bg-muted/30 overflow-hidden">
+                        <div
+                          className={`h-full rounded-full transition-all duration-1000 ease-out ${
+                            isFast
+                              ? "bg-gradient-to-r from-emerald-400 to-emerald-500"
+                              : ms < 3000
+                              ? "bg-gradient-to-r from-primary/70 to-primary"
+                              : "bg-gradient-to-r from-amber-400 to-amber-500"
+                          }`}
+                          style={{ width: `${pct}%` }}
+                        />
+                      </div>
+                      <span className={`text-[9px] font-mono tabular-nums w-10 shrink-0 ${
+                        isFast ? "text-emerald-600 dark:text-emerald-400" : "text-muted-foreground"
+                      }`}>
+                        {ms < 1000 ? `${ms}ms` : `${(ms / 1000).toFixed(1)}с`}
+                      </span>
+                    </div>
+                  );
+                })}
+            </div>
+          </div>
+        )}
+
+        {/* Summary bar */}
         {phase === "done" && !isRunning && (
-          <div className="mt-3 flex items-center justify-between px-2 py-1.5 rounded-lg bg-emerald-500/5 border border-emerald-500/10">
-            <span className="text-[10px] text-emerald-700 dark:text-emerald-300 font-medium">
-              {doneCount} движков · {errCount > 0 ? `${errCount} с ошибкой · ` : ""}{((totalMs ?? 0) / 1000).toFixed(1)}с
-            </span>
-            <div className="flex items-center gap-1">
-              <Sparkles className="h-3 w-3 text-emerald-500" />
-              <span className="text-[10px] font-semibold text-emerald-600 dark:text-emerald-400">
-                Ensemble готов
+          <div className="mt-3 flex items-center justify-between px-3 py-2 rounded-xl bg-gradient-to-r from-emerald-500/5 to-primary/5 border border-emerald-500/10">
+            <div className="flex items-center gap-2">
+              <div className="w-5 h-5 rounded-full bg-emerald-500 flex items-center justify-center">
+                <Check className="h-3 w-3 text-white" />
+              </div>
+              <span className="text-[11px] font-medium text-foreground">
+                {doneCount} движков · {((totalMs ?? 0) / 1000).toFixed(1)}с
+              </span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <Sparkles className="h-3.5 w-3.5 text-primary" />
+              <span className="text-[11px] font-semibold text-primary">
+                Ensemble AI
               </span>
             </div>
           </div>
