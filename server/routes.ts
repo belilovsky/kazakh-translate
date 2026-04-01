@@ -3,6 +3,7 @@ import { createServer, type Server } from "http";
 import { z } from "zod";
 import { storage } from "./storage.js";
 import { translateWithAll, selectBest, engines, type ProgressCallback } from "./engines/index.js";
+import { getTestHistory, getLastRun, runFullTestSuite, startPeriodicTesting, TEST_CASES } from "./selftest.js";
 
 // --- Validation schemas ---
 
@@ -345,6 +346,38 @@ export async function registerRoutes(
 
     return res.json({ engines: engineStatuses });
   });
+
+  // ── Self-testing API ──────────────────────────────────────────────
+
+  /** GET /api/admin/selftest — last test run summary */
+  app.get("/api/admin/selftest", (_req, res) => {
+    const last = getLastRun();
+    if (!last) return res.json({ status: "no_runs", message: "Тесты ещё не запускались" });
+    return res.json(last);
+  });
+
+  /** GET /api/admin/selftest/history — all stored test runs */
+  app.get("/api/admin/selftest/history", (_req, res) => {
+    return res.json(getTestHistory());
+  });
+
+  /** POST /api/admin/selftest/run — trigger a test run manually */
+  app.post("/api/admin/selftest/run", async (_req, res) => {
+    try {
+      const summary = await runFullTestSuite();
+      return res.json(summary);
+    } catch (err: any) {
+      return res.status(500).json({ message: err?.message ?? "Ошибка тестирования" });
+    }
+  });
+
+  /** GET /api/admin/selftest/cases — list of test cases */
+  app.get("/api/admin/selftest/cases", (_req, res) => {
+    return res.json(TEST_CASES);
+  });
+
+  // Start periodic testing (every 6 hours)
+  startPeriodicTesting(6);
 
   return httpServer;
 }
