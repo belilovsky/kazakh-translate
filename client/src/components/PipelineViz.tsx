@@ -285,7 +285,7 @@ export default function PipelineViz({
                   .map(eng => (
                     <div key={eng} className="grid grid-cols-[64px_1fr] gap-2 items-start">
                       <span className="text-[9px] font-medium text-muted-foreground text-right pt-1 tabular-nums">{engineLabels[eng]?.split(" ")[0]}</span>
-                      <span className="text-[10px] text-foreground leading-snug bg-background/50 rounded px-2 py-1">{engineTexts[eng]}</span>
+                      <span className="text-[10px] text-foreground leading-snug bg-background/50 rounded px-2 py-1">{engineTexts[eng]?.replace(/—/g, "–")}</span>
                     </div>
                   ))}
                 {errorEntries.length > 0 && errorEntries.map(([eng, txt]) => (
@@ -328,7 +328,7 @@ export default function PipelineViz({
                   accent="primary"
                   badge={<span className="text-[8px] text-primary/60">{engineTextEntries.length} вариантов + рецензия → 1 лучший</span>}
                 >
-                  <TextBlock label="Результат ensemble" text={ensembleText} accent="primary" />
+                  <TextBlock label="Результат ensemble" text={ensembleText.replace(/—/g, "–")} accent="primary" />
                 </Sec>
               )}
             </div>
@@ -404,7 +404,7 @@ export default function PipelineViz({
                   )}
 
                   {!selfEvalChanged && (
-                    <p className="text-[10px] text-muted-foreground/70 italic">Текст не требовал изменений — ensemble дал качественный результат</p>
+                    <p className="text-[10px] text-muted-foreground/70 italic">Текст не требовал изменений – ensemble дал качественный результат</p>
                   )}
                 </div>
               </Sec>

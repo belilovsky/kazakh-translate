@@ -144,7 +144,7 @@ export default function EnginesPage() {
                     <div>
                       <p className="text-[10px] text-muted-foreground">Ср. латентность</p>
                       <p className="text-lg font-bold text-foreground">
-                        {eng.avgLatencyMs > 0 ? `${eng.avgLatencyMs}` : "—"}
+                        {eng.avgLatencyMs > 0 ? `${eng.avgLatencyMs}` : "–"}
                         {eng.avgLatencyMs > 0 && (
                           <span className="text-xs font-normal text-muted-foreground">ms</span>
                         )}
@@ -153,7 +153,7 @@ export default function EnginesPage() {
                     <div>
                       <p className="text-[10px] text-muted-foreground">Лучший</p>
                       <p className="text-lg font-bold text-foreground">
-                        {eng.bestCount > 0 ? eng.bestCount : "—"}
+                        {eng.bestCount > 0 ? eng.bestCount : "–"}
                       </p>
                     </div>
                   </div>
@@ -186,7 +186,7 @@ export default function EnginesPage() {
                   <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
                     <Key className="h-3 w-3" />
                     <span className="font-mono">{eng.keyEnvVar}</span>
-                    <span>—</span>
+                    <span>–</span>
                     <span>{eng.hasApiKey ? "Настроен" : "Отсутствует"}</span>
                   </div>
 

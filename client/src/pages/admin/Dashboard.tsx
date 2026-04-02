@@ -184,7 +184,7 @@ export default function DashboardPage() {
             value={
               bestCountData.length > 0
                 ? bestCountData[0].engine
-                : "—"
+                : "–"
             }
             subtitle={
               bestCountData.length > 0
@@ -199,7 +199,7 @@ export default function DashboardPage() {
             value={
               latencyData.length > 0
                 ? latencyData[0].engine
-                : "—"
+                : "–"
             }
             subtitle={
               latencyData.length > 0

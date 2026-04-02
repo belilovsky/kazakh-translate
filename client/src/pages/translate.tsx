@@ -403,7 +403,9 @@ export default function TranslatePage() {
 
   const engineResults = result?.allResults?.filter((r) => r.engine !== "ensemble") ?? [];
   const ensembleResult = result?.allResults?.find((r) => r.engine === "ensemble");
-  const displayedText = ensembleResult?.text ?? result?.bestTranslation?.text ?? "";
+  const rawDisplayedText = ensembleResult?.text ?? result?.bestTranslation?.text ?? "";
+  // Normalize: mdash → ndash throughout
+  const displayedText = rawDisplayedText.replace(/—/g, "–");
   const displayedEngine = ensembleResult ? "ensemble" : result?.bestTranslation?.engine ?? "";
 
   // Format elapsed time as seconds string
@@ -775,7 +777,7 @@ export default function TranslatePage() {
             <kbd className="px-1.5 py-0.5 bg-muted/50 border border-border rounded text-[10px]">Ctrl</kbd>
             {" + "}
             <kbd className="px-1.5 py-0.5 bg-muted/50 border border-border rounded text-[10px]">Enter</kbd>
-            {" — быстрый перевод"}
+            {" – быстрый перевод"}
           </div>
         )}
 
@@ -845,7 +847,7 @@ export default function TranslatePage() {
                     {er.error ? (
                       <p className="text-sm text-destructive">{er.error}</p>
                     ) : (
-                      <p className="text-sm text-foreground leading-relaxed">{er.text}</p>
+                      <p className="text-sm text-foreground leading-relaxed">{er.text?.replace(/—/g, "–")}</p>
                     )}
                   </div>
                 ))}
@@ -878,7 +880,7 @@ export default function TranslatePage() {
       {/* Footer */}
       <footer className="border-t border-border/30 py-4 text-center relative z-10">
         <p className="text-[11px] text-muted-foreground/40 tracking-wide">
-          Қазтілші — AI-переводчик на казахский язык
+          Қазтілші – AI-переводчик на казахский язык
         </p>
       </footer>
     </div>
