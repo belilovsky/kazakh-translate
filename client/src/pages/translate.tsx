@@ -19,6 +19,7 @@ import { useTheme } from "@/components/theme-provider";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import PipelineViz from "@/components/PipelineViz";
+import TTSPlayer from "@/components/TTSPlayer";
 
 type SourceLang = "ru" | "en";
 
@@ -220,15 +221,8 @@ export default function TranslatePage() {
     setIsListening(true);
   };
 
-  // TTS
-  const handleSpeak = (text: string) => {
-    if (!text || !window.speechSynthesis) return;
-    window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = "kk-KZ";
-    utterance.rate = 0.9;
-    window.speechSynthesis.speak(utterance);
-  };
+  // TTS state
+  const [showTTS, setShowTTS] = useState(false);
 
   useEffect(() => {
     return () => {
@@ -249,6 +243,8 @@ export default function TranslatePage() {
     setCritiqueText("");
     setEnsembleText("");
     setEvalDetails({});
+    setShowTTS(false);
+    window.speechSynthesis?.cancel();
     translateStartTimeRef.current = Date.now();
 
     try {
@@ -642,6 +638,13 @@ export default function TranslatePage() {
                   </div>
                 </div>
 
+                {/* TTS Player */}
+                {showTTS && displayedText && (
+                  <div className="px-3 sm:px-4 pb-1">
+                    <TTSPlayer text={displayedText} />
+                  </div>
+                )}
+
                 {/* Result panel footer */}
                 <div className="absolute bottom-0 left-0 right-0 flex items-center justify-between px-3 sm:px-4 py-2 bg-card/50 backdrop-blur-sm border-t border-border/50">
                   <div className="flex items-center gap-0.5">
@@ -666,20 +669,25 @@ export default function TranslatePage() {
                       )}
                     </Button>
 
-                    {/* Listen */}
+                    {/* Listen toggle */}
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <Button
-                          variant="ghost"
+                          variant={showTTS ? "secondary" : "ghost"}
                           size="icon"
-                          onClick={() => handleSpeak(displayedText)}
-                          className="h-8 w-8 text-muted-foreground"
+                          onClick={() => {
+                            if (showTTS) {
+                              window.speechSynthesis?.cancel();
+                            }
+                            setShowTTS(!showTTS);
+                          }}
+                          className={`h-8 w-8 ${showTTS ? 'text-primary' : 'text-muted-foreground'}`}
                           data-testid="speak-translation"
                         >
                           <Volume2 className="h-4 w-4" />
                         </Button>
                       </TooltipTrigger>
-                      <TooltipContent>Прослушать</TooltipContent>
+                      <TooltipContent>{showTTS ? 'Скрыть плеер' : 'Прослушать'}</TooltipContent>
                     </Tooltip>
 
                     {/* Rating */}
