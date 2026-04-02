@@ -638,15 +638,16 @@ export default function TranslatePage() {
                   </div>
                 </div>
 
-                {/* TTS Player */}
-                {showTTS && displayedText && (
-                  <div className="px-3 sm:px-4 pb-1">
-                    <TTSPlayer text={displayedText} />
-                  </div>
-                )}
-
                 {/* Result panel footer */}
-                <div className="absolute bottom-0 left-0 right-0 flex items-center justify-between px-3 sm:px-4 py-2 bg-card/50 backdrop-blur-sm border-t border-border/50">
+                <div className="absolute bottom-0 left-0 right-0 bg-card/50 backdrop-blur-sm border-t border-border/50">
+                  {/* TTS Player row */}
+                  {showTTS && displayedText && (
+                    <div className="px-3 sm:px-4 pt-2 pb-1">
+                      <TTSPlayer text={displayedText} />
+                    </div>
+                  )}
+                  {/* Controls row */}
+                  <div className="flex items-center justify-between px-3 sm:px-4 py-2">
                   <div className="flex items-center gap-0.5">
                     {/* Prominent Copy button */}
                     <Button
@@ -734,6 +735,7 @@ export default function TranslatePage() {
                     <Badge variant="outline" className="text-[11px] text-muted-foreground font-normal">
                       {ENGINE_LABELS[displayedEngine] ?? displayedEngine}
                     </Badge>
+                  </div>
                   </div>
                 </div>
               </div>
