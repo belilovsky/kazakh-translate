@@ -3,7 +3,7 @@ import type { TranslationResult } from "./types.js";
 import { KAZAKH_GRAMMAR_RULES } from "./kazakh-rules.js";
 
 const TIMEOUT_MS = 25000;
-const CRITIC_TIMEOUT_MS = 12000;
+const CRITIC_TIMEOUT_MS = 18000;
 
 /**
  * Smart Ensemble with Critic:
@@ -43,7 +43,16 @@ async function getCritique(
         body: JSON.stringify({
           systemInstruction: {
             parts: [{
-              text: `Сен — қазақ тілінің сарапшысысың. Аударма нұсқаларын тексеріп, қысқа сын жаз. Тек нақты қателерді көрсет: сингармонизм, калька, сөз тәртібі, морфология. Жақсы нұсқаларды да атап өт. 3-4 сөйлем жеткілікті.`,
+              text: `Сен — қазақ тілінің сарапшысысың. Аударма нұсқаларын тексеріп, мұқият сын жаз. Тек нақты қателерді көрсет: сингармонизм, калька, сөз тәртібі, морфология. Жақсы нұсқаларды да атап өт. Толық сын жаз.
+
+Міндетті тексеру нүктелері:
+1. Сингармонизм бұзылған ба? (жуан+жіңішке араласқан ба?)
+2. Орыс/ағылшын калькасы бар ма?
+3. Сөз тәртібі SOV сақталған ба?
+4. Септік/тәуелдік жалғаулары дұрыс па?
+5. Қай нұсқа ең жақсы және неге?
+
+Ешқандай ойлау процесін, кіріспе сөздерін немесе қосымша түсініктемелерді жазба. Тек сын мәтінін жаз.`,
             }],
           },
           contents: [{
@@ -51,7 +60,7 @@ async function getCritique(
               text: `Бастапқы мәтін (${srcLabel}):\n«${sourceText}»\n\nНұсқалар:\n${variantsBlock}\n\nҚысқа сын:`,
             }],
           }],
-          generationConfig: { temperature: 0.1, maxOutputTokens: 800 },
+          generationConfig: { temperature: 0.1, maxOutputTokens: 1500 },
         }),
         signal: controller.signal,
       }
@@ -61,7 +70,13 @@ async function getCritique(
     if (!response.ok) return null;
 
     const data = (await response.json()) as any;
-    return data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || null;
+    const finishReason = data?.candidates?.[0]?.finishReason;
+    const text = data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || null;
+    if (finishReason === "MAX_TOKENS") {
+      console.warn(`[critic] Gemini truncated (MAX_TOKENS). Got ${text?.length ?? 0} chars.`);
+    }
+    console.log(`[critic] finishReason=${finishReason}, length=${text?.length ?? 0}`);
+    return text;
   } catch {
     return null; // Critic failure is non-fatal
   }
