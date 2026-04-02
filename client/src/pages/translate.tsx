@@ -414,20 +414,22 @@ export default function TranslatePage() {
 
 
   return (
-    <div className="min-h-screen bg-background text-foreground flex flex-col">
+    <div className={`min-h-screen text-foreground flex flex-col bg-noise ${theme === 'dark' ? 'page-gradient-dark' : 'page-gradient-light'}`}>
       {/* Header */}
-      <header className="border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
-        <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <KaztilshiLogo size={32} />
+      <header className="border-b border-border/50 bg-background/80 backdrop-blur-xl supports-[backdrop-filter]:bg-background/50 sticky top-0 z-50">
+        <div className="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="animate-float">
+              <KaztilshiLogo size={36} />
+            </div>
             <div className="flex flex-col">
-              <span className="font-bold text-base tracking-tight leading-none">Қазтілші</span>
-              <span className="text-[10px] text-muted-foreground leading-tight hidden sm:block">AI-переводчик</span>
+              <span className="font-display font-bold text-lg tracking-tight leading-none gradient-text">Қазтілші</span>
+              <span className="text-[10px] text-muted-foreground/70 leading-tight hidden sm:block tracking-wider uppercase">AI-переводчик</span>
             </div>
           </div>
 
           <div className="flex items-center gap-1">
-            <Button variant="ghost" size="sm" asChild className="text-muted-foreground">
+            <Button variant="ghost" size="sm" asChild className="text-muted-foreground hover:text-foreground">
               <Link href="/history" data-testid="history-link">
                 <History className="h-4 w-4 mr-1.5" />
                 <span className="hidden sm:inline">История</span>
@@ -440,7 +442,7 @@ export default function TranslatePage() {
                   size="icon"
                   onClick={toggleTheme}
                   data-testid="theme-toggle"
-                  className="text-muted-foreground"
+                  className="text-muted-foreground hover:text-foreground"
                 >
                   {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
                 </Button>
@@ -452,9 +454,9 @@ export default function TranslatePage() {
       </header>
 
       {/* Main */}
-      <main className="flex-1 max-w-5xl mx-auto w-full px-3 sm:px-4 py-4 sm:py-6">
+      <main className="flex-1 max-w-5xl mx-auto w-full px-3 sm:px-4 py-5 sm:py-8 relative z-10">
         {/* Language selector bar */}
-        <div className="flex items-center gap-0 mb-0 rounded-t-xl border border-b-0 border-border bg-card/50 overflow-hidden">
+        <div className="flex items-center gap-0 mb-0 rounded-t-2xl border border-b-0 border-border/40 bg-card/60 backdrop-blur-sm overflow-hidden">
           {/* Source language tabs */}
           <div className="flex items-center flex-1 min-w-0">
             {langOptions.map((opt) => (
@@ -496,9 +498,9 @@ export default function TranslatePage() {
         </div>
 
         {/* Two-panel translation area */}
-        <div className="grid grid-cols-1 md:grid-cols-2 border border-border rounded-b-xl overflow-hidden shadow-sm" data-testid="translation-panels">
+        <div className="glass-card grid grid-cols-1 md:grid-cols-2 rounded-b-2xl overflow-hidden" data-testid="translation-panels">
           {/* LEFT PANEL — Source */}
-          <div className="relative bg-background border-b md:border-b-0 md:border-r border-border flex flex-col">
+          <div className="relative bg-background/50 border-b md:border-b-0 md:border-r border-border/30 flex flex-col">
             <textarea
               ref={textareaRef}
               value={sourceText}
@@ -567,7 +569,7 @@ export default function TranslatePage() {
                   onClick={handleTranslate}
                   disabled={isLoading || !sourceText.trim()}
                   size="sm"
-                  className="font-medium gap-1.5 px-4 sm:px-5 rounded-lg"
+                  className="font-medium gap-1.5 px-4 sm:px-5 rounded-lg btn-glow"
                   data-testid="translate-button"
                 >
                   {isLoading ? (
@@ -589,7 +591,7 @@ export default function TranslatePage() {
           </div>
 
           {/* RIGHT PANEL — Translation Result */}
-          <div className="relative bg-card/30 flex flex-col min-h-[300px]">
+          <div className="relative bg-card/40 flex flex-col min-h-[300px]">
             {/* Loading state — simple skeleton in right panel */}
             {isLoading && (
               <div className="flex items-center justify-center flex-1 p-8">
@@ -864,8 +866,8 @@ export default function TranslatePage() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-border/50 py-3 text-center">
-        <p className="text-[11px] text-muted-foreground/40">
+      <footer className="border-t border-border/30 py-4 text-center relative z-10">
+        <p className="text-[11px] text-muted-foreground/40 tracking-wide">
           Қазтілші — AI-переводчик на казахский язык
         </p>
       </footer>

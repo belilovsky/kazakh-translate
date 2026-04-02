@@ -107,14 +107,14 @@ function Sec({
 /* ── Stage label with arrow ─────────────────────────────── */
 function StageArrow({ label, num }: { label: string; num: number }) {
   return (
-    <div className="flex items-center gap-2 my-2">
+    <div className="flex items-center gap-2 my-3">
       <div className="flex items-center gap-1.5">
-        <div className="w-5 h-5 rounded-md bg-primary/10 flex items-center justify-center">
-          <span className="text-[9px] font-bold text-primary">{num}</span>
+        <div className="w-5 h-5 rounded-md bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center ring-1 ring-primary/15">
+          <span className="text-[9px] font-bold font-display text-primary">{num}</span>
         </div>
-        <span className="text-[10px] font-bold text-primary uppercase tracking-wider">{label}</span>
+        <span className="text-[10px] font-display font-bold text-primary uppercase tracking-wider">{label}</span>
       </div>
-      <div className="flex-1 h-px bg-primary/10" />
+      <div className="flex-1 h-px bg-gradient-to-r from-primary/15 to-transparent" />
     </div>
   );
 }
@@ -170,7 +170,7 @@ export default function PipelineViz({
 
   return (
     <div
-      className={`mt-3 rounded-2xl overflow-hidden relative transition-all duration-500 ${fin ? "border border-emerald-500/20" : "border border-border/30"}`}
+      className={`mt-4 rounded-2xl overflow-hidden relative transition-all duration-500 glass-card ${fin ? "ring-1 ring-emerald-500/15" : ""}`}
       data-testid="pipeline-viz"
     >
       <div className="absolute inset-0 bg-gradient-to-b from-card via-background/90 to-card/80" />
@@ -191,7 +191,7 @@ export default function PipelineViz({
               : fin
                 ? <div className="w-4 h-4 rounded-full bg-emerald-500 flex items-center justify-center"><Check className="h-2.5 w-2.5 text-white" /></div>
                 : null}
-            <span className="text-[11px] font-bold text-foreground uppercase tracking-[0.08em]">Пайплайн перевода</span>
+            <span className="text-[11px] font-display font-bold text-foreground uppercase tracking-[0.1em]">Пайплайн перевода</span>
           </div>
           <div className="flex items-center gap-1.5">
             <Timer className="h-3.5 w-3.5 text-muted-foreground" />
