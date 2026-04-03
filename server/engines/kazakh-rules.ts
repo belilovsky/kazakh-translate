@@ -61,6 +61,47 @@ Kazakh is strictly SOV (Subject-Object-Verb). The verb ALWAYS comes at the end.
 - Academic/official text should use more Turkic-origin vocabulary
 - Colloquial text can use more Russian loanwords naturally
 - Preserve the register of the source text — formal stays formal, casual stays casual
+
+### 8. 3SG POSSESSIVE + CASE: SPECIAL FORMS
+After 3SG possessive (-сы/-сі/-ы/-і), use special case endings — NOT the default ones:
+- ACC → -н (NOT -ны): баласын ✓ / баласыны ✗
+- DAT → -на/-не (NOT -ға/-ге): баласына ✓ / баласыға ✗
+- LOC → -нда/-нде: баласында ✓ / баласыда ✗
+- ABL → -нан/-нен: баласынан ✓
+- WRONG: "оның кітапында" → RIGHT: "оның кітабында"
+
+### 9. NUMERAL + NOUN: ALWAYS SINGULAR
+After any numeral, the noun takes NO plural suffix.
+- WRONG: "бес балалар" → RIGHT: "бес бала"
+- WRONG: "үш кітаптар" → RIGHT: "үш кітап"
+- Possessive group: олардың бес баласы (NOT балалары)
+
+### 10. NEGATION ORDER: stem + (voice) + NEG + tense + personal ending
+NEG suffix (-ма/-ме/-ба/-бе/-па/-пе) ALWAYS follows voice suffixes and PRECEDES tense:
+- WRONG: жаздыма → RIGHT: жазбады (жаз+ба+ды)
+- WRONG: пассив+тенс+NEG → RIGHT: аш+ыл+ма+ды (passive → NEG → tense)
+
+### 11. SUBORDINATE CLAUSES — CONVERB PATTERNS (NOT LITERAL)
+Map Russian subordinators to Kazakh converbs:
+- «когда» → -ғанда/-генде (келгенде, барғанда)
+- «если» → -са/-се (барса, келсе)
+- «чтобы» → infinitive + үшін (оқу үшін)
+- «пока (не)» → -ғанша/-генше (келгенше)
+- «после того как» → -ып/-іп (оқып болды, жазып кетті)
+
+### 12. «КОТОРЫЙ» → PARTICIPIAL CONSTRUCTION (NEVER LITERAL)
+Russian relative clauses → prenominal participle + head noun:
+- Past «который сделал» → -ған/-ген + noun: келген адам, жазған кітап
+- Present/habitual «который делает» → -атын/-етін: жазатын адам
+- Future «который сделает» → -ар/-ер: барар жол
+- WRONG: "который келді" → RIGHT: "келген [noun]"
+
+### 13. TOP-5 MT ERRORS TO AVOID
+1. Missing POSS+ACC after «его/её X»: "оның баласын" (NOT "оның бала")
+2. Vowel harmony in LOC: "мектепте" front (NOT "мектепта" back)
+3. Plural suffix after voiceless: "достармен" (NOT "дослармен")
+4. Plural after numeral: "бес бала" (NOT "бес балалар")
+5. 3SG POSS+LOC special form: "кітабында" (NOT "кітапында")
 `;
 
 export const KAZAKH_FEWSHOT_RU = `

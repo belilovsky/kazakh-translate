@@ -1,865 +1,1615 @@
-# Kazakh Linguistics Research Report
-## For the Қазтілші Machine Translation System (RU→KK, EN→KK)
+# Казахский язык: комплексный справочник для системы машинного перевода Қазтілші
+## (RU→KK, EN→KK)
 
-**Prepared:** March 2026  
-**Scope:** Comprehensive linguistic, sociolinguistic, and NLP-focused research for improving RU→KK and EN→KK machine translation quality.
-
----
-
-## Table of Contents
-
-1. [Kazakh Dialects and Regional Variations](#1-kazakh-dialects-and-regional-variations)
-2. [Historical Evolution of the Kazakh Language](#2-historical-evolution-of-the-kazakh-language)
-3. [Modern Kazakh vs Literary Kazakh](#3-modern-kazakh-vs-literary-kazakh)
-4. [Key Linguistic Features MT Systems Get Wrong](#4-key-linguistic-features-mt-systems-get-wrong)
-5. [Academic Resources and Corpora](#5-academic-resources-and-corpora)
-6. [Cultural and Pragmatic Considerations](#6-cultural-and-pragmatic-considerations)
-7. [Practical Recommendations for Қазтілші](#7-practical-recommendations-for-қазтілші)
+**Составлен:** апрель 2026  
+**Охват:** Полная морфологическая система, социолингвистика, диалектология, прагматика и рекомендации по реализации для систем RU→KK и EN→KK.  
+**Язык документа:** Русский (с казахскими примерами)
 
 ---
 
-## 1. Kazakh Dialects and Regional Variations
+## Содержание
 
-### 1.1 The Three-Dialect Classification
+### Часть I. Морфологическая система
+1. [Именное словоизменение (существительные)](#1-именное-словоизменение)
+2. [Глагольная система](#2-глагольная-система)
+3. [Конвербы и причастия (нефинитные формы)](#3-конвербы-и-причастия)
 
-The canonical academic classification, established by linguist Sarsen Amanzholov (1959) and confirmed by the LDC Language Specific Peculiarities document for Kazakh, divides the language into **three main dialect areas**:
+### Часть II. Социолингвистика и диалектология
+4. [Диалекты и региональные вариации](#4-диалекты-и-региональные-вариации)
+5. [Историческая эволюция казахского языка](#5-историческая-эволюция)
+6. [Современный казахский vs литературный казахский](#6-современный-vs-литературный-казахский)
 
-| Dialect | Zhuz Historical Basis | Primary Regions | Key Cities |
-|---|---|---|---|
-| **Northeastern** | Orta Zhuz (Middle Horde) | Akmola, Kostanay, Karaganda, Pavlodar, East Kazakhstan | Astana, Karaganda, Semey, Oskemen, Pavlodar |
-| **Southern** | Uly Zhuz (Great Horde) | Almaty, Zhambyl, South Kazakhstan, Kyzylorda, Taraz | Almaty, Shymkent, Taraz, Türkestan |
-| **Western** | Kishi Zhuz (Little Horde) | Atyrau, Mangystau, Aktobe, West Kazakhstan | Aktau, Atyrau, Oral, Aktobe |
+### Часть III. Ключевые лингвистические особенности, проблемные для MT
+7. [Система падежей (7 падежей)](#7-система-падежей)
+8. [Сингармонизм: исключения и граничные случаи](#8-сингармонизм)
+9. [Глагольные формы без эквивалентов в русском/английском](#9-глагольные-формы-без-эквивалентов)
+10. [Система вежливости (сіздеу/сендеу)](#10-система-вежливости)
+11. [Порядок слов SOV и реструктурирование предложения](#11-порядок-слов-sov)
+12. [Числа, даты и форматы](#12-числа-даты-и-форматы)
+13. [Идиомы и фразеологизмы](#13-идиомы-и-фразеологизмы)
+14. [Типичные ошибки MT: разбор примеров](#14-типичные-ошибки-mt)
 
-An alternative two-way classification (Doskaraev, 1954) groups these into **south-eastern** and **north-western** dialect families.
+### Часть IV. Академические ресурсы и инструменты
+15. [Корпуса и параллельные данные](#15-корпуса-и-параллельные-данные)
+16. [Инструменты NLP и анализаторы](#16-инструменты-nlp)
+17. [Официальные языковые ресурсы](#17-официальные-языковые-ресурсы)
 
-**Critical fact for MT systems:** The **Northeastern dialect** forms the basis of standard literary Kazakh (ádebı tıl). However, due to large-scale internal migration to Almaty and Astana, the traditional dialects of these cities are no longer representative — urban speech is heavily influenced by multiple regional varieties and Russian.
+### Часть V. Культурные и прагматические аспекты
+18. [Реестры и формальность](#18-реестры-и-формальность)
+19. [Заимствования: когда использовать казахские эквиваленты](#19-заимствования)
+20. [«Қазақстандық» vs «Қазақ»: идентичность и чувствительность](#20-идентичность)
+21. [Исламская терминология в казахском контексте](#21-исламская-терминология)
+22. [Советские vs современные топонимы и имена собственные](#22-топонимы-и-имена)
 
-### 1.2 Phonological Differences by Dialect
-
-| Feature | Northeastern (Standard) | Southern | Western |
-|---|---|---|---|
-| **Ch/Sh substitution** | ш [ʃ] | ч [tʃ] instead of ш (Kyrgyz influence) | standard ш |
-| **Vowel openness** | More closed | More open (Uzbek influence) | Broadly open, clear articulation |
-| **Intonation** | Flatter, "hard sounds" (per Reddit users) | Softer, melodic | Very open, clear |
-| **Russian influence** | High (urban) | Moderate | Moderate |
-
-Notable: Atyrau (Western) speakers often cited as having the clearest, most "open" pronunciation. Almaty speakers (Southern) described as having a Russian-influenced rhythm. Eastern Kazakhs use ч/дж sounds instead of ш/ж.
-
-### 1.3 Lexical Differences by Region
-
-The most practically important vocabulary differences for an MT system targeting multiple regions:
-
-| Standard | Southern (Almaty/Shymkent region) | Western | Meaning |
-|---|---|---|---|
-| пияз | жуа (жуа is western Kyzylorda) | жуа | onion |
-| ата | — | — | grandfather/elder |
-| тате (aunt, standard) | апше | — | aunt |
-| ага (older male, standard) | көке | — | uncle/older male |
-| Солай ше? | — | — | "Isn't that so?" (Southern sentence-final particle) |
-| Не хабар? | — | Не хайар? | What news/how are you? |
-| Сау болыңыз | — | Сай бош (=goodbye or thank you in Aktau) | goodbye |
-| Немене? | — | Не зат? | What? |
-
-**Southern dialect** shows absorption of Uzbek vocabulary (e.g., "ойакта" for "оl жакта" = "there"), Persian words, and specific interjections ("Оліяа!" vs. standard "Ойбай!").
-
-**Western dialect** distinctive vocabulary: "гой/гоо" (emphasis particle), specific farewell and greeting forms, Tatar/Bashkir loanwords not found elsewhere.
-
-### 1.4 Morphological and Syntactic Dialect Features
-
-Dialectal differences in vowel harmony rules are the primary morphological variation — this was identified in 19th-century texts as the **main distinguishing feature between dialects** (Normanskaya, 2022). Specifically, the rules governing plural suffix selection (тырнақтар vs. тырнақлар in older forms) diverge between dialects. The standard literary form consistently uses vowel-harmony-governed plurals.
-
-**For MT:** Dialectal forms are unlikely to appear in training corpora (which skew heavily literary/journalistic). The risk is in the output direction — the system may produce standard forms that sound unnatural to regional speakers. Aiming for Northeastern standard is appropriate for official/written output.
-
-### 1.5 Diaspora Kazakh
-
-Kazakh in China and Mongolia largely belongs to the Northeastern dialect group with additional local features. Kazakhstan diaspora in Turkey uses a Latin-based orthography and shows Turkish lexical influence. These varieties are distinct enough to warrant separate treatment in any dialect-aware system.
+### Часть VI. Практические рекомендации для Қазтілші
+23. [Стратегия обучающих данных](#23-стратегия-обучающих-данных)
+24. [Конвейер морфологической обработки](#24-конвейер-морфологической-обработки)
+25. [Контроль качества вывода MT](#25-контроль-качества)
+26. [Обработка переключения кодов (code-switching)](#26-переключение-кодов)
+27. [Работа со скриптами](#27-работа-со-скриптами)
+28. [Обработка идиом и фразем](#28-обработка-идиом)
+29. [Оценка качества MT](#29-оценка-качества)
 
 ---
 
-## 2. Historical Evolution of the Kazakh Language
-
-### 2.1 Script Chronology
-
-Kazakh has undergone four major script changes — making it one of the most frequently re-scripted languages in the world:
-
-| Period | Script | Notes |
-|---|---|---|
-| Pre-10th century | Old Turkic (runic) | Orkhon-Yenisei inscriptions |
-| ~10th century – 1929 | Arabic (Perso-Arabic) | Modified by Akhmet Baitursynov in 1924 to better represent Kazakh phonology |
-| 1929 – 1940 | Latin (Yañalif/Yangi alifba) | Soviet-introduced unified Turkic Latin script; Kazakh-specific variant |
-| 1940 – present | Cyrillic | Soviet-mandated; accepted current form by Sarsen Amanzholov in 1940; 42 letters |
-| 2017 – ongoing | New Latin (in transition) | Presidential decree by Nazarbayev 2017; deadline moved from 2025 to 2031; 2021 version uses diacritics (umlauts, breves, cedillas); currently used in education only |
-
-**The 2026 situation:** As of early 2026, Kazakhstan is still using Cyrillic for official documents, media, and most public communications. The Latin alphabet is being introduced in schools and some official contexts but mass transition has not occurred. A new constitution (February 2026 draft) reaffirms Kazakh as state language while retaining Russian's official use "along with" Kazakh — a subtle weakening of Russian's previous "on equal footing" language.
-
-**Key implication for MT:** Қазтілші should output Cyrillic as the primary script. However, implementing a Cyrillic↔Latin transliteration module is strongly recommended given the ongoing transition. The 2021 Latin variant uses: Á á, Ä ä, É é, Ğ ğ, İ i, Ń ń, Ö ö, Ú ú, Ü ü alongside standard Latin letters.
-
-### 2.2 Pre-Soviet Period (before 1920s)
-
-- Kazakh oral tradition (akyns, jyrshys) had highly developed poetic/rhetorical language
-- Written Kazakh in Arabic script primarily for religious/scholarly use
-- Abai Qunanbaiuly (1845–1904) — foundational literary figure; his works define classical Kazakh literary register
-- Ibrahim Altynsarin (1841–1889) — first attempted Cyrillic script for Kazakh pedagogical purposes
-- Persian and Arabic loanwords heavily present, especially in educated/religious registers
-
-### 2.3 Soviet Era (1920s–1991): Linguistic Impact
-
-The Soviet period produced the most dramatic structural changes to Kazakh, many of which still affect MT system quality today:
-
-**Positive structural effects:**
-- Standardization of literary Kazakh based on Northeastern dialect
-- Development of written norms, orthography, grammar descriptions
-- Creation of technical, scientific, and administrative vocabulary (much through Russian loanwords or calques)
-- Literacy expansion — Kazakh went from primarily oral to fully written
-
-**Negative/distorting effects:**
-
-1. **Mass Russian loanwords**: Technology, science, politics, daily life vocabulary flooded with Russian terms. Pairs like "дүкен/магазин" (shop) and "телефон" coexist; Russian forms dominate in cities.
-
-2. **Syntactic shift**: Traditional Kazakh SOV order was influenced by Russian SVO. Urban speech shows increased use of Russian-style constructions, especially in conjunctions, complex sentences, and modal expressions.
-
-3. **Calquing**: Russian idioms and compound concepts translated literally into Kazakh, creating non-native patterns. Modern written Kazakh often reflects "translated Russian" thought structure.
-
-4. **Phonological influence**: Cyrillic alphabet introduced Russian sound representations; initial "й" sounds emerged (Yerbol → [j]erbol) mimicking Russian orthographic patterns; vowel system partially restructured in urban standard pronunciation.
-
-5. **Translation culture**: All official texts prepared first in Russian, then translated to Kazakh. This institutionalized "translation Kazakh" (аударма қазақша) — a register characterized by Russian thought patterns encoded in Kazakh surface forms.
-
-**Research finding (ERIC paper on Modern vs Traditional Kazakh):** Paradoxically, the Soviet-era literary lexicon is **more traditional and normative** than post-independence vocabulary. During the Soviet period, the majority of Kazakh speakers lived rurally and preserved native language patterns. Post-independence, the educated urban elite used Russian; attempts to create new Kazakh vocabulary often produced non-systematic, artificial forms.
-
-### 2.4 Independence Period (1991–present)
-
-**1989: Kazakh SSR Law on Languages** — First to give Kazakh "state language" status; established Kazakh as language of administration and made it mandatory in schools.
-
-**1997: Law of the Republic of Kazakhstan "On Languages"** (Тіл туралы заң) — Kazakh as state language; Russian as official language of state bodies; created Republican Terminology Commission (Termincom). Updated with major amendments January 2025.
-
-**Key policy milestones:**
-
-| Year | Event |
-|---|---|
-| 1989 | First Law on Languages; Kazakh becomes state language of Kazakh SSR |
-| 1995 | Constitution of independent Kazakhstan; Article 7 defines Kazakh as state language, Russian as official |
-| 1997 | Law on Languages (Тіл туралы заң); establishes Termincom |
-| 1998 | First State Program on Languages (1998–2000) |
-| 2007 | Trilingualism concept introduced (Kazakh/Russian/English) |
-| 2011 | State Program for Development and Use of Languages 2011–2020 |
-| 2017 | Decree on transition to Latin alphabet by 2025 |
-| 2021 | Latin transition deadline moved to 2031; revised alphabet approved |
-| 2023 | Concept for Development of Language Policy 2023–2029 adopted |
-| 2024 | Language test required for naturalization; mandate: 55% Kazakh content on TV/radio by 2025 |
-| 2025 | Law on Languages amendments (January 2025) — added language policy principles and main purpose articles |
-| 2026 | Constitutional revision reaffirms Kazakh state status; Russian described as used "along with" (not "on equal footing") Kazakh |
-
-**2024 Kazakhization push**: Government is actively promoting Kazakh in all public spaces. "Qazaqsha söyle" (Speak Kazakh) has become a social media meme and real-life pressure phrase. Some ethnic Kazakh Russian-speakers report feeling socially bullied when unable to switch to Kazakh.
-
-### 2.5 Language Purification Movement
-
-The "language purification" movement (тілдік тазалық/тілдің тазалығы) aims to replace Russian and international loanwords with Kazakh-origin or Turkic alternatives. However, it is contested:
-
-**Arguments for:**
-- Restoring native vocabulary suppressed under Soviet rule
-- Removing Russification artifacts from the language
-- Aligning with Latin script transition (Cyrillic loanwords from Russian hard to adapt to new alphabet)
-
-**Arguments against:**
-- Many proposed replacements are artificial and not accepted by speakers
-- Some "purified" words are actually Arabic/Persian, not native Turkic
-- International technical terminology functions better when shared with other languages
-- Practical impact minimal — population continues using Russian forms colloquially
-
-**Official mechanism:** Republican Terminology Commission (Termincom) under the Government of Kazakhstan has approved **35,680 terms since 1971** (as of 2022). The Termincom.kz database holds **383,534 terminology units** as of 2022. However, official approval does not guarantee actual language use.
-
-**Examples of purification pairs:**
-
-| Russian/International loan | Proposed Kazakh equivalent | Adoption status |
-|---|---|---|
-| телефон | байланыс/сымтелефон | телефон dominates in speech |
-| магазин | дүкен | дүкен widely accepted |
-| компьютер | дербес компьютер/есептеуіш | компьютер dominates |
-| проблема | мәселе | мәселе used in formal written |
-| автобус | автобус (no replacement) | no Kazakh term gained traction |
-| водка | арақ | арақ used in Kazakh contexts |
-| вино | шарап | шарап used in formal contexts |
+# Часть I. Морфологическая система
 
 ---
 
-## 3. Modern Kazakh vs Literary Kazakh
+## 1. Именное словоизменение
 
-### 3.1 The Literary/Colloquial Divide
+### 1.0. Общее устройство именной морфологии
 
-**Literary (ádebı) Kazakh** is characterized by:
-- Adherence to Northeastern dialect as codified standard
-- Full pronunciation of all letters and morphemes
-- Formal vocabulary following Termincom recommendations
-- SOV word order strictly maintained
-- Absence of Russian loanwords (aspirationally)
+Порядок аффиксов для имени:  
+**основа + (мн. число) + (притяжат.) + (падеж)**
 
-**Colloquial/spoken Kazakh** is characterized by:
-- Heavy Russian lexical borrowings (especially in urban areas)
-- Code-switching (see §3.2)
-- Simplified morphophonology (dropped syllables, elision)
-- Non-standard word order under Russian influence
-- Regional/dialectal vocabulary
+7 падежей: именительный (без аффикса), родительный, дательный-направительный, винительный, местный, исходный, творительный.
 
-**Key observation for MT:** Dubbing and formal Kazakh media is perceived as stiff and unnatural by native speakers (Reddit/Kazakhstan, February 2025). The "every letter pronounced, slow pace, formal vocabulary" style is difficult to relate to. This creates a quality perception problem — output that is linguistically correct may feel artificial to users.
+Варианты всех суффиксов определяются:
+- сингармонизмом (последняя гласная основы — передняя/задняя);
+- звонкостью/глухостью конечного согласного;
+- наличием притяжательного аффикса (есть специальные варианты падежей после 3 л. притяж.).
 
-### 3.2 Code-Switching Patterns (Қазіргі тіл)
+#### Правила для MT-системы (общий шаблон)
 
-Kazakh-Russian code-switching (also called **шала қазақ** — "half Kazakh") is the dominant mode of communication for urban Kazakhs, especially in Almaty, Astana, Shymkent, and other major cities.
+При анализе существительного хранить признаки: [±plural], [POSS:person/number], [CASE].  
+При генерации формы всегда вычислять аффиксы в порядке: мн. → притяж. → падеж, с учётом гармонии по последней гласной.
 
-**Survey data** (2021 and 2024 surveys, n=100 total educated respondents age 21-40):
-- 75–77% of respondents acknowledge mixing Kazakh and Russian
-- 54–67% observe others mixing languages
-- **Reasons for switching**: "habit and convenience" (32%), "don't know word in target language" (31%), identity/community signaling (remaining portion)
-
-**Types of code-switching:**
-
-| Type | Description | Example pattern |
-|---|---|---|
-| **Intrasentential** | Russian word(s) inside Kazakh grammatical structure | Kazakh frame + Russian lexical items |
-| **Intersentential** | Complete sentence in Russian within Kazakh discourse | Alternating full sentences |
-| **Tag-switching** | Russian discourse markers/interjections | "короче," "то есть," "вот" etc. in Kazakh speech |
-
-**Domain triggers** (from research): Topics with high Russian vocabulary density trigger more switching:
-- Technical/computer topics: almost entirely Russian or borrowed terms
-- Medical terminology: Russian-origin terms dominate
-- Legal/bureaucratic language: often Russian-first then Kazakh translation
-- Everyday urban life: high switching frequency
-- Traditional culture/nature: Kazakh-dominant
-
-**Important nuance:** Code-switching in Kazakhstan is NOT viewed as deficiency — it is a social identity marker and a communicative resource. Mixing signals membership in urban educated culture. "Pure Kazakh" can mark rural origin or ostentatious purism.
-
-### 3.3 Registers: Media vs Academic vs Legal Language
-
-| Register | Characteristics | MT Challenges |
-|---|---|---|
-| **Legal** | Highest formality; Termincom-approved vocabulary; passive constructions; nominalization heavy | Extreme density of case-marked noun phrases; specialized vocabulary; many terms exist in parallel Kazakh/Russian without clear precedence |
-| **Academic** | Heavy Russian influence in scientific terminology; calqued sentence structures; often feels translated | Technical terms may have multiple competing Kazakh equivalents; Russian thought patterns in syntax |
-| **News/Media** | Mixed formal/informal; Termincom vocabulary used but Russian names/brands kept | Named entities; current events vocabulary; transliteration of foreign names |
-| **Literary/Fiction** | Closest to traditional literary standard; proverbs; figurative language | Idioms; culturally specific vocabulary; archaic forms |
-| **Social Media/Colloquial** | Heavy code-switching; abbreviations; Cyrillic/Latin/emoji mixing; borrowings from English | Non-standard morphology; internet slang; mixed scripts |
-
-**KazParC corpus domain breakdown** (for context):
-- Legal documents: 20.8% of lines but 41% of tokens (longest sentences)
-- Mass media: 32.4% of lines
-- General: 25.5%
-- Education/science: 12.4%
-- Fiction: 8.9%
-
-### 3.4 Youth Slang and Modern Borrowings
-
-Gen Z Kazakh slang (2020s) is characterized by three-way hybridization:
-
-**Russian loanwords in slang:**
-- тусовка (tusovka) — "party/gathering"
-- бабки (babki) — "money"
-- отжигать (otzhigat') — "to party hard"
-- нормально (normalno) — "okay/fine"
-- прикол (prikol) — "joke/cool thing"
-
-**English internet borrowings:**
-- бро (bro) — "brother/friend"
-- фейк (feik) — "fake"
-- лол/LOL — "laugh out loud"
-- хайп (khayp) — "hype"
-- мем (mem) — "meme"
-- лайкату (laikatu) — "to like [social media]" (Kazakh verb suffix applied to English "like")
-- свайпату (swaipatu) — "to swipe"
-- байфренд/байфренд (baifrend) — "boyfriend" (Kazakh бай "rich" folk-etymology added)
-
-**Kazakh internet neologisms:**
-- Abbreviations mixed with Kazakh morphology
-- Non-standard Cyrillic representations of Russian pronunciation
-- Mixed Cyrillic-Latin within single words
+Не смешивать русский порядок: «у моего друга» ≠ «менің дос менің» — генитив + притяжательный суффикс всегда на **обладаемом** существительном.
 
 ---
 
-## 4. Key Linguistic Features MT Systems Get Wrong
+### 1.1. Типы основ существительных
 
-### 4.1 Agglutination: The Core Challenge
+Основные классы, важные для автоматической генерации:
 
-Kazakh is a **highly agglutinative language** — a single word form can encode what requires an entire English or Russian phrase. The canonical example from the KazMorphCorpus-2025 research:
+- **Основа на гласную** — Примеры: бала «ребёнок», үй «дом», ана «мать», кесе «чашка».
+- **Основа на звонкий согласный** — Примеры: қыз «девочка», жаз «лето/письмо», жол «дорога».
+- **Основа на глухой согласный** — Примеры: кітап «книга», дос «друг», ат «лошадь/имя».
+- **Основа на назальный (носовой)** — Примеры: алтын «золото», мен «я», тән «тело».
+- **Основа на сонант (л, р, й, у)** — Примеры: жол «дорога», бір «один», тау «гора».
+- **Заимствования с нетипичными финалями**:
+  - Русские: план, процесс, адрес, доклад, студент
+  - Арабо-персидские: кітап, хабар, заң, мәселе.
 
-> **балаларымызға** = бала + лар + ымыз + ға  
-> = child + PL + 1PL.POSS + DAT  
-> = "to our children"
-
-This creates serious MT challenges:
-- **Tokenization**: Naïve word-based models treat this as one token, missing the morphological content
-- **Segmentation errors**: 31.5% of morphological analysis discrepancies involve incorrect segment boundaries
-- **Affix chain misclassification**: 34.0% of discrepancies
-- **Borrowing errors**: 14.9% — applying Kazakh morphological rules to foreign stems fails
-
-**Error rate data** (KazMorphCorpus-2025): Even the best hybrid FST+CRF+KazRoBERTa system achieves 90.8% accuracy; mBERT achieves only 82.6%.
-
-**Common affix confusion pairs:**
-
-| Affix | Meaning 1 | Meaning 2 |
-|---|---|---|
-| -ды/-ді/-ты/-ті | Past tense marker | Accusative case marker |
-| -лар/-лер/-дар/-дер/-тар/-тер | Plural suffix | Can be part of other chains |
-| -(с)ы/-сі | 3rd person possessive | Can mark definiteness on verbs |
-| -ған/-ген | Past participle | Part of relative clause |
-
-### 4.2 The Seven-Case System
-
-Kazakh has **7 cases**, all marked by suffixes with multiple allomorphs due to vowel harmony and consonant assimilation. This is a primary source of MT errors:
-
-| Case | Name (Kazakh) | Suffixes | Main Uses |
-|---|---|---|---|
-| **Nominative** | Атаý септік | unmarked | Subject; *also* indefinite direct object (crucial distinction) |
-| **Accusative** | Табыс септік | -ты/-ті, -ны/-ні, -н, -ды/-ді | *Definite* direct object only |
-| **Genitive** | Ілік септік | -ның/-нің, -дың/-дің, -тың/-тің | Possession (triggers possessive suffix on head noun) |
-| **Dative** | Барыс септік | -ға/-ге, -қа/-ке, -(н)а/-(н)е | Indirect object; destination; time duration |
-| **Ablative** | Шығыс септік | -дан/-ден, -тан/-тен, -нан/-нен | Source; partitive; comparison benchmark |
-| **Locative** | Жатыс септік | -да/-де, -та/-те, -нда/-нде | Location; temporal; "when" clauses with participles |
-| **Instrumental** | Көмектес септік | -мен/-бен/-пен | Instrument/means; "with" comitative |
-
-**Critical MT error: Nominative-Accusative distinction**
-
-English and Russian both mark direct objects consistently. Kazakh marks direct objects with accusative ONLY when definite. Indefinite direct objects remain in nominative. MT systems trained on Russian→Kazakh incorrectly apply accusative to indefinite objects:
-
-- ✓ Correct: Азамат **қалам** сатып алды (Azamat bought **a pen** — nominative, indefinite)
-- ✓ Correct: Азамат **қаламды** сатып алды (Azamat bought **the pen** — accusative, definite)
-- ✗ MT error: Азамат **қаламды** сатып алды when source says "a pen"
-
-**Case suffix allomorphy** (dative example with 8 surface forms):
-
-The dative suffix -ға/-ге has 8 allomorphs based on final phoneme of stem: -ға, -ге, -қа, -ке, -на, -не, -а, -е. Systems that fail to learn all allomorph contexts produce vowel harmony violations.
-
-### 4.3 Vowel Harmony — Exceptions and Edge Cases
-
-Kazakh has a **backness harmony system** with 9+ phonemic vowels. The basic rule: suffixes agree in backness with the root vowel. However:
-
-**Systematic exceptions:**
-
-1. **Russian loanwords** do not follow vowel harmony: компьютер (front vowels) + -ке (dative) = компьютерге ✓ (not компьютерқа). Loanwords count as transparent to harmony with the preceding context.
-
-2. **The comitative suffix** -мен/-пен/-бен: Always surfaces with front vowels regardless of root backness. This is one of two "idiosyncratically transparent" suffixes in Kazakh.
-
-3. **The infinitive suffix** -у/-ю: Phonetically varies but morphologically neutral in certain contexts (disputed in academic literature — Bowman & Lokshin 2014 vs. McCollum response).
-
-4. **The polygon-forming suffix** -ген: Front vowel regardless of root; blocks harmony for following suffixes (makes following suffixes match its front quality).
-
-5. **Lip-rounding harmony**: Present in spoken/colloquial Kazakh but NOT in written standard — rounding harmony is only literary in written texts but active phonologically.
-
-6. **International technical terms**: Variable harmony application; speakers often apply native-language-like harmony when forced to inflect foreign stems.
-
-**Key MT implication:** A system that does not know which stems are borrowed will apply wrong harmony variants. The 18% loanword token density in corpora (KazMorphCorpus-2025) means ~1 in 5–6 tokens requires special treatment.
-
-### 4.4 Kazakh Verb Forms Without English/Russian Equivalents
-
-Kazakh has a rich system of verb forms that map poorly to English (4 present forms) and Russian (1 present form):
-
-**Present/Aspect forms:**
-- **Ауыспалы осы шақ** (Habitual present): "Fish swim" (general/habitual facts) — балық жүзеді
-- **Нақ осы шақ** (Progressive): "He is writing" — ол жазып отыр (writing + sitting AUX)
-- **Жедел өткен шақ** (Simple past): witnessed, completed — баттым
-- **Бұрынғы өткен шақ** (Remote past): reported/hearsay past — барыпты (heard that someone went)
-
-**Future forms (3 types):**
-- **Болжалды келер шақ** (Probabilistic future): "Maybe/probably will" — modal nuance
-- **Мақсатты келер шақ** (Purposive future): "Intended to" — different from simple future
-- **Ауыспалы келер шақ** (General/habitual future): Used in past contexts as "would" (future-in-past)
-
-**Converb system** (especially challenging for MT):
-
-| Converb | Suffix | Meaning | Example |
-|---|---|---|---|
-| Sequential | -(I)p | "and then"; durative with AUX | оқып жатыр = "is reading (ongoing)" |
-| Simultaneous/manner | -а/-е/-й | "by doing"; continuous | жүре отыр = "sitting while going" |
-| Purposive | -ғалы/-гелі | "in order to" | оқығалы келді = "came in order to study" |
-| Ability | -а алу | "can/be able to" | сөйлей алады = "can speak" |
-| Near-miss | -а жаздау | "almost did" | адаса жазды = "almost got lost" |
-| Attempt/benefit | -(I)p алу | "did for oneself" | тауып алды = "found (for own benefit)" |
-
-**Russian/English MT failure pattern:** These converb-auxiliary combinations get collapsed to simple past or present in Russian/English→Kazakh translation. The nuance of "did for oneself," "almost," "while doing," "in order to" is routinely lost.
-
-**Verb forms unique to Kazakh that stump MT:**
-- **Жате тұру** (lie down for a while/briefly): "let him lie down awhile" — no single English equivalent
-- **Күте тұрсын**: "he will have to wait" OR "tell him to wait" OR "let him wait" — context-dependent
-- **-а жатар** (future gradual/future discovery): "they will find out later" — not standard future
-- **Causative** (-дыр/-тыр/-ыт/-т) and **passive** (-ыл/-ін) stack with tense/aspect — multilayer complexity
-
-### 4.5 Honorifics and Respect Forms (Сіздеу/Сендеу)
-
-Kazakh has a **T-V distinction** (like French tu/vous, German du/Sie):
-
-| Form | Pronoun (nom) | Use Case |
-|---|---|---|
-| **Informal (сендеу)** | сен | Peers, younger people, close friends, children |
-| **Formal (сіздеу)** | сіз | Elders, superiors, strangers, formal contexts |
-
-**Full case paradigm:**
-
-| Case | сен (informal) | сіз (formal) |
-|---|---|---|
-| Nominative | сен | сіз |
-| Genitive | сенің | сіздің |
-| Dative | саған | сізге |
-| Accusative | сені | сізді |
-| Locative | сенде | сізде |
-| Ablative | сенен | сізден |
-| Instrumental | сенімен | сізбен |
-
-**Possessive form distinction:**
-- Informal 2SG possessive: -ың/-ің (e.g., кітабың "your book")
-- Formal 2SG possessive: -ыңыз/-іңіз (e.g., кітабыңыз "your book [formal]")
-- Plural informal: -ларың/-лерің
-- Plural formal: -ларыңыз/-леріңіз
-
-**MT failure mode:** Russian and English use formal "you" (вы/you) in both polite singular and plural contexts. Kazakh splits these. When translating Russian "Вы" or English "you" to Kazakh, MT systems must determine:
-1. Is this singular or plural "you"?
-2. If singular, is the social context formal or informal?
-
-MT systems typically default to formal сіз for Russian вы (correct), but fail on:
-- Colloquial texts where Russian ты should map to сен
-- Group contexts where plural needed (сендер/сіздер)
-- Mixed documents with varying registers
-
-Additionally, **ағай** (respectful address for older male), **апай** (respectful address for older female/teacher), **балам** (addressing younger person as "my child"), **қызым** ("my daughter") are used in Kazakh honorific address system but have no direct translation. These are sometimes collapsed to Russian-style forms or omitted entirely in MT output.
-
-### 4.6 SOV Word Order and Structural Reordering
-
-Kazakh is **strictly SOV (Subject-Object-Verb)**. In contrast:
-- Russian: SVO (flexible but default SVO)
-- English: SVO (rigid)
-
-For MT from Russian/English, the verb must be moved from second position to final position, and the entire argument structure reorganized. This is the most fundamental structural transformation required.
-
-**Additional complexity:**
-- Modifiers (adjectives, relative clauses, possessors) **precede** their head nouns in Kazakh — opposite of English "the man who came" vs. Kazakh **келген** адам (come-PST.PTCP man)
-- Postpositions replace prepositions: "in the city" = қалада (city-LOC), "from the city" = қаладан (city-ABL)
-- Subordinate clauses are non-finite and precede the main clause verb
-
-**MT consequence:** Attention mechanisms in neural MT struggle with long-distance reordering when source-target word alignment differs fundamentally. KazParC research notes that intricate syntactic structures in Kazakh-Russian alignment required 40% manual correction in prior work.
-
-### 4.7 Numbers, Dates, and Currency Formatting
-
-**Date format in Kazakh:**
-- Short: `yyyy.dd.mm` (e.g., 2026.31.03)  
-- Long format: `yyyy ж. d MMMM` (e.g., **2026 ж. 31 наурыз**)  
-- Full format: `yyyy ж. dd MMMM` (e.g., **2026 ж. 31 наурыз**)
-
-**Month names in Kazakh** (not borrowed from Russian, unlike some other Turkic languages):
-
-| # | Kazakh | Transliteration | Meaning |
-|---|---|---|---|
-| 1 | Қаңтар | Qantar | January ("when rivers freeze") |
-| 2 | Ақпан | Aqpan | February |
-| 3 | Наурыз | Nawryz | March ("Nauryz" — new year) |
-| 4 | Сәуір | Säwir | April |
-| 5 | Мамыр | Mamyr | May |
-| 6 | Маусым | Mawsym | June |
-| 7 | Шілде | Şilde | July |
-| 8 | Тамыз | Tamyz | August |
-| 9 | Қыркүйек | Qyrküiek | September |
-| 10 | Қазан | Qazan | October |
-| 11 | Қараша | Qaraşa | November |
-| 12 | Желтоқсан | Jeltöqsan | December |
-
-**Localization marker:** When writing dates, the year requires the postparticle **"ж."** (abbreviation of **жыл** = year): "2026 ж." not just "2026".
-
-**Currency:** Tenge = **теңге** (тг). Amount formatting: **1 500 000 теңге** (space as thousands separator in Kazakh format). Ordinal numbers: -ыншы/-інші added to cardinal: **бірінші** (1st), **екінші** (2nd).
-
-**Ordinal/cardinal distinction important in MT:** Russian "первый" can map to either Kazakh **бірінші** (ordinal) or context demands checking whether cardinal **бір** is appropriate.
-
-### 4.8 Kazakh Idioms and Phraseology Resisting Literal Translation
-
-Kazakh idioms (мақал-мәтел) are deeply rooted in nomadic pastoral culture and resist literal translation:
-
-**Nomadic/pastoral idioms:**
-
-| Kazakh idiom | Literal translation | Actual meaning |
-|---|---|---|
-| Жүрегі тас төбесіне шығу | "Heart goes to the top of stone/head" | To be very scared |
-| Айызы қану | "Thirst is quenched" | To be extremely happy/satisfied |
-| Қанжығасына жеңісті байлау | "To tie victory to the saddlebag" | To achieve victory/succeed |
-| Зығырданын қайнату | "To boil his linseed oil" | To irritate someone greatly |
-| Аузына құм құйылды | "Sand poured into his mouth" | Lost ability to speak/shocked into silence |
-| Бетті бері қарау | "Face turned this way" | To recover/get better |
-| Жерден алып жерге салу | "Taken from ground and put back on ground" | To abuse/criticize harshly |
-| Жұбайының көзіне шөп салу | "To put grass in spouse's eyes" | To commit adultery/deceive spouse |
-| Пора порасы шыққанша жылау | "Cry until your pores open" | To cry uncontrollably |
-| Үзеңгілес | "One who shares the stirrup" | Close companion/comrade (martial origin) |
-
-**Proverbs with no direct equivalent:**
-
-- **Токсан ауыз сөздің тобықтай түйіні** — "The essence of 90 words in a knucklebone" = wisdom compressed into brief form
-- **Достың жылатып айтады, дұшпан күлдіртіп айтады** — "A friend tells truth making you cry; an enemy flatters making you laugh"
-- **Туған жердің жусаны да тәтті** — "Even the wild onion/wormwood of one's homeland is sweet" = patriotism/homesickness
-- **Кез кеткен, бар бол** — farewell blessing with no Russian/English equivalent (lit. "may your eyes leave [well/safely]")
-
-**Key issue for MT:** These idioms cannot be computed from their parts. They require a phrasebook/lexicon approach rather than compositional translation.
+Для заимствованных основ часто существует колебание в соответствии гармонии, но в современном стандартном языке ориентируются на последнюю гласную.
 
 ---
 
-## 5. Academic Resources and Corpora
+### 1.2. Падежная система: морфемы и базовые таблицы
 
-### 5.1 Parallel Corpora for MT
+#### 1.2.1. Набор падежных аффиксов
 
-**KazParC** (ISSAI, Nazarbayev University, 2024)
-- **URL:** https://issai.nu.edu.kz/2024/07/01/kazparc-kazakh-parallel-corpus-for-machine-translation/
-- **ACL:** https://aclanthology.org/2024.lrec-main.842/
-- **Size:** 371,902 human-translated parallel sentences (KK↔EN, KK↔RU, KK↔TR)
-- **Domains:** Mass media (32.4%), General (25.5%), Legal (20.8%), Education/Science (12.4%), Fiction (8.9%)
-- **Quality:** 41,600 person-hours of human effort (10 translators × 26 months × 160 hrs/month)
-- **Derived model:** Tilmash — NLLB-200-distilled-1.3B fine-tuned on KazParC + SynC (1.7M synthetic sentences)
-- **BLEU results** (KazParC test set, higher is better, 0–1 scale):
+(без притяжательности, единственное число)
 
-| Direction | Tilmash (parsync) | Google Translate | Yandex Translate |
-|---|---|---|---|
-| EN→KK | 0.58 | 0.30 | 0.21 |
-| RU→KK | 0.61 | 0.24 | 0.23 |
-| KK→EN | 0.62 | 0.31 | 0.28 |
-| KK→RU | 0.63 | 0.29 | 0.29 |
+| Падеж | Аффиксы | Примеры |
+|-------|---------|---------|
+| Именительный (NOM) | — | бала, кітап |
+| Родительный (GEN) | -ның/-нің/-тың/-тің/-дың/-дің | баланың, кітаптың |
+| Дательный (DAT) | -ға/-ге/-қа/-ке | балаға, кітапқа |
+| Винительный (ACC) | -ны/-ні/-ты/-ті/-ды/-ді | баланы, кітапты |
+| Местный (LOC) | -да/-де/-та/-те | балада, кітапта |
+| Исходный (ABL) | -дан/-ден/-тан/-тен/-нан/-нен | баладан, кітаптан |
+| Творительный (INSTR) | -мен/-бен/-пен | баламен, кітаппен |
 
-Note: BLEU scores for KK are inherently lower than European language pairs due to agglutination (each morphological form is a unique token). ChrF scores provide a more morphology-friendly metric.
+Выбор конкретного варианта зависит от:
+- гласного: задний (а, о, ұ, ы) → форма с а; передний (е, ө, ү, і, ә) → с е;
+- конечного согласного: звонкий/сонор → -ның/-дың/-ді; глухой → -тың/-тің/-тк-варианты.
 
-**SynC** (synthetic corpus included with KazParC):
-- 1,797,066 sentences auto-translated via Google Translate from English crawled data
-- Lower quality but useful for domain coverage
+#### 1.2.2. Склонение основ на гласную
 
-### 5.2 Monolingual Kazakh Corpora
+**Пример 1: бала «ребёнок» (задний ряд гласных)**
 
-**Qazcorpora.kz / Qazcorpus.kz** (National Kazakh Language Corpus)
-- Government-funded national corpus
-- 43 million meta-tagged tokens as of end-2022 (actively growing)
-- URL: https://qazcorpora.kz
+| Падеж | Казахская форма | Транслитерация |
+|-------|----------------|----------------|
+| NOM | бала | bala |
+| GEN | баланың | bala+nyŋ |
+| DAT | балаға | bala+ğa |
+| ACC | баланы | bala+ny |
+| LOC | балада | bala+da |
+| ABL | баладан | bala+dan |
+| INSTR | баламен | bala+men |
 
-**MDBKD** (Multi-Domain Bilingual Kazakh Dataset)
-- 24,883,808+ unique texts from multiple domains
-- Used for training KazRoBERTa (conversational variant)
+**Пример 2: үй «дом» (передний ряд; финальная гласная й считается передней)**
 
-**KazMorphCorpus-2025** (Baitenova et al., 2025)
-- 150,000 sentences (~2 million word tokens)
-- Manually annotated for morphological analysis
-- 5 domains: fiction, news, social media, scientific, legal
+| Падеж | Казахская форма | Транслитерация |
+|-------|----------------|----------------|
+| NOM | үй | üi |
+| GEN | үйдің | üi+diŋ |
+| DAT | үйге | üi+ge |
+| ACC | үйді | üi+di |
+| LOC | үйде | üi+de |
+| ABL | үйден | üi+den |
+| INSTR | үймен | üi+men |
 
-### 5.3 NLP Datasets and Benchmarks
+**Правила для MT:** при генерации падежа к основам на гласную просто подставлять аффикс, без вставочных согласных; предотвращать появление «балааға» — двух а подряд (автоматически сливаются: балаға).
 
-| Dataset | Task | Size | Notes |
-|---|---|---|---|
-| **KazNERD** (Yeshpanov et al., 2022) | Named Entity Recognition | 112,702 tokens | 25 entity classes; news, fiction, legal |
-| **KazQAD** (Yeshpanov et al., 2024) | Question Answering | — | Built from Wikipedia and educational texts |
-| **KazBench-KK** (2025) | Cultural knowledge QA | 7,111 questions | 17 culturally salient domains; pastoral, social hierarchies, politics |
-| **KazUnified National Testing MC** | Multiple choice QA | — | Based on KZ education system |
-| **SIB-200** (Kazakh subset) | Topic classification | — | Part of multilingual benchmark |
-| **Belebele** (Kazakh) | Reading comprehension | — | Part of multilingual reading benchmark |
+#### 1.2.3. Склонение основ на звонкий согласный
 
-### 5.4 Language Models
+**Пример 1: қыз «девочка» (задний ряд, звонкий з)**
 
-| Model | Type | Strengths | Source |
-|---|---|---|---|
-| **KazRoBERTa** | Monolingual RoBERTa | 90.8% morphological accuracy; best for Kazakh NLP | HuggingFace: kz-transformers/kaz-roberta-conversational |
-| **KazBERT** | Monolingual BERT | F1=0.947 on morphological tagging | |
-| **mBERT** | Multilingual BERT | 82.6% morphological accuracy; worse than mono | Standard HuggingFace |
-| **XLM-R** | Cross-lingual | Moderate QA performance | |
-| **Tilmash** | Neural MT (NLLB fine-tuned) | Best public KK↔EN/RU MT | ISSAI |
-| **SozKZ** (2026) | Small Kazakh LM | 600M params, 9B token training; released open | ArXiv 2603.20854 |
-| **KazLLM-70B** | Large Kazakh LLM | Best on cultural benchmarks (~69% KazBench) | |
-| **NLLB-200** | Multilingual MT | Decent baseline; improved by fine-tuning | Meta |
+| Падеж | Казахская форма | Транслитерация |
+|-------|----------------|----------------|
+| NOM | қыз | qyz |
+| GEN | қыздың | qyz+dyŋ |
+| DAT | қызға | qyz+ğa |
+| ACC | қызды | qyz+dy |
+| LOC | қызда | qyz+da |
+| ABL | қыздан | qyz+dan |
+| INSTR | қызбен | qyz+ben |
 
-**KazRoBERTa outperforms mBERT by 8.2 percentage points** on morphological analysis — strongly recommend using KazRoBERTa-based components in any Kazakh NLP pipeline.
+Замена з → зб в творительном (мен → бен) — пример ассимиляции: после звонкого согласного творительный реализуется как -бен.
 
-### 5.5 Morphological Analysis Tools
+**Пример 2: жол «дорога» (задний, сонор л)**
 
-**Apertium-kaz**
-- URL: https://github.com/apertium/apertium-kaz
-- Rule-based FST morphological analyzer/generator and CG tagger
-- Used in: KK↔TT, EN↔KK, KG↔KK, KK↔KAA, KK↔RU pairs
-- Files: `kaz.lexc` (dictionary), `kaz.twol` (morphophonological rules), CG disambiguation rules
-- Status: Actively maintained; foundation for many Kazakh NLP tools
-- Error detection research uses Apertium platform as analysis backbone
+| Падеж | Казахская форма | Транслитерация |
+|-------|----------------|----------------|
+| NOM | жол | jol |
+| GEN | жолдың | jol+dyŋ |
+| DAT | жолға | jol+ğa |
+| ACC | жолды | jol+dy |
+| LOC | жолда | jol+da |
+| ABL | жолдан | jol+dan |
+| INSTR | жолмен | jol+men |
 
-**KazNLP** (GitHub: makazhan/kaznlp)
-- URL: https://github.com/makazhan/kaznlp
-- Open-source toolkit: tokenizer, language detector, morphological analyzer, tagger
-- Status: Initial release ~2018; check for updates
+#### 1.2.4. Склонение основ на глухой согласный
 
-**Hybrid FST+CRF+KazRoBERTa system** (Baitenova et al., 2025, Frontiers in AI)
-- State-of-the-art: 90.8% accuracy, F1=0.907
-- Three-stage pipeline: FST → CRF disambiguation → KazRoBERTa neural refinement
-- Quantized version: 1.5GB memory, 1060 tokens/sec throughput
+**Пример 1: кітап «книга» (задний ряд, глухой п)**
 
-### 5.6 Official Language Resources and Standards
+| Падеж | Казахская форма | Транслитерация |
+|-------|----------------|----------------|
+| NOM | кітап | kitap |
+| GEN | кітаптың | kitap+tyŋ |
+| DAT | кітапқа | kitap+qa |
+| ACC | кітапты | kitap+ty |
+| LOC | кітапта | kitap+ta |
+| ABL | кітаптан | kitap+tan |
+| INSTR | кітаппен | kitap+pen |
 
-**Termincom.kz** (Republican Terminology Commission database)
-- URL: https://termincom.kz
-- 383,534 terminology units (as of 2022)
-- 35,680 terms approved since 1971
-- Sections: Approved Terms, Chronology, Branch Terms, Discussion
-- Annual additions: 4,069 new terms approved in 2022 across legislation, healthcare, energy, agriculture, ecology, geology
-- **Critical for MT:** This is the authoritative source for official Kazakh technical vocabulary. MT system should integrate Termincom-approved forms as preferred translations in technical/official domains.
+**Пример 2: дос «друг» (задний, глухой с)**
 
-**Sozdikqor.kz** (Universal dictionary platform)
-- 400,000+ words, 1,243,850 linguistic units
-- 60+ industry dictionaries and encyclopedias
-- Includes 15-volume Dictionary of Kazakh Literary Language, Abai's dictionary, Akhmet Baitursynov's encyclopedia, phraseological dictionary
-- API/bot: @Sozdikqor.kz (Telegram)
+| Падеж | Казахская форма | Транслитерация | Примечание |
+|-------|----------------|----------------|------------|
+| NOM | дос | dos | |
+| GEN | достың | dos+tyŋ | |
+| DAT | досқа | dos+qa | |
+| ACC | досты | dos+ty | |
+| LOC | досста | dos+ta | двойной с → орф. досста |
+| ABL | достан | dos+tan | |
+| INSTR | доспен | dos+pen | |
 
-**Emle.kz** — Orthographic electronic database
-**Qazgramma.kz** — Grammar reference
-**Qazlatyn.kz** — Latin alphabet resources
-**Atau.kz** — Onomastics (names/places)
+**Правило для MT:** после глухих согласных использовать формы с т/қ/к/п (-тың/-тің, -қа/-ке, -та/-те, -тан/-тен, -пен), автоматически разрешая сдвоенные согласные (дос+та → досста).
 
-**Baitursynov Institute of Linguistics** — Primary academic body for Kazakh linguistics; coordinates script transition working groups; produced current (2021) Latin alphabet
+#### 1.2.5. Склонение назальных основ
 
-### 5.7 MT Quality on Standard Benchmarks
+**Пример: алтын «золото» (задний ряд, назальный н)**
 
-From KazParC paper (BLEU, FLoRes test set):
+| Падеж | Казахская форма | Транслитерация |
+|-------|----------------|----------------|
+| NOM | алтын | altyn |
+| GEN | алтынның | altyn+nyŋ |
+| DAT | алтынға | altyn+ğa |
+| ACC | алтынды | altyn+dy |
+| LOC | алтында | altyn+da |
+| ABL | алтыннан | altyn+nan |
+| INSTR | алтынмен | altyn+men |
 
-| Direction | Tilmash | Google | Yandex |
-|---|---|---|---|
+Важно корректно реализовать ассимиляцию н+д → нд, н+н → нн в орфографии; многие MT её игнорируют.
+
+#### 1.2.6. Существительные во множественном числе
+
+Суффиксы мн. числа: -лар/-лер/-дар/-дер/-тар/-тер по правилам гармонии и звонкости.
+
+| Тип основы | Примеры |
+|-----------|---------|
+| На гласную или сонор (задний) | бала → балалар, жол → жолдар |
+| На глухой (задний) | кітап → кітаптар, дос → достар |
+| На гласную/сонор (передний) | көрпе → көрпелер, үй → үйлер |
+| На глухой (передний) | көк → көктер |
+
+**бала во множественном числе с падежами:**
+
+| Падеж | Форма | Транслитерация |
+|-------|-------|----------------|
+| NOM | балалар | bala+lar |
+| GEN | балалардың | bala+lar+dyŋ |
+| DAT | балаларға | bala+lar+ğa |
+| ACC | балаларды | bala+lar+dy |
+| LOC | балаларда | bala+lar+da |
+| ABL | балалардан | bala+lar+dan |
+| INSTR | балалармен | bala+lar+men |
+
+**Правило для MT:** При числительном >1 (бес бала) **не** использовать множественное у существительного, кроме особых прагматических случаев. Базовое правило: **единственное число после числительного**.
+
+---
+
+### 1.3. Притяжательные формы (тәуелдік жалғау)
+
+#### 1.3.1. Полная парадигма притяжательных аффиксов
+
+(без падежа и плюрала, базовые формы)
+
+| Лицо/Число | Аффикс | Примеры |
+|-----------|--------|---------|
+| 1 ед. (мой) | -м/-ым/-ім | бала-м, үй-ім, кітап-ым |
+| 2 ед. (твой) | -ң/-ың/-ің | бала-ң, үй-ің, кітап-ың |
+| 2 ед. вежл. (Ваш) | -ңыз/-ңіз | бала-ңыз, үй-іңіз, кітап-ыңыз |
+| 3 ед. (его/её) | -сы/-сі/-ы/-і | бала-сы, үй-і, кітап-ы |
+| 1 мн. (наш) | -мыз/-міз | бала-мыз, үй-іміз, кітап-ымыз |
+| 2 мн. (ваш) | -ңдар/-ңдер | бала-ңдар, кітап-тарың |
+| 2 мн. вежл. | -ңыздар/-ңіздер | үй-леріңіз, кітап-тарыңыз |
+| 3 мн. (их) | -сы/-сі + лар | бала-сы-лар, кітап-тары |
+
+На практике 3-е мн. нерегулярно и часто заменяется 3 ед. + контекст.
+
+#### 1.3.2. Примеры по типам основ
+
+**После гласной: бала «ребёнок»**
+
+| Лицо | Казахская форма | Транслитерация |
+|------|----------------|----------------|
+| 1SG | балам | bala+m |
+| 2SG | балаң | bala+ŋ |
+| 2SG.HON | балаңыз | bala+ŋyz |
+| 3SG | баласы | bala+sy |
+| 1PL | баламыз | bala+myz |
+| 2PL | балаңдар | bala+ŋdar |
+| 2PL.HON | балаларыңыз | bala+laryŋyz |
+| 3PL | балалары | bala+lary |
+
+**После глухого согласного: кітап «книга»**
+
+| Лицо | Казахская форма | Транслитерация |
+|------|----------------|----------------|
+| 1SG | кітабым | kitabym |
+| 2SG | кітабың | kitabyŋ |
+| 2SG.HON | кітабыңыз | kitabyŋyz |
+| 3SG | кітабы | kitaby |
+| 1PL | кітабымыз | kitabymyz |
+| 2PL | кітаптарың | kitap+taryŋ |
+| 2PL.HON | кітаптарыңыз | kitap+taryŋyz |
+| 3PL | кітаптары | kitap+tary |
+
+Ассимиляция п → б в произношении (кітапым → кітабым) часто отражается орфографически.
+
+**После сонанта: жол «дорога»**
+
+| Лицо | Казахская форма | Транслитерация |
+|------|----------------|----------------|
+| 1SG | жолым | jolym |
+| 2SG | жолың | jolyŋ |
+| 2SG.HON | жолыңыз | jolyŋyz |
+| 3SG | жолы | joly |
+| 1PL | жолымыз | jolymyz |
+| 2PL | жолдарың | joldaryŋ |
+| 2PL.HON | жолдарыңыз | joldaryŋyz |
+| 3PL | жолдары | joldary |
+
+#### 1.3.3. Притяжательные формы с падежами: порядок аффиксов
+
+Порядок строго: **основа + (множественное) + притяжательный + падеж**.
+
+Примеры:
+- **менің баламмен** «с моим ребёнком»: бала + м (POSS.1SG) + мен (INSTR) → баламмен
+- **кітабымда** «в моей книге»: кітап + ым (POSS.1SG) + да (LOC) → кітабымда
+
+**Специальные формы падежей после 3 л. ед. притяжательного:**
+
+| Падеж | Специальная форма (после 3SG POSS) |
+|-------|------------------------------------|
+| GEN | -ның/-нің |
+| DAT | -на/-не |
+| ACC | -н |
+| LOC | -нда/-нде |
+| ABL | -нан/-нен |
+| INSTR | -мен/-бен |
+
+Примеры:
+- **баласының үйі** — «дом его ребёнка» (бала+сы+ның)
+- **баласына айттым** — «сказал его/её ребёнку» (бала+сы+на)
+- **баласын көрдім** — «увидел его/её ребёнка» (бала+сы+н)
+
+#### 1.3.4. Полные мини-парадигмы с притяжательностью и падежами
+
+**1 лицо ед. числа (мой ребёнок) — баламен**
+
+| Падеж | Форма |
+|-------|-------|
+| NOM | балам |
+| GEN | баламның |
+| DAT | балама |
+| ACC | баламды |
+| LOC | баламда |
+| ABL | баламнан |
+| INSTR | баламмен |
+
+**3 лицо ед. числа (его/её ребёнок) — баласы**
+
+| Падеж | Форма |
+|-------|-------|
+| NOM | баласы |
+| GEN | баласының |
+| DAT | баласына |
+| ACC | баласын |
+| LOC | баласында |
+| ABL | баласынан |
+| INSTR | баласымен |
+
+#### 1.3.5. Притяжательные формы с числительными
+
+После числительных:
+- существительное, как правило, **без притяжательного**;
+- если нужно указать принадлежность всей группы, притяжательный добавляется к существительному;
+- «их пять детей» → олардың бес баласы (генитив владельца + существительное с 3SG POSS).
+
+Примеры:
+- **бес бала** — «пять детей» (нет притяж.)
+- **бес балам** — «мои пять детей» (балам: POSS.1SG)
+- **олардың бес баласы** — «их пять детей» (POSS.3SG на бала, владелец в генитиве)
+
+**Правила для MT:**
+- Русское «их пять детей» → олардың бес баласы (не олардың бес балалары).
+- Русское «наши студенты» → біздің студенттер.
+
+---
+
+### 1.4. Заимствованные основы с нетипичными финалями
+
+#### 1.4.1. Русские заимствования
+
+- если в слове есть только передние гласные → аффиксы с е;
+- если только задние → аффиксы с а;
+- при смешении (тип университет) ориентируются на последнюю гласную;
+- конечные кластеры согласных сохраняются, аффиксы присоединяются без дополнительной гласной.
+
+**Пример: процесс (последняя гласная е — передний ряд)**
+
+| Падеж | Форма |
+|-------|-------|
+| NOM | процесс |
+| GEN | процестің |
+| DAT | процеске |
+| ACC | процесті |
+| LOC | процесте |
+| ABL | процестен |
+| INSTR | процеспен |
+
+#### 1.4.2. Арабо-персидские заимствования
+
+Многие давно ассимилированы и ведут себя как типичные казахские слова: кітап, мекеме, мәселе, сабақ.
+
+Примеры:
+- **мәселе** «проблема» (передний ряд): мәселенің, мәселеге, мәселені, мәселеде, мәселеден, мәселемен.
+- **заң** «закон» (задний): заңның, заңға, заңды, заңда, заңнан, заңмен.
+
+**Правила для MT:** Классифицировать заимствованные основы по последней гласной (для гармонии) и последнему согласному (для выбора вариантов). При сомнении использовать стандарт современного языка: большинство заимствований тяготеет к последней гласной.
+
+---
+
+### 1.5. Типичные ошибки MT в именном словоизменении
+
+| # | Ошибочная форма | Правильная | Тип ошибки |
+|---|----------------|-----------|------------|
+| 1 | Мен оның бала көрдім | Мен оның баласын көрдім | Не добавлен притяжательный + винительный |
+| 2 | біздің мектепта | біздің мектепте | Неверная гармония (задний вместо переднего) |
+| 3 | дослармен | достармен | Неверный суффикс мн. (-лар после глухого с вместо -тар) |
+| 4 | бес балалар | бес бала | Лишний множественный после числительного |
+| 5 | оның кітапында | оның кітабында | Ошибка после 3SG POSS (должна быть спец. форма) |
+
+**Правила для MT:** Всегда проверять цепочку:
+- есть ли числительное → скорее всего, NO plural у существительного;
+- есть ли личное притяжательное → падежные аффиксы берутся из набора «после POSS»;
+- есть ли русское притяжательное местоимение (мой/твой/его/ее/наш/ваш/их) → генитив владельца + POSS суффикс на существительном.
+
+---
+
+## 2. Глагольная система
+
+### 2.0. Общие принципы
+
+Базовый порядок морфем для личной глагольной формы:  
+**основа (корень/дериват) + (словообраз. аффиксы: каузатив/пассив/рефлексив/взаимный) + (негация) + (тенсовый/видовой аффикс) + личное окончание**
+
+Времена и виды:
+- **Настоящие:** нақ осы шақ (прямо сейчас), ауыспалы осы шақ (обычно/будущее)
+- **Прошедшие:** жедел өткен шақ (свидетельное), бұрынғы өткен шақ (несвидетельное, -ған/-ген), болжалды өткен шақ (предположительное)
+- **Будущие:** аналитический (-ып + бол/отыр/жатыр/жүр/тұр), -ар/-ер аорист/будущий, -мақ/-мек (намеренный)
+
+**Правила для MT (общий каркас):**
+- Для каждого русского/английского времени хранить набор соответствующих казахских форм (в т.ч. аналитических).
+- Сначала выбирать вид/аспект (длительность, результативность, привычность), затем решать, какую казахскую форму использовать.
+
+---
+
+### 2.1. Настоящее время
+
+#### 2.1.1. Нақ осы шақ (конкретное настоящее)
+
+Образуется: **основа + көсемше -ып/-іп/-п + вспомогательный глагол (жатыр/отыр/жүр/тұр) + личное окончание**
+
+**Пример глагола жазу «писать» (жаз- основа, задний ряд):**
+
+| Лицо | Форма |
+|------|-------|
+| 1SG | жазып жатырмын |
+| 2SG | жазып жатырсың |
+| 2SG.HON | жазып жатырсыз |
+| 3SG | жазып жатыр |
+| 1PL | жазып жатырмыз |
+| 2PL | жазып жатырсыңдар |
+| 3PL | жазып жатыр |
+
+Варианты вспомогательного:
+- **жатыр** (процесс в ходу)
+- **отыр** (сидя, концентрация)
+- **жүр** (повторяющееся, привычное)
+- **тұр** (стоя, кратковременность)
+
+Примеры:
+- Қазір кітап оқып отырмын — «Сейчас читаю книгу».
+- Ол ән тыңдап жатыр — «Он слушает песню (в процессе)».
+- Біз ауылға барып жүрміз — «Мы постоянно ездим в аул».
+
+**Правила для MT:**
+- Русское Present Continuous и явно текущие действия → по умолчанию «-ып жатыр».
+- Семантика повторяемости («часто езжу», «постоянно делаю») → жүр (барып жүрмін).
+
+#### 2.1.2. Ауыспалы осы шақ (общее настоящее / будущее)
+
+Образуется аористом: **основа + -а/-е/-й + личные окончания**
+
+**Пример жазу:**
+
+| Лицо | Форма |
+|------|-------|
+| 1SG | жазамын |
+| 2SG | жазасың |
+| 2SG.HON | жазасыз |
+| 3SG | жазады |
+| 1PL | жазамыз |
+| 2PL | жазасыңдар |
+| 3PL | жазады |
+
+Аорист выражает:
+- обычное/регулярное действие (habitual): Мен күнде ерте тұрамын — «Я каждый день рано встаю».
+- общее будущее: Ертең Алматыға барамын — «Завтра поеду в Алматы».
+
+**Правила для MT:**
+- Русское Present Simple с значением привычности → ауыспалы осы шақ (-а/-е/-й).
+- Простое будущее без специально подчёркнутого намерения → тоже аорист (барамын).
+- При генерации аориста учитывать гармонию и фонетику: ойнау → ойнаймын, жүру → жүремін.
+
+---
+
+### 2.2. Прошедшее время
+
+#### 2.2.1. Жедел өткен шақ (свидетельное прошедшее)
+
+Формула: **основа + -ды/-ді/-ты/-ті + личное окончание**
+
+**Пример жазу:**
+
+| Лицо | Форма |
+|------|-------|
+| 1SG | жаздым |
+| 2SG | жаздың |
+| 2SG.HON | жаздыңыз |
+| 3SG | жазды |
+| 1PL | жаздық |
+| 2PL | жаздыңдар |
+| 3PL | жазды |
+
+Значение: говорящий лично наблюдал или участвовал.
+
+Примеры:
+- Кеше хат жаздым — «Вчера написал письмо (сам, точно знаю)».
+- Олар кино көрді — «Они смотрели кино (свидетельно)».
+
+#### 2.2.2. Бұрынғы өткен шақ (несвидетельное, -ған/-ген/-қан/-кен)
+
+Формула: **основа + -ған/-ген/-қан/-кен + личное окончание**
+
+**Пример жазу:**
+
+| Лицо | Форма |
+|------|-------|
+| 1SG | жазғанмын |
+| 2SG | жазғансың |
+| 2SG.HON | жазғансыз |
+| 3SG | жазған |
+| 1PL | жазғанбыз |
+| 2PL | жазғансыңдар |
+| 3PL | жазған |
+
+Эта форма часто используется как причастие прошедшего времени; в личной форме → «дистанционное» или несвидетельное прошедшее.
+
+Примеры:
+- Ол бұрын мұнда тұрған екен — «Оказывается, он раньше здесь жил».
+- Олар көп кітап оқыған — «Говорят, они прочитали много книг».
+
+#### 2.2.3. Болжалды өткен шақ (предположительное прошедшее)
+
+Использует основу -ған/-ген с модальными словами шығар, болар — «наверное, сделал».
+
+Примеры:
+- Ол келмеген шығар — «Наверное, он не пришёл».
+- Олар тапсырманы орындаған болар — «Вероятно, они выполнили задание».
+
+**Правила для MT:**
+- Русские «наверное, сделал», «скорее всего, сделал» → -ған шығар / -ған болар.
+- Для простого «сделал» без модальности → жедел өткен (-ды/-ді).
+
+---
+
+### 2.3. Будущее время
+
+#### 2.3.1. -ар/-ер/-р (общий будущий / аорист с будущим оттенком)
+
+Суффикс пересекается с аористом; в системе выделяется как форма будущего или «общего/потенциального».
+
+Типичнее для книжного/письменного стиля и как причастие будущего: оқыр кісі «человек, который будет читать».
+
+#### 2.3.2. Болжалды келер шақ (вероятностное будущее)
+
+Выражается конструкциями: **-ар + шығар / -ар + болар**.
+
+Примеры:
+- Ол ертең келер шығар — «Возможно, он придёт завтра».
+- Олар жеңер болар — «Наверное, они победят».
+
+#### 2.3.3. -мақ/-мек/-пақ/-пек/-бақ/-бек (намеренный будущий)
+
+Формула: **основа + -мақ/-мек/... + личные формы вспомогательного бол**
+
+Примеры:
+- бармақпын — «я собираюсь идти/поехать».
+- жазбақшы едім — «я намеревался написать».
+
+Используется для выражения намерения/цели.
+
+**Правила для MT:**
+- Русские «собираюсь сделать», «намерен сделать» → -мақпын / аналитические формы с ойлаймын, ниеттім.
+- Обычное «сделаю завтра» → аорист (жазамын), а не жазбақпын.
+
+---
+
+### 2.4. Отрицание: позиция и варианты
+
+Отрицательный суффикс: **-ма/-ме/-ба/-бе/-па/-пе** — добавляется после основы (и после залоговых аффиксов) и **перед** временным аффиксом.
+
+Выбор варианта:
+- гармония: задний ряд → -ма/-ба/-па; передний ряд → -ме/-бе/-пе;
+- звонкость: после гласного/звонкого → -ма/-ме/-ба/-бе; после глухого → -па/-пе.
+
+Примеры:
+- **жазбадым** — «я не писал» (жаз-ба-ды-м)
+- **көрмедім** — «я не видел» (көр-ме-ді-м)
+- **айтпаймын** — «я не скажу/не говорю» (айт-па-й-мын)
+
+Позиция с залогами: есік аш-ыл-ма-ды «дверь не открылась»: пассив -ыл сначала, потом отрицание -ма, потом прошедшее -ды.
+
+**Правила для MT:** Порядок строго: **основа + (залоги) + NEG + (тенс) + личное окончание**. Никогда не ставить NEG после времени: _жаздыма_ неверно; правильно **жазбады**.
+
+---
+
+### 2.5. Голоса (залог): каузатив, пассив, рефлексив, взаимный
+
+#### 2.5.1. Каузатив (заставлять делать)
+
+Основные суффиксы: -дыр/-дір/-тыр/-тір/-ғыз/-гіз/-қыз/-кіз и др.
+
+Примеры:
+- оқу «учиться, читать» → оқыту «обучать» (оқ-ыт-у).
+- жазу → жаздыру «заставить писать» (жаз-дыр-у).
+- жуу «мыть» → жуғызу «заставить мыть» (жу-ғыз-у).
+
+Правила выбора зависят от финального согласного основы и гармонии.
+
+#### 2.5.2. Пассив: -ыл/-іл/-л
+
+Образует форму, где субъект не выражен или выражен в творительном:
+- ашу → ашылу «открыться» (аш-ыл-у);
+- жазу → жазылу «быть написанным».
+
+Примеры:
+- Есік ашылды — «Дверь открылась / была открыта».
+- Хат жазылды — «Письмо написано».
+
+#### 2.5.3. Рефлексив: -ын/-ін/-н
+
+Действие, направленное на субъект:
+- жу → жуыну «мыться»;
+- кию → киіну «одеваться».
+
+#### 2.5.4. Взаимный: -ыс/-іс/-с
+
+Взаимное действие:
+- сөйлесу «разговаривать» (сөйл-е-с-у);
+- көрісу «видеться (друг с другом)»;
+- ұрысу «ругаться друг с другом».
+
+**Комбинирование залогов:** Суффиксы могут комбинироваться.  
+Пример: активтеу → активтелу (passive) → активтену (reflexive) → активтендіру (causative of reflexive) → активтендірілу (passive of causative of reflexive).
+
+**Правила для MT:**
+- В словаре хранить базовый залог глагола: многие глаголы лексически фиксируют залог.
+- «Заставить сделать», «дать возможность сделать», «быть сделанным», «делать друг другу» → применять соответствующие суффиксы.
+
+---
+
+## 3. Конвербы и причастия (нефинитные формы)
+
+Конвербы (көсемше) — нефинитные формы, которые в цепочках передают русские придаточные: причины, времени, условия, цели.
+
+---
+
+### 3.1. Конверб -ып/-іп/-п (последовательность/одновременность)
+
+Образование: **основа + -ып/-іп/-п** (по гармонии).
+
+Функции:
+- последовательность: «сделав X, он сделал Y»;
+- одновременность: «делая X, он делает Y».
+
+Примеры:
+- Кітапты оқып, жаттап алды — «Прочитав книгу, он выучил её».
+- Ол күліп сөйлейді — «Он говорит, смеясь».
+- Аяқтап болып, үйге кетті — «Закончив, он ушёл домой».
+
+**Правила для MT:**
+- «Когда сделал X, сделал Y» (простая последовательность) → X в форме -ып/-іп/-п.
+- При сложных многоступенчатых действиях выстраивать цепочку конвербов: киініп, шығып, автобусқа мінді.
+
+---
+
+### 3.2. Конверб -а/-е/-й (способ действия, одновременность)
+
+Образование: **основа + -а/-е/-й**
+
+Функции: способ/манера действия; значения близки к русскому деепричастию на -я.
+
+Примеры:
+- Жүгіре келді — «Подбежал бегом» (букв. «бегая, пришёл»).
+- Ойлана жауап берді — «Ответил, подумав».
+- Күле сөйлейді — «Говорит, смеясь».
+
+**Правила для MT:** Использовать для перевода русских деепричастий на -я, если действие тесно связано с основным (говоря, улыбаясь, думая).
+
+---
+
+### 3.3. Конверб -ғалы/-гелі (с тех пор как / для того чтобы)
+
+Формула: **основа + -ғалы/-гелі**
+
+Функции:
+- «с тех пор как» (с момента действия до настоящего);
+- «для того чтобы» (целевая конструкция).
+
+Примеры:
+- Көргелі бері көп уақыт өтті — «Много времени прошло с тех пор, как увидел(и)».
+- Ол оқуға түскелі, көп дайындалды — «Он много готовился к тому, чтобы поступить».
+
+**Правила для MT:** «С тех пор как» и «для того чтобы» в целевом значении → -ғалы/-гелі.
+
+---
+
+### 3.4. Конверб -ғанша/-генше (пока / до тех пор, как)
+
+Формула: **основа + -ғанша/-генше**
+
+Функции: предел действия: «пока не ...», «до тех пор, пока ...».
+
+Примеры:
+- Сен келгенше, мен күтемін — «Я буду ждать, пока ты не придёшь».
+- Жаңбыр басылғанша, үйде отырамыз — «Будем сидеть дома, пока дождь не кончится».
+
+**Правила для MT:** Русские «пока не» и «до того как» → -ғанша/-генше.
+
+---
+
+### 3.5. Конверб -са/-се (условие)
+
+Формула: **основа + -са/-се** (пересекается с условным наклонением).
+
+Функции: условие: «если».
+
+Примеры:
+- Уақытым болса, барамын — «Если будет время, я пойду».
+- Келсең, хабарлас — «Если придёшь, позвони».
+- Жаңбыр жауса, жол тайғақ болады — «Если пойдёт дождь, дорога станет скользкой».
+
+**Правила для MT:** Русское «если» (условие) → -са/-се, главное предложение в аористе/будущем. В схемах «Если бы..., то...» → комбинация -са/-се + -ар еді / -атын еді.
+
+---
+
+### 3.6. Конверб -ғанда/-генде (когда)
+
+Формула: **основа + -ғанда/-генде**
+
+Функции: временная клауза «когда ...».
+
+Примеры:
+- Сен келгенде, мен үйде боламын — «Когда ты придёшь, я буду дома».
+- Кішкентай болғанда, көп ауырдым — «Когда был маленьким, часто болел».
+- Автобус келгенде, адамдар мінді — «Когда автобус прибыл, люди сели».
+
+**Правила для MT:** Русские «когда X, Y» → X в форме -ғанда/-генде, Y в личной форме.
+
+---
+
+### 3.7. Причастия (есімше) и относительные конструкции
+
+Причастия — нефинитные формы, используемые как определения к существительным (аналог русских «который»-конструкций).
+
+**Базовые типы:**
+
+| Тип | Суффикс | Пример |
+|-----|---------|--------|
+| Прошедшее | -ған/-ген/-қан/-кен | жазған адам — «человек, который написал» |
+| Настояще-будущее длительное | -атын/-етін/-йтын/-йтін | жазатын адам — «человек, который пишет/будет писать (обычно)» |
+| Будущее (аористное) | -ар/-ер/-р | жазар адам — «человек, который напишет» |
+
+**Перевод русских «который»:**
+- «Человек, который пришёл» → келген адам (букв. «пришедший человек»).
+- «Дом, в котором он живёт» → ол тұратын үй (букв. «дом, в котором он живёт»).
+- «Книга, которую я вчера купил» → кеше сатып алған кітабым.
+
+**Правила для MT:**
+- Русские относительные предложения с «который» → модель: [причастный оборот + определяемое существительное], **не использовать отдельное слово «который»**.
+- Определять вид причастия по виду и времени русского:
+  - прошедшее совершенное «который сделал» → -ған/-ген;
+  - регулярное/настоящее «который делает» → -атын/-етін;
+  - будущее «который сделает» → -ар/-ер.
+
+---
+
+### 3.8. Базовые синтаксические паттерны RU→KK через конвербы
+
+**«Когда X, (то) Y»**
+> Когда он пришёл, мы начали урок.  
+> → Ол келгенде, біз сабақты бастадық.
+
+**«Если X, то Y»**
+> Если пойдёт дождь, мы останемся дома.  
+> → Жаңбыр жауса, біз үйде қаламыз.
+
+**«Сделав X, он сделал Y» (после того как)**
+> Прочитав книгу, он написал отчёт.  
+> → Кітапты оқып, ол есеп жазды.
+
+**«Чтобы X, он сделал Y» (цель)**
+> Чтобы сдать экзамен, он много занимался.  
+> → Емтиханды тапсыру үшін, ол көп дайындалды.
+
+**«Пока X, Y»**
+> Пока он читал, дети играли.  
+> → Ол оқып жатқанда, балалар ойнады.
+
+**«Человек, который делает X» (причастие как определение)**
+> Человек, который пишет статью → мақала жазып жатқан адам.  
+> Студент, который прочитал книгу → кітапты оқыған студент.
+
+**Правила для MT:**
+- Русские придаточные времени/условия/цели/причины по возможности сводить к конвербным конструкциям.
+- Всегда проверять, можно ли «вытащить» придаточное влево и сделать цепочку глаголов с конвербами (SOV-порядок).
+
+---
+
+# Часть II. Социолингвистика и диалектология
+
+---
+
+## 4. Диалекты и региональные вариации
+
+### 4.1. Трёхдиалектная классификация
+
+Каноническая академическая классификация, установленная лингвистом Сарсеном Аманжоловым (1959), делит казахский язык на **три основных диалектных области**:
+
+| Диалект | Историческая основа | Основные регионы | Ключевые города |
+|---------|--------------------|-----------------|-----------------| 
+| **Северо-восточный** | Орта жүз (Средний жуз) | Акмола, Костанай, Карагандинская, Павлодар, ВКО | Астана, Қарағанды, Семей, Өскемен, Павлодар |
+| **Южный** | Ұлы жүз (Старший жуз) | Алматы, Жамбыл, Южный Казахстан, Қызылорда, Тараз | Алматы, Шымкент, Тараз, Түркістан |
+| **Западный** | Кіші жүз (Младший жуз) | Атырау, Маңғыстау, Актобе, ЗКО | Ақтау, Атырау, Орал, Ақтөбе |
+
+Альтернативная двучастная классификация (Досқараев, 1954) группирует их в **юго-восточный** и **северо-западный** диалектные семейства.
+
+**Критический факт для MT:** **Северо-восточный диалект** является основой стандартного литературного казахского языка. Из-за масштабной внутренней миграции в Алматы и Астану традиционные диалекты этих городов больше не репрезентативны — городская речь сильно смешана с влиянием русского.
+
+### 4.2. Фонологические различия по диалектам
+
+| Черта | Северо-восточный (стандарт) | Южный | Западный |
+|-------|----------------------------|-------|----------|
+| Ш/Ч | ш [ʃ] | ч [tʃ] вместо ш (влияние кыргызского) | стандартное ш |
+| Открытость гласных | Более закрытые | Более открытые (влияние узбекского) | Широко открытые |
+| Интонация | Ровная | Мягкая, мелодичная | Очень открытая, чёткая |
+| Влияние русского | Высокое (городское) | Умеренное | Умеренное |
+
+Жители Атырау (Западный) часто cited как имеющие наиболее «открытое» произношение. Алматинцы (Южный) — как имеющие ритм под влиянием русского. Восточные казахи используют звуки ч/дж вместо ш/ж.
+
+### 4.3. Лексические различия по регионам
+
+| Стандарт | Южный (Алматы/Шымкент) | Западный | Значение |
+|---------|----------------------|---------|---------|
+| пияз | жуа | жуа | лук |
+| тате (тётя, стандарт) | апше | — | тётя |
+| ағa (старший мужчина) | көке | — | дядя/старший мужчина |
+| Не хабар? | — | Не хайар? | Как дела/что слышно? |
+| Сау болыңыз | — | Сай бош | До свидания |
+| Немене? | — | Не зат? | Что? |
+
+### 4.4. Морфологические и синтаксические диалектные особенности
+
+Диалектные различия в правилах сингармонизма — основное морфологическое различие между диалектами. Правила выбора суффикса множественного числа (тырнақтар vs тырнақлар в старых формах) расходятся между диалектами. Стандартный литературный язык последовательно использует формы, управляемые сингармонизмом.
+
+**Для MT:** Диалектные формы маловероятны в обучающих корпусах (которые смещены в сторону литературного/журналистского). Риск — в направлении вывода: система может производить стандартные формы, звучащие неестественно для региональных носителей. Ориентация на северо-восточный стандарт подходит для официального/письменного вывода.
+
+### 4.5. Казахский диаспоры
+
+Казахский в Китае и Монголии в основном относится к северо-восточной диалектной группе с дополнительными местными особенностями. Казахская диаспора в Турции использует алфавит на основе латиницы и демонстрирует турецкое лексическое влияние.
+
+**Правила для MT:** Целевой диалект для системы — северо-восточный стандарт (Астана/литературный). Диалектные входные данные обрабатывать по стандарту.
+
+---
+
+## 5. Историческая эволюция казахского языка
+
+### 5.1. Хронология письменностей
+
+Казахский прошёл через четыре крупные смены письменности:
+
+| Период | Письменность | Примечание |
+|--------|-------------|-----------|
+| До X в. | Старотюркская (руническая) | Орхоно-Енисейские надписи |
+| ~X в. – 1929 | Арабская (персо-арабская) | Модифицирована Ахметом Байтурсыновым в 1924 г. |
+| 1929–1940 | Латиница (Яналиф) | Советская единая тюркская латиница |
+| 1940 – наст. вр. | Кириллица | 42 буквы; принята Сарсеном Аманжоловым в 1940 г. |
+| 2017 – текущий | Новая латиница (переход) | Указ Назарбаева 2017; дедлайн перенесён с 2025 на 2031; вариант 2021 г. используется в образовании |
+
+**Ситуация 2026:** Казахстан по-прежнему использует кириллицу для официальных документов, СМИ и большинства публичных коммуникаций. Латиница вводится в школах и некоторых официальных контекстах, но массового перехода не произошло.
+
+**Ключевое следствие для MT:** Қазтілші должен выводить кириллицу как основной скрипт. Настоятельно рекомендуется реализация модуля транслитерации кириллица↔латиница.
+
+### 5.2. Досоветский период (до 1920-х)
+
+- Богатая устная традиция (акыны, жыршы)
+- Письменный казахский на арабской графике — в основном для религиозных/учёных целей
+- **Абай Қунанбайұлы** (1845–1904) — основоположник казахской литературы; его произведения определяют классический литературный регистр
+- **Ибрагим Алтынсарин** (1841–1889) — первая попытка использования кириллицы для педагогических целей
+- Тяжёлое влияние персидских и арабских заимствований в образованном/религиозном регистре
+
+### 5.3. Советский период (1920-е–1991): языковое воздействие
+
+**Позитивные структурные эффекты:**
+- Стандартизация литературного казахского на основе северо-восточного диалекта
+- Разработка письменных норм, орфографии, грамматических описаний
+- Создание технической, научной и административной лексики
+- Рост грамотности
+
+**Негативные/искажающие эффекты:**
+
+1. **Массовые русские заимствования:** технология, наука, политика, повседневная жизнь затоплены русскими терминами.
+2. **Синтаксический сдвиг:** традиционный порядок SOV был под влиянием русского SVO.
+3. **Калькирование:** русские идиомы дословно переведены в казахский, создавая нетипичные паттерны.
+4. **«Аударма қазақша»** (переводной казахский): казахский с русскими моделями мышления, закодированными в казахские поверхностные формы.
+
+**Исследовательский вывод:** Советская литературная лексика **более традиционна и нормативна**, чем постнезависимая. В советское время большинство казахоязычных жили сельски и сохраняли нативные языковые паттерны.
+
+### 5.4. Период независимости (1991–настоящее)
+
+| Год | Событие |
+|-----|---------|
+| 1989 | Первый Закон о языках; казахский становится государственным языком Казахской ССР |
+| 1995 | Конституция; Статья 7: казахский — государственный, русский — официальный |
+| 1997 | Закон о языках (Тіл туралы заң); создание Termincom |
+| 2007 | Концепция трилингвизма (казахский/русский/английский) |
+| 2017 | Указ о переходе на латиницу к 2025 |
+| 2021 | Дедлайн перенесён на 2031; утверждён пересмотренный алфавит |
+| 2023 | Концепция развития языковой политики 2023–2029 |
+| 2024 | Языковой тест для натурализации; мандат: 55% казахского контента на ТВ/радио к 2025 |
+| 2025 | Поправки к Закону о языках (январь 2025) |
+| 2026 | Конституционная ревизия: русский описывается как используемый «наряду с» (не «на равных») казахским |
+
+**Правила для MT:** Отслеживать оба варианта Нур-Султан/Астана (город был Нур-Султан в 2019–2022, теперь снова Астана). Знать оба варианта русифицированных и казахских имён собственных.
+
+### 5.5. Движение за языковое очищение
+
+**Механизм:** Терминологическая комиссия (Termincom.kz) утвердила **35 680 терминов с 1971 г.**. База данных Termincom.kz содержит **383 534 единицы терминологии** (по состоянию на 2022 г.).
+
+**Примеры пар очищения:**
+
+| Русский/международный заём | Предлагаемый казахский аналог | Статус принятия |
+|---------------------------|------------------------------|----------------|
+| телефон | байланыс/сымтелефон | телефон доминирует в речи |
+| магазин | дүкен | дүкен широко принят |
+| компьютер | дербес компьютер/есептеуіш | компьютер доминирует |
+| проблема | мәселе | мәселе используется в формальном письменном |
+| водка | арақ | арақ используется в казахских контекстах |
+
+**Правила для MT:** Использовать казахские эквиваленты Termincom для официальных/юридических документов; принятые заимствования допустимы в разговорном/СМИ регистре.
+
+---
+
+## 6. Современный vs литературный казахский
+
+### 6.1. Разрыв литературный/разговорный
+
+**Литературный (ádebí) казахский:**
+- Строгое соответствие северо-восточному диалекту как кодифицированному стандарту
+- Полное произношение всех букв и морфем
+- Формальная лексика по рекомендациям Termincom
+- Строгий порядок SOV
+- Отсутствие русских заимствований (в идеале)
+
+**Разговорный/устный казахский:**
+- Интенсивные лексические заимствования из русского (особенно в городах)
+- Переключение кодов (см. 6.2)
+- Упрощённая морфофонология (выпадение слогов, элизия)
+- Нестандартный порядок слов под влиянием русского
+- Региональная/диалектная лексика
+
+**Ключевое наблюдение для MT:** Дубляж и формальные казахские СМИ воспринимаются как скованные и неестественные носителями (Reddit/Kazakhstan, февраль 2025). Стиль «каждая буква произносится, медленный темп, формальная лексика» трудно воспринимается. Это создаёт проблему качества — лингвистически правильный вывод может казаться искусственным.
+
+### 6.2. Паттерны переключения кодов (Қазіргі тіл)
+
+Казахско-русское переключение кодов (**шала қазақ** — «полуказахский») — доминирующий режим общения для городских казахов.
+
+**Данные опросов** (2021 и 2024, n=100 образованных респондентов 21–40 лет):
+- 75–77% респондентов признают смешение казахского и русского
+- 54–67% наблюдают смешение у других
+- **Причины переключения:** «привычка и удобство» (32%), «не знаю слова на целевом языке» (31%)
+
+**Типы переключения кодов:**
+
+| Тип | Описание | Пример |
+|-----|---------|--------|
+| Внутрипредложенческое | Русские слова внутри казахской грамматической структуры | Казахский каркас + русская лексика |
+| Межпредложенческое | Целое предложение по-русски в казахском дискурсе | Чередование полных предложений |
+| Тег-переключение | Русские дискурсивные маркеры/интerjections | «короче,» «то есть,» «вот» в казахской речи |
+
+**Правила для MT:** «Шала қазақ» не является дефицитом — это социальный идентификатор. При вводе с переключением кодов: выявлять казахские слова в русском источнике и пропускать без повторного перевода.
+
+### 6.3. Регистры: СМИ vs академический vs юридический
+
+| Регистр | Характеристики | Проблемы MT |
+|---------|---------------|-------------|
+| **Юридический** | Высшая формальность; лексика Termincom; пассивные конструкции | Плотные именные группы с падежными маркировками; специализированная лексика |
+| **Академический** | Сильное русское влияние в научной терминологии; кальки | Множество конкурирующих казахских аналогов |
+| **Новости/СМИ** | Смешанный формально/неформальный | Именованные объекты; транслитерация иностранных имён |
+| **Художественная литература** | Ближе всего к традиционному литературному стандарту | Идиомы; культурно-специфичная лексика; архаизмы |
+| **Социальные медиа/разговорный** | Интенсивное переключение кодов; смешение скриптов | Нестандартная морфология; интернет-сленг |
+
+### 6.4. Молодёжный сленг и современные заимствования
+
+**Из русского:**
+- тусовка «вечеринка/тусовка», бабки «деньги», нормально «нормально»
+
+**Из английского (интернет):**
+- бро, фейк, лол/LOL, хайп, мем, лайкату «лайкать», свайпату «свайпать»
+
+**Особенность:** Казахские глагольные суффиксы применяются к английским основам: лайкату, свайпату — продуктивная морфологическая адаптация заимствований.
+
+---
+
+# Часть III. Ключевые лингвистические особенности, проблемные для MT
+
+---
+
+## 7. Система падежей (7 падежей)
+
+Казахский имеет **7 падежей**, все маркированы суффиксами с многочисленными алломорфами. Это основной источник ошибок MT.
+
+| Падеж | Казахское название | Суффиксы | Основные функции |
+|-------|-------------------|----------|-----------------|
+| **Именительный** | Атаý септік | — (немаркированный) | Подлежащее; *также* неопределённое прямое дополнение |
+| **Винительный** | Табыс септік | -ты/-ті, -ны/-ні, -н, -ды/-ді | *Только* определённое прямое дополнение |
+| **Родительный** | Ілік септік | -ның/-нің, -дың/-дің, -тың/-тің | Принадлежность (требует притяжат. суффикса на главном слове) |
+| **Дательный** | Барыс септік | -ға/-ге, -қа/-ке, -(н)а/-(н)е | Косвенное дополнение; направление; длительность |
+| **Исходный** | Шығыс септік | -дан/-ден, -тан/-тен, -нан/-нен | Источник; разделительный; сравнение |
+| **Местный** | Жатыс септік | -да/-де, -та/-те, -нда/-нде | Местонахождение; временной; клаузы «когда» с причастиями |
+| **Творительный** | Көмектес септік | -мен/-бен/-пен | Инструмент/средство; «с» (комитатив) |
+
+**Критическая ошибка MT: различие именительный–винительный**
+
+Русский и английский маркируют прямые дополнения последовательно. Казахский маркирует прямые дополнения винительным **только при определённости**. Неопределённые прямые дополнения остаются в именительном. MT-системы на базе RU→KK ошибочно применяют винительный к неопределённым дополнениям:
+
+- ✓ Правильно: Азамат **қалам** сатып алды (купил **ручку** — именительный, неопределённое)
+- ✓ Правильно: Азамат **қаламды** сатып алды (купил **ту ручку** — винительный, определённое)
+- ✗ Ошибка MT: Азамат **қаламды** сатып алды, когда источник говорит «a pen»
+
+**Алломорфия суффикса дательного** (пример с 8 поверхностными формами):
+
+Суффикс дательного -ға/-ге имеет 8 алломорфов в зависимости от финальной фонемы основы: -ға, -ге, -қа, -ке, -на, -не, -а, -е.
+
+**Правила для MT:** Хранить полные таблицы алломорфов для каждого падежа. Обязательно различать определённое и неопределённое прямое дополнение в источнике.
+
+---
+
+## 8. Сингармонизм: исключения и граничные случаи
+
+Казахский имеет **систему гармонии по ряду** с 9+ фонемными гласными. Базовое правило: суффиксы согласуются по ряду с корневой гласной.
+
+**Системные исключения:**
+
+1. **Русские заимствования** не следуют сингармонизму: компьютер (передние гласные) + дательный = компьютерге ✓ (не компьютерқа).
+
+2. **Суффикс комитатива** -мен/-пен/-бен: всегда реализуется с передними гласными независимо от ряда корня.
+
+3. **Суффикс инфинитива** -у/-ю: фонетически варьируется, но морфологически нейтрален в некоторых контекстах.
+
+4. **Суффикс -ген**: с передними гласными независимо от корня; блокирует гармонию для последующих суффиксов.
+
+5. **Губная гармония**: присутствует в устном/разговорном казахском, но **не** в письменном стандарте.
+
+6. **Международные технические термины**: вариативное применение гармонии; носители часто применяют гармонию родного языка к иностранным основам.
+
+**Ключевое следствие для MT:** Система без знания о заимствованных основах будет применять неправильные варианты гармонии. Плотность токенов-заимствований ~18% (данные KazMorphCorpus-2025) — примерно 1 из 5–6 токенов требует специальной обработки.
+
+**Правила для MT:** Вести список заимствованных основ с маркировкой типа гармонии. Для русских заимствований ориентироваться на последнюю гласную основы.
+
+---
+
+## 9. Глагольные формы без эквивалентов в русском/английском
+
+**Настоящие/аспектуальные формы:**
+- **Ауыспалы осы шақ** (привычное настоящее): балық жүзеді «рыбы плавают» (общие/привычные факты)
+- **Нақ осы шақ** (прогрессивное): ол жазып отыр «он пишет» (с вспом. глаголом позиции)
+- **Жедел өткен шақ** (простое прошедшее): баттым (наблюдаемое, завершённое)
+- **Бұрынғы өткен шақ** (дистанционное прошедшее): барыпты (услышанное/пересказное)
+
+**Формы будущего (3 типа):**
+- **Болжалды келер шақ**: «Возможно, придёт» (модальный оттенок)
+- **Мақсатты келер шақ**: «Намеревался» (целевой)
+- **Ауыспалы келер шақ**: «Сделал бы» (будущее-в-прошедшем)
+
+**Конвербная система** (особенно сложная для MT):
+
+| Конверб | Суффикс | Значение | Пример |
+|---------|---------|---------|--------|
+| Последовательный | -(I)p | «и затем»; длительный с вспом. | оқып жатыр = «читает (в процессе)» |
+| Одновременный/манера | -а/-е/-й | «делая»; непрерывный | жүре отыр = «сидит, идя» |
+| Целевой | -ғалы/-гелі | «для того чтобы» | оқығалы келді = «пришёл, чтобы учиться» |
+| Способность | -а алу | «может/быть способным» | сөйлей алады = «может говорить» |
+| Почти-промах | -а жаздау | «чуть не сделал» | адаса жазды = «чуть не заблудился» |
+| Попытка/польза | -(I)p алу | «сделал для себя» | тауып алды = «нашёл (для себя)» |
+
+**Паттерн ошибки RU/EN→KK:** Комбинации конверб-вспомогательный коллапсируются до простого прошедшего или настоящего. Тонкость «сделал для себя», «почти», «делая», «для того чтобы» систематически теряется.
+
+**Правила для MT:** Хранить отдельные правила для каждого типа конверба. Не упрощать аспектуальные различия до простых форм.
+
+---
+
+## 10. Система вежливости (сіздеу/сендеу)
+
+Казахский имеет **T-V различие** (как французское tu/vous):
+
+| Форма | Местоимение (ном.) | Контекст использования |
+|-------|--------------------|----------------------|
+| **Неформальная (сендеу)** | сен | Ровесники, младшие, близкие друзья, дети |
+| **Формальная (сіздеу)** | сіз | Старшие, начальники, незнакомые, формальные контексты |
+
+**Полная падежная парадигма:**
+
+| Падеж | сен (неформальный) | сіз (формальный) |
+|-------|-------------------|-----------------|
+| Именительный | сен | сіз |
+| Родительный | сенің | сіздің |
+| Дательный | саған | сізге |
+| Винительный | сені | сізді |
+| Местный | сенде | сізде |
+| Исходный | сенен | сізден |
+| Творительный | сенімен | сізбен |
+
+**Различие притяжательных форм:**
+- Неформальный 2SG притяжательный: -ың/-ің (кітабың «твоя книга»)
+- Формальный 2SG притяжательный: -ыңыз/-іңіз (кітабыңыз «Ваша книга»)
+
+**Ошибка MT:** Русский и английский используют формальное «вы/you» и в вежливом единственном, и во множественном. Казахский различает их. При переводе русского «Вы» или английского «you» MT должна определить:
+1. Единственное или множественное?
+2. Если единственное, формальный или неформальный социальный контекст?
+
+MT-системы по умолчанию используют формальный сіз для русского вы (правильно), но ошибаются на:
+- Разговорных текстах, где русское ты должно отображаться в сен
+- Групповых контекстах (нужно сендер/сіздер)
+- Документах со смешанными регистрами
+
+**Обращения за пределами местоимений:**
+- **Ағай** (aqay): Уважительное обращение к старшему мужчине — там, где русский скажет «Владимир Иванович»
+- **Апай** (apay): То же для женщин
+- **Мырза**: Формальное «Мистер» (из персидского)
+- **Ханым**: Формальное «Миссис/Мисс»
+- **Азамат**: «Гражданин» (советская эпоха, всё ещё используется)
+
+**Правила для MT:** Определять уровень формальности входного текста. Последовательно применять сіз ИЛИ сен по всему документу. Не смешивать формальный/неформальный адрес в одном переводе.
+
+---
+
+## 11. Порядок слов SOV и реструктурирование предложения
+
+Казахский — **строго SOV (Подлежащее-Объект-Сказуемое)**. Для сравнения:
+- Русский: SVO (гибкий, но по умолчанию SVO)
+- Английский: SVO (жёсткий)
+
+Для MT из русского/английского глагол должен быть перемещён из второй позиции в конечную, и вся аргументная структура реорганизована.
+
+**Дополнительная сложность:**
+- Модификаторы (прилагательные, придаточные, притяжатели) **предшествуют** своим главным словам в казахском — противоположно английскому «the man who came» vs казахскому **келген** адам
+- Послелоги заменяют предлоги: «в городе» = қалада (город-LOC), «из города» = қаладан (город-ABL)
+- Подчинительные клаузы нефинитны и предшествуют сказуемому главной клаузы
+
+**Следствие для MT:** Механизмы внимания в нейронном MT испытывают трудности с дальними перестановками при фундаментально различающемся выравнивании слов источник-цель.
+
+**Правила для MT:**
+- Верифицировать, что сказуемое находится в конце клаузы
+- Верифицировать, что модификаторы предшествуют главным словам
+- Относительные клаузы должны предшествовать своим главным словам (конструкция причастия)
+- Не использовать отдельное слово «который» — использовать причастные конструкции
+
+---
+
+## 12. Числа, даты и форматы
+
+### 12.1. Формат дат
+
+- Краткий: `гггг.дд.мм` (напр., 2026.31.03)
+- Длинный формат: `гггг ж. д ММММ` (напр., **2026 ж. 31 наурыз**)
+
+**Названия месяцев в казахском** (не заимствованы из русского):
+
+| # | Казахское | Значение |
+|---|-----------|---------|
+| 1 | Қаңтар | Январь |
+| 2 | Ақпан | Февраль |
+| 3 | Наурыз | Март |
+| 4 | Сәуір | Апрель |
+| 5 | Мамыр | Май |
+| 6 | Маусым | Июнь |
+| 7 | Шілде | Июль |
+| 8 | Тамыз | Август |
+| 9 | Қыркүйек | Сентябрь |
+| 10 | Қазан | Октябрь |
+| 11 | Қараша | Ноябрь |
+| 12 | Желтоқсан | Декабрь |
+
+**Маркер локализации:** При записи дат год требует постчастицы **«ж.»** (сокращение от **жыл** = год): «2026 ж.», а не просто «2026».
+
+### 12.2. Валюта и числа
+
+Тенге = **теңге** (тг). Форматирование сумм: **1 500 000 теңге** (пробел как разделитель тысяч в казахском формате).
+
+**Порядковые числительные:** -ыншы/-інші добавляется к количественным: **бірінші** (1-й), **екінші** (2-й).
+
+**Правила для MT:**
+- Русское «первый» может отображаться в **бірінші** (порядковое) или **бір** (количественное) — требует проверки контекста.
+- Всегда добавлять «ж.» после года при датировке.
+- При числительном >1 — существительное в единственном числе (см. §1.2.6).
+
+---
+
+## 13. Идиомы и фразеологизмы
+
+Казахские идиомы (мақал-мәтел) глубоко укоренены в кочевой пастбищной культуре и сопротивляются буквальному переводу.
+
+**Идиомы кочевого/пастбищного происхождения:**
+
+| Казахская идиома | Буквальный перевод | Реальное значение |
+|-----------------|-------------------|------------------|
+| Жүрегі тас төбесіне шығу | «Сердце выходит на вершину камня/головы» | Быть очень напуганным |
+| Айызы қану | «Жажда утолена» | Быть чрезвычайно счастливым/удовлетворённым |
+| Қанжығасына жеңісті байлау | «Привязать победу к переметной суме» | Одержать победу/добиться успеха |
+| Зығырданын қайнату | «Кипятить его льняное масло» | Сильно раздражать кого-то |
+| Аузына құм құйылды | «В его рот насыпали песок» | Потерял способность говорить/онемел от шока |
+| Бетті бері қарау | «Лицо повернулось сюда» | Поправиться/выздоравливать |
+| Жерден алып жерге салу | «Взят с земли и возвращён на землю» | Жёстко критиковать/оскорблять |
+| Пора порасы шыққанша жылау | «Плакать, пока поры не откроются» | Плакать безудержно |
+| Үзеңгілес | «Тот, кто делит стремя» | Близкий товарищ/соратник (военного происхождения) |
+
+**Пословицы без прямого эквивалента:**
+- **Токсан ауыз сөздің тобықтай түйіні** — «Суть девяноста слов с грецкий орех» — краткость — сестра таланта
+- **Жеті рет өлшеп, бір рет кес** — «Семь раз отмерь, один раз отрежь» (прямое соответствие с русским)
+
+**Правила для MT:**
+- Выявлять фиксированные выражения через n-граммное сопоставление с лексиконом фразем
+- Не переводить компонент за компонентом
+- Предоставлять культурный эквивалент из фразеологического словаря Sozdikqor.kz
+
+---
+
+## 14. Типичные ошибки MT: разбор примеров
+
+### 14.1. Ошибки в именном словоизменении
+
+| # | Источник (RU) | Ошибочный вывод | Правильный вывод | Тип ошибки |
+|---|--------------|----------------|-----------------|------------|
+| 1 | Я видел его ребёнка | Мен оның бала көрдім | Мен оның баласын көрдім | Не добавлен притяж. + винительный |
+| 2 | в нашей школе | біздің мектепта | біздің мектепте | Неверная гармония |
+| 3 | с друзьями | дослармен | достармен | Неверный суффикс мн. (-лар вместо -тар) |
+| 4 | пять детей | бес балалар | бес бала | Лишний мн.ч. после числительного |
+| 5 | в его книге | оның кітапында | оның кітабында | Ошибка после 3SG POSS |
+
+### 14.2. Ошибки в глагольной системе
+
+| # | Источник (RU) | Ошибочный вывод | Правильный вывод | Тип ошибки |
+|---|--------------|----------------|-----------------|------------|
+| 1 | Он сейчас читает | Ол оқиды | Ол оқып жатыр | Нет прогрессивной конструкции |
+| 2 | Говорят, он уехал | Ол кетті | Ол кеткен (екен) | Пересказное прошедшее заменено свидетельным |
+| 3 | Если придёт — позвони | Ол келсе — соңдапқол | Ол келсе, хабарлас | Неверная форма условного |
+| 4 | Наверное, не придёт | Ол келмейді | Ол келмеген шығар | Нет болжалды формы |
+| 5 | Дверь не открылась | Есік ашылмады (правильно) | (иногда: Есік ашыладыма) | Порядок: NEG ставится перед временем |
+
+### 14.3. Ошибки в конвербных конструкциях
+
+| # | Источник (RU) | Ошибочный вывод | Правильный вывод | Тип ошибки |
+|---|--------------|----------------|-----------------|------------|
+| 1 | Прочитав книгу, написал | Кітапты оқыды, жазды | Кітапты оқып, жазды | Нет конверба -ып для последовательности |
+| 2 | Человек, который пришёл | Адам, ол келді | Келген адам | Использовано придаточное вместо причастия |
+| 3 | Пока не придёт | Ол келмейінше | Ол келгенше | Неверный конверб |
+
+**Правила для MT (общие):**
+- Хранить два набора падежных аффиксов: стандартный и «после 3SG POSS»
+- NEG всегда перед тенсовым аффиксом, после залоговых
+- «Который» → причастный оборот, никогда не отдельное слово
+- Прогрессивное → -ып/-іп + жатыр/отыр/жүр/тұр (не аорист)
+- Пересказное → -ған (екен), свидетельное → -ды/-ді
+
+---
+
+# Часть IV. Академические ресурсы и инструменты
+
+---
+
+## 15. Корпуса и параллельные данные
+
+### 15.1. KazParC
+
+**KazParC** — наиболее ценный имеющийся параллельный корпус:
+- 371 902 предложения, переведённые людьми
+- 4 домена: юридический (20.8% строк, 41% токенов), новости (32.4%), общий (25.5%), образование/наука (12.4%), художественная литература (8.9%)
+- Связан с системой MT Tilmash (ISSAI)
+- Источник: https://aclanthology.org/2024.lrec-main.842/
+
+### 15.2. Qazcorpora.kz
+
+- 43M+ токенов монолингвального казахского
+- Хорошее покрытие доменов
+- https://qazcorpora.kz
+
+### 15.3. MDBKD
+
+- 24.8M текстов; хорошее покрытие доменов
+
+### 15.4. Показатели качества MT на стандартных бенчмарках
+
+BLEU по набору тестов FLoRes (Tilmash vs Google vs Yandex):
+
+| Направление | Tilmash | Google | Yandex |
+|------------|---------|--------|--------|
 | EN→KK | 0.56 | 0.60 | 0.20 |
 | RU→KK | 0.52 | 0.53 | 0.13 |
 | KK→EN | 0.62 | 0.62 | 0.31 |
 | KK→RU | 0.51 | 0.52 | 0.18 |
 
-**Key insight:** Google Translate performs best on EN→KK FLoRes (0.60) but Tilmash matches or exceeds Google on KazParC test set (which reflects domain-appropriate content). RU→KK is consistently harder than EN→KK across all systems, and Tilmash shows particular strength in the KazParC legal domain.
+**Ключевое понимание:** RU→KK последовательно сложнее, чем EN→KK во всех системах. BLEU существенно недооценивает качество казахского MT из-за агглютинации — рекомендуется ChrF и COMET.
 
 ---
 
-## 6. Cultural and Pragmatic Considerations
+## 16. Инструменты NLP и анализаторы
 
-### 6.1 Formal vs Informal Register Rules
+### 16.1. Apertium-kaz
 
-**Register selection triggers:**
+- URL: https://github.com/apertium/apertium-kaz
+- Морфологический анализатор/генератор на основе FST правил и CG-теггер
+- Файлы: `kaz.lexc` (словарь), `kaz.twol` (морфофонологические правила)
+- Активно поддерживается; основа для многих казахских NLP-инструментов
 
-| Context | Register | Pronoun | Notes |
-|---|---|---|---|
-| Legal/government documents | Formal | Сіз | Mandatory formal; passive voice preferred |
-| Official correspondence | Formal | Сіз | Full Termincom vocabulary |
-| Academic writing | Formal | Сіз (if addressing) | May use impersonal constructions |
-| News media | Semi-formal | — | Mix; Termincom terms but natural syntax |
-| Customer service | Formal | Сіз | Business standard |
-| Social media | Informal | Сен or ambiguous | Heavy code-switching |
-| Literature/fiction | Variable | Character-dependent | Historical literature uses archaic forms |
-| Spoken interaction | Variable | Age/status dependent | See honorifics §4.5 |
+### 16.2. KazNLP
 
-**Address forms beyond pronouns:**
+- URL: https://github.com/makazhan/kaznlp
+- Открытый инструментарий: токенизатор, детектор языка, морфологический анализатор, теггер
 
-- **Ағай** (aqay): Respectful address for older male teacher, colleague, or respected person — used where Russian would say "Владимир Иванович" or "уважаемый"
-- **Апай** (apay): Same function for women
-- **Мырза**: Formal "Mr." (from Persian; used in formal titles)
-- **Ханым**: "Mrs./Ms." (formal)
-- **Азамат**: "Citizen" (Soviet-era formal address still used)
-- **Жолдас**: "Comrade" (Soviet era; now dated but occasionally ironic)
+### 16.3. Гибридная система FST+CRF+KazRoBERTa (Байтенова и др., 2025)
 
-### 6.2 Loanwords: When to Use Kazakh Equivalents vs Accepted Loans
+- Точность 90.8%, F1=0.907
+- Трёхэтапный конвейер: FST → CRF дисамбигуация → KazRoBERTa нейронное уточнение
+- Квантизированная версия: 1.5GB памяти, 1060 токенов/сек
+- Источник: https://pmc.ncbi.nlm.nih.gov/articles/PMC12741073/
 
-This is a contested area requiring nuanced MT policy. The following framework reflects current usage patterns:
+### 16.4. KazMorphCorpus-2025: ключевые метрики ошибок
 
-**Use Kazakh Termincom equivalents when:**
-- Output is for official government documents
-- Domain is legal, administrative, legislative
-- Target audience is formal/institutional
-- Topic is covered by published Termincom terms
+- **Ошибки в границах сегментов:** 31.5% расхождений при морфологическом анализе
+- **Неверная классификация цепочек аффиксов:** 34.0% расхождений
+- **Ошибки заимствований:** 14.9% (применение казахских морфологических правил к иностранным основам)
+- Плотность токенов-заимствований: ~18%
 
-**Retain Russian/international loanwords when:**
-- Source text is colloquial or informal
-- Term is deeply embedded (no widely-recognized Kazakh equivalent)
-- Technical/scientific term where international form aids precision
-- Named entities (brand names, product names, institutions)
+---
 
-**Practical examples:**
+## 17. Официальные языковые ресурсы
 
-| Domain | Loanword form | Kazakh equivalent | MT recommendation |
-|---|---|---|---|
-| Legal | — | заң (law), сот (court) | Use Kazakh forms (well-established) |
-| Technology | компьютер | дербес компьютер/есептеуіш | компьютер in general; official docs use Termincom |
-| Medical | диагноз, операция | — (no established alternatives) | Use international forms |
-| Administration | министрлік | — | Казakhized borrowing acceptable |
-| Transport | автобус, поезд | — | No Kazakh alternatives established |
-| Modern tech | смартфон, интернет | — | International forms dominant |
+| Ресурс | URL | Описание |
+|--------|-----|---------|
+| **Termincom.kz** | https://termincom.kz | 383 534 терминологических единиц; авторитетный источник официальной казахской технической лексики |
+| **Sozdikqor.kz** | https://sozdikqor.kz | 400 000+ слов; 60+ отраслевых словарей; API в Telegram |
+| **Emle.kz** | https://emle.kz | Орфографическая электронная база данных |
+| **Qazgramma.kz** | https://qazgramma.kz | Грамматический справочник |
+| **Qazlatyn.kz** | https://qazlatyn.kz | Ресурсы латинского алфавита |
+| **Atau.kz** | https://atau.kz | Ономастика (имена/места) |
 
-### 6.3 "Қазақстандық" vs "Қазақ" — Identity and Sensitivity
+**Институт языкознания Байтурсынова** — главный академический орган по казахской лингвистике; координирует рабочие группы по переходу скриптов; создал текущий (2021) латинский алфавит.
 
-This is arguably the most culturally sensitive terminological distinction for MT systems serving Kazakhstan:
+---
+
+# Часть V. Культурные и прагматические аспекты
+
+---
+
+## 18. Реестры и формальность
+
+### 18.1. Правила выбора регистра
+
+| Контекст | Регистр | Местоимение | Примечание |
+|---------|---------|-------------|-----------|
+| Юридические/государственные документы | Формальный | Сіз | Обязателен; предпочтителен пассивный залог |
+| Официальная переписка | Формальный | Сіз | Полная лексика Termincom |
+| Академическое письмо | Формальный | Сіз (при обращении) | Возможны безличные конструкции |
+| Новости/СМИ | Полуформальный | — | Смешанный; термины Termincom, но естественный синтаксис |
+| Обслуживание клиентов | Формальный | Сіз | Бизнес-стандарт |
+| Социальные медиа | Неформальный | Сен или неопределённый | Интенсивное переключение кодов |
+| Художественная литература | Переменный | Зависит от персонажа | Исторические тексты используют архаичные формы |
+| Устное взаимодействие | Переменный | Зависит от возраста/статуса | см. §10 |
+
+### 18.2. Формы обращения
+
+- **Ағай** (aqay): Уважительное обращение к старшему мужчине-учителю, коллеге — там, где русский скажет «Владимир Иванович»
+- **Апай** (apay): То же для женщин
+- **Мырза**: Формальное «Мистер» (из персидского; используется в официальных титулах)
+- **Ханым**: «Миссис/Мисс» (формальное)
+- **Азамат**: «Гражданин» (советская эпоха; всё ещё используется)
+- **Жолдас**: «Товарищ» (советская эпоха; теперь устарело, иногда ироничное)
+
+---
+
+## 19. Заимствования: когда использовать казахские эквиваленты
+
+**Использовать казахские эквиваленты Termincom, когда:**
+- Вывод предназначен для официальных государственных документов
+- Домен юридический, административный, законодательный
+- Тема охвачена опубликованными терминами Termincom
+
+**Сохранять русские/международные заимствования, когда:**
+- Исходный текст разговорный или неформальный
+- Термин глубоко укоренился (нет широко признанного казахского аналога)
+- Технический/научный термин, где международная форма обеспечивает точность
+- Именованные объекты (торговые марки, названия продуктов)
+
+**Практические примеры:**
+
+| Домен | Форма займа | Казахский аналог | Рекомендация MT |
+|-------|------------|-----------------|----------------|
+| Юридический | — | заң (закон), сот (суд) | Использовать казахские формы |
+| Технологии | компьютер | дербес компьютер/есептеуіш | компьютер в общем; официальные документы используют Termincom |
+| Медицина | диагноз, операция | — | Использовать международные формы |
+| Транспорт | автобус, поезд | — | Казахских аналогов не установлено |
+| Современные технологии | смартфон, интернет | — | Международные формы доминируют |
+
+---
+
+## 20. «Қазақстандық» vs «Қазақ»: идентичность и чувствительность
 
 **Қазақ** (Qazaq):
-- Refers specifically to the **ethnic group** (Kazakh people, their culture, language)
-- Ethnicity marker: "Мен қазақпын" = "I am (an ethnic) Kazakh"
-- Language: "Қазақ тілі" = Kazakh language (of the Kazakh people)
+- Относится конкретно к **этнической группе** (казахский народ, его культура, язык)
+- Маркер этничности: «Мен қазақпын» = «Я (этнический) казах»
+- Язык: «Қазақ тілі» = казахский язык (казахского народа)
 
 **Қазақстандық** (Qazaqstandyq):
-- Refers to **citizens of Kazakhstan** regardless of ethnicity
-- Civic identity: "Мен қазақстандықпын" = "I am a Kazakhstani (citizen)"
-- Policy documents use this when addressing all citizens
-- Inclusive of ethnic Russians, Uzbeks, Koreans, Germans etc. living in Kazakhstan
+- Относится к **гражданам Казахстана** независимо от этничности
+- Гражданская идентичность: «Мен қазақстандықпын» = «Я гражданин Казахстана»
+- Политические документы используют это при обращении ко всем гражданам
+- Включает этнических русских, узбеков, корейцев, немцев и т.д., проживающих в Казахстане
 
-**Why this matters for MT:**
-- Russian "казахский" (Kazakh) can mean either — context-dependent
-- English "Kazakh" similarly ambiguous
-- Mistranslating "all citizens of Kazakhstan" as "қазақтар" (Kazakhs) is ethnically exclusionary
-- The 2026 constitutional debate specifically highlighted this: Kazakhstan's identity is "polysynthetic" combining ethnic and civic dimensions
-- Use **қазақстандық** for civic/national identity; **қазақ** for ethnic/linguistic identity
+**Почему это важно для MT:**
+- Русское «казахский» может означать оба варианта — зависит от контекста
+- Перевод «все граждане Казахстана» как «қазақтар» является этническим исключением
+- Конституционные дебаты 2026 г. специально выделили это
 
-**Related terms:**
-- **Қазақша** = "in Kazakh (language)" or "in the Kazakh way"
-- **Қазақстан** = the country Kazakhstan
-- **Шала қазақ** = "half-Kazakh" (pejorative/informal — used for Kazakhs who don't speak Kazakh)
-- **Нағыз қазақ** = "true/real Kazakh" (ideological claim about ethnic authenticity)
+**Связанные термины:**
+- **Қазақша** = «по-казахски» или «по-казахскому»
+- **Қазақстан** = страна Казахстан
+- **Шала қазақ** = «полуказах» (пренебрежительное/неформальное — для казахов, не говорящих по-казахски)
+- **Нағыз қазақ** = «настоящий казах» (идеологическое утверждение об этнической подлинности)
 
-### 6.4 Islamic Terminology in Kazakh Context
-
-Kazakhstan is predominantly Sunni Muslim (Hanafi school), but Islamic practice is "folk" rather than orthodox — nomadic Kazakh culture synthesized Islam with pre-Islamic Tengrist beliefs. This affects terminology:
-
-**Commonly used Islamic terms in everyday Kazakh:**
-
-| Term | Origin | Everyday usage |
-|---|---|---|
-| Алла | Arabic Allah | Common exclamation; "Алла-ай!" = "Oh my God!" |
-| Иншалла | Arabic Inshallah | "If God wills" — used casually |
-| Рахмет | Arabic Rahmat | "Thank you" (most common thank-you word) |
-| Мешіт | Arabic Masjid | Mosque |
-| Намаз | Persian Namaz | Prayer (5x daily) |
-| Ораза | Persian Rozah | Fasting/Ramadan fast |
-| Хала | Arabic Halal | "Permissible"; also "fine/okay" colloquially |
-| Иман | Arabic Iman | Faith; **has been desacralized** — now often means "morality/humanity" |
-| Дүние | Arabic Dunya | "The world/life" (secular meaning dominant) |
-
-**Key desacralization**: Many Arabic religious terms in Kazakh have lost their specifically religious meaning. "Иманды" (from Arabic iman = faith) now primarily means "a moral, decent person" rather than "a believer." MT systems trained on Arabic-Kazakh data may produce overly religious translations.
-
-**Modern Islamic revival**: Since the 1990s, there has been a revival of explicitly Islamic vocabulary. Terms that were previously archaic (used only in pre-revolutionary texts) have re-entered active use. MT systems trained on Soviet-era corpora will under-represent this vocabulary.
-
-**Translation notes for Qur'an-related text:**
-- Standard Kazakh translation of the Qur'an by Halifa Altay uses **Кур'ан Кәрім** (following Saudi/KFQPC convention)
-- Older Kazan Tatar/Soviet-era texts use **Хадис**, **Ислам** with slightly different transliterations
-- Term **Пайғамбар** = Prophet (can refer to any prophet, not just Muhammad)
-
-### 6.5 Soviet-Era vs Modern Naming Conventions
-
-**Personal names:**
-
-| Soviet-era naming patterns | Post-independence patterns |
-|---|---|
-| Russian first names with Kazakh surnames: Владимир Сейткали | Revived traditional Kazakh names: Болат, Айдар, Жансая |
-| Patronymics on Russian model: Ибрагимович | Kazakh patronymic: -ұлы (son of) / -қызы (daughter of): Ибрагімұлы, Ибрагімқызы |
-| Russian suffixed surnames: Сейтов, Ахметов | Traditional forms: Сейт, Ахмет (without Russian -ов/-ев) |
-
-**Patronymic/surname changes:** Since 2021, Kazakhstanis can legally change their Russified surnames to Kazakh forms. MT systems should handle both:
-- **Old form**: Назарбаев (surname with Russian -ев suffix)
-- **New form**: Назарбайұлы (Nazarbay's son) or Назарбаева → Назарбайқызы
-
-**Place names:**
-
-| Soviet/Russian name | Kazakh name | Status |
-|---|---|---|
-| Алма-Ата | Алматы | Official change 1993 |
-| Целиноград → Акмола → Астана → Нур-Султан | Астана (2022) | Reverted to Астана under Tokayev |
-| Гурьев | Атырау | Official since 1991 |
-| Чимкент | Шымкент | Official since 1993 |
-| Семипалатинск | Семей | Official since 2007 |
-| Усть-Каменогорск | Өскемен | Official since 1993 |
-
-**Note:** MT systems must handle all variants — both old Russian names (which appear in historical texts and in speech of older generation) and new Kazakh names.
-
-**Institutional naming:** Soviet-era institutions often had Russian-first names; modern equivalents have Kazakh-first names. State institutions are now officially named in Kazakh with Russian as secondary.
+**Правила для MT:**
+- «Қазақ» для этнического/лингвистического контекста; «Қазақстандық» для гражданского/национального контекста.
+- Никогда не использовать этнические термины, когда источник говорит «граждане» или «народ Казахстана».
 
 ---
 
-## 7. Practical Recommendations for Қазтілші
+## 21. Исламская терминология в казахском контексте
 
-### 7.1 Training Data Strategy
+Казахстан преимущественно суннитский мусульманский (ханафитская школа), но исламская практика «народная», а не ортодоксальная.
 
-**Priority 1: Domain-aware corpora**
-- Prioritize KazParC (371,902 human-translated sentences) as the core training resource — it is the highest-quality available parallel corpus
-- Supplement with Qazcorpora.kz for monolingual Kazakh (43M+ tokens)
-- For RU→KK specifically: build a Russian-Kazakh parallel corpus focused on government documents, legal texts, and news — these are the highest-frequency official use cases
+**Распространённые исламские термины в повседневном казахском:**
 
-**Priority 2: Termincom integration**
-- Integrate Termincom.kz (383,534 terms) as a forced translation lexicon for technical/official terminology
-- Create a domain classifier to activate appropriate Termincom term sets
-- Periodically sync with Termincom.kz for new approved terms (4,000+ per year)
+| Термин | Происхождение | Повседневное использование |
+|--------|-------------|--------------------------|
+| Алла | Арабский Allah | Распространённое восклицание; «Алла-ай!» = «О Боже!» |
+| Иншалла | Арабский Inshallah | «Если Богу угодно» — используется непринуждённо |
+| Рахмет | Арабский Rahmat | «Спасибо» (наиболее распространённое слово благодарности) |
+| Мешіт | Арабский Masjid | Мечеть |
+| Намаз | Персидский Namaz | Молитва (5 раз в день) |
+| Ораза | Персидский Rozah | Пост/рамазанский пост |
+| Хала | Арабский Halal | «Разрешённый»; разговорно «хорошо/нормально» |
+| Иман | Арабский Iman | Вера; **десакрализовано** — теперь часто означает «нравственность/человечность» |
+| Дүние | Арабский Dunya | «Мир/жизнь» (светское значение доминирует) |
 
-**Priority 3: Colloquial data**
-- The KazParC corpus is biased toward formal registers (legal 41% of tokens)
-- Augment with social media/conversational data for natural output
-- The MDBKD dataset (24.8M texts) provides good domain coverage
+**Ключевая десакрализация:** Многие арабские религиозные термины в казахском потеряли свои специфически религиозные значения. «Иманды» теперь прежде всего означает «моральный, порядочный человек», а не «верующий». MT, обученные на арабско-казахских данных, могут производить чрезмерно религиозные переводы.
 
-### 7.2 Morphological Processing Pipeline
+**Правила для MT:**
+- Исламские приветствия: **Ассалаумалайкүм** (формальное исламское приветствие) vs **Сәлем** (неформальное повседневное); зависит от контекста.
+- Всегда использовать принятые казахские формы: Алла (не Allah), Намаз (не Salat), Ораза (не Sawm).
 
-**Required components:**
+---
 
-1. **Morphological analyzer**: Use Apertium-kaz FST as the rule-based backbone
-2. **Neural disambiguation**: KazRoBERTa for contextual disambiguation (outperforms mBERT by 8.2pp)
-3. **Loanword detection**: Flag tokens not in native Kazakh lexicon for special harmony/suffix handling
-4. **Subword tokenization**: Use BPE or unigram LM tokenization that respects morpheme boundaries — avoid character-level or word-level only
+## 22. Советские vs современные топонимы и имена собственные
 
-**Critical**: A dedicated 50K BPE tokenizer trained on Kazakh (as in SozKZ, 2026) substantially outperforms multilingual tokenizers for topic classification and downstream tasks.
+### 22.1. Названия мест
 
-### 7.3 Key Quality Checks for MT Output
+| Советское/Русское название | Казахское название | Статус |
+|--------------------------|------------------|--------|
+| Алма-Ата | Алматы | Официальное изменение 1993 |
+| Целиноград → Акмола → Астана → Нур-Султан | Астана (2022) | Вернулись к Астана при Токаеве |
+| Гурьев | Атырау | Официальное с 1991 |
+| Чимкент | Шымкент | Официальное с 1993 |
+| Семипалатинск | Семей | Официальное с 2007 |
+| Усть-Каменогорск | Өскемен | Официальное с 1993 |
 
-**Check 1: Vowel harmony consistency**
-- All suffix vowels must harmonize with the preceding root
-- Detect violations: any suffix with a back vowel following a front-vowel root (or vice versa)
-- Exception list needed for: comitative (-мен/-бен/-пен — always front), Russian loanwords, international terms
+**Примечание:** MT должны обрабатывать оба варианта — как старые русские имена (которые появляются в исторических текстах и речи старшего поколения), так и новые казахские.
 
-**Check 2: Definite/Indefinite DO marking**
-- Input English/Russian "a/один/одна" → Kazakh nominative (indefinite DO)
-- Input English/Russian "the/этот/тот" → Kazakh accusative (definite DO)
-- Common MT error: applying accusative to all direct objects
+### 22.2. Личные имена и патронимы
 
-**Check 3: Case suffix allomorphy**
-- Dative: verify -ға/-ге/-қа/-ке selection based on final consonant voicing
-- Ablative: -дан/-ден/-тан/-тен/-нан/-нен selection
-- Genitive: proper possessive suffix triggering on head noun
+| Советский образец | Постнезависимый образец |
+|------------------|------------------------|
+| Русские имена с казахскими фамилиями: Владимир Сейткали | Возрождённые традиционные казахские имена: Болат, Айдар, Жансая |
+| Отчества по русской модели: Ибрагимович | Казахское патронимическое: -ұлы (сын) / -қызы (дочь): Ибрагімұлы, Ибрагімқызы |
+| Русифицированные фамилии: Сейтов, Ахметов | Традиционные формы: Сейт, Ахмет (без -ов/-ев) |
 
-**Check 4: Honorific consistency**
-- Detect source language formality level
-- Consistently apply сіз OR сен throughout a document
-- Do not mix formal/informal address within a single translation
+С 2021 г. казахстанцы могут юридически изменить свои русифицированные фамилии на казахские формы.
 
-**Check 5: SOV order**
-- Verify predicate is clause-final
-- Verify modifiers precede head nouns
-- Relative clauses must precede their head nouns (participle construction)
+**Правила для MT:**
+- Распознавать оба варианта: Назарбаев и Назарбайұлы как одну и ту же сущность.
+- Выражение «Нур-Султан/Астана»: всегда использовать Астана для текущих контекстов (с 2022).
 
-**Check 6: Converb selection**
-- Progressive: use -(I)p + otyr/jat/jür/tur (situational AUX)
-- Habitual: use habitual present suffix
-- Do not collapse all aspectual distinctions to simple past
+---
 
-### 7.4 Register and Formality Handling
+# Часть VI. Практические рекомендации для Қазтілші
 
-**Implement a register detector** for input texts:
-- Legal/official → apply full Termincom vocabulary, formal grammar
-- News/media → balanced register, international names unchanged
-- Conversational → accept code-switching patterns in input; output in natural colloquial register
-- Technical → domain-specific terminology from Termincom sector dictionaries
+---
 
-**Register markers in Russian to watch:**
-- Russian вы → formal сіз (default for most MT contexts)
-- Russian ты in clearly personal/informal text → сен
-- Russian formal titles → Kazakh honorific equivalents (ағай/апай where appropriate)
+## 23. Стратегия обучающих данных
 
-### 7.5 Handling Code-Switched Input
+**Приоритет 1: Корпуса с доменным разграничением**
+- Приоритизировать KazParC (371 902 предложения) как основной ресурс обучения — высочайшее доступное качество
+- Дополнить Qazcorpora.kz для монолингвального казахского (43M+ токенов)
+- Для RU→KK специально: строить параллельный корпус, сосредоточенный на государственных документах, юридических текстах, новостях
 
-**~75-77% of urban Kazakh speakers mix languages.** For an MT system, this means:
+**Приоритет 2: Интеграция Termincom**
+- Интегрировать Termincom.kz (383 534 термина) как принудительный переводной лексикон для технической/официальной терминологии
+- Создать доменный классификатор для активации соответствующих наборов терминов Termincom
+- Периодически синхронизировать с Termincom.kz (4000+ в год)
 
-- **RU→KK**: Source may already contain Kazakh words — detect and pass through, don't re-translate
-- **EN→KK**: Source may have Kazakh names/terms — handle as proper nouns
-- **Output normalization**: Decide policy — pure Kazakh output vs. code-switched natural Kazakh?
-  - Recommendation: Pure Kazakh output for formal register; optionally allow accepted Russian loanwords (компьютер, телефон) in informal register
+**Приоритет 3: Разговорные данные**
+- Корпус KazParC смещён к формальным регистрам (юридический = 41% токенов)
+- Дополнить данными социальных медиа/разговорного контента
+- Набор данных MDBKD (24.8M текстов) обеспечивает хорошее доменное покрытие
 
-**Шала қазақ avoidance**: Ensure the system doesn't produce stilted "translation Kazakh" (аударма қазақша) — the unnatural register produced by direct calquing of Russian syntax into Kazakh lexemes. This requires:
-- Native Kazakh syntactic patterns (converb chains, SOV order)
-- Avoiding Russian-style conjunction overuse
-- Using traditional Kazakh discourse markers
+---
 
-### 7.6 Script Handling
+## 24. Конвейер морфологической обработки
 
-**Current (2026) status**: Cyrillic primary for all official output.
+**Необходимые компоненты:**
 
-**Recommended architecture:**
-- Primary: Cyrillic output
-- Secondary module: Cyrillic↔Latin (2021 Qazaq Latin) transliteration
-- Optional: Cyrillic→Arabic (for Chinese Kazakh diaspora materials)
+1. **Морфологический анализатор:** Использовать Apertium-kaz FST как основу на основе правил
+2. **Нейронная дисамбигуация:** KazRoBERTa для контекстуальной дисамбигуации (превосходит mBERT на 8.2 п.п.)
+3. **Определение заимствований:** Помечать токены, не находящиеся в нативном казахском лексиконе, для специальной обработки гармонии/суффиксов
+4. **Субсловная токенизация:** Использовать BPE или unigram LM токенизацию, уважающую границы морфем
 
-**Latin alphabet (2021 version) character mapping for key Kazakh sounds:**
+**Ключевое:** Выделенный 50K BPE-токенизатор, обученный на казахском (как в SozKZ, 2026), существенно превосходит многоязычные токенизаторы.
 
-| Sound | Cyrillic | Latin (2021) |
-|---|---|---|
+**При генерации именных форм:**
+- Хранить два набора падежных аффиксов: стандартный и «после 3SG POSS»
+- Порядок: основа → мн.ч. → притяж. → падеж
+
+**При генерации глагольных форм:**
+- Порядок: основа → залог → NEG → тенс → личное окончание
+- Никогда не ставить NEG после тенсового аффикса
+
+---
+
+## 25. Контроль качества вывода MT
+
+**Проверка 1: Последовательность сингармонизма**
+- Все суффиксные гласные должны согласовываться по ряду с предшествующим корнем
+- Обнаруживать нарушения: любой суффикс с задней гласной после корня с передней гласной (или наоборот)
+- Список исключений: комитатив (-мен/-бен/-пен — всегда передний), русские заимствования, международные термины
+
+**Проверка 2: Маркировка определённого/неопределённого прямого дополнения**
+- Источник EN/RU «a/один/одна» → казахский именительный (неопределённое прямое дополнение)
+- Источник EN/RU «the/этот/тот» → казахский винительный (определённое прямое дополнение)
+
+**Проверка 3: Алломорфия суффикса падежа**
+- Дательный: верифицировать выбор -ға/-ге/-қа/-ке в зависимости от звонкости конечного согласного
+- Исходный: -дан/-ден/-тан/-тен/-нан/-нен
+- Родительный: надлежащий притяжательный суффикс на главном слове
+
+**Проверка 4: Последовательность вежливости**
+- Определять уровень формальности исходного языка
+- Последовательно применять сіз ИЛИ сен по всему документу
+- Не смешивать формальный/неформальный адрес в одном переводе
+
+**Проверка 5: Порядок слов SOV**
+- Верифицировать, что сказуемое находится в конце клаузы
+- Верифицировать, что модификаторы предшествуют главным словам
+- Относительные клаузы должны предшествовать своим главным словам (конструкция причастия)
+
+**Проверка 6: Выбор конверба**
+- Прогрессивное: использовать -(I)p + otyr/jat/jür/tur (ситуационный вспом.)
+- Привычное: использовать суффикс привычного настоящего
+- Не схлопывать все аспектуальные различия до простого прошедшего
+
+**Проверка 7: Специальные формы после 3SG POSS**
+- ACC → добавлять только -н, не -ны/-ні
+- DAT → -на/-не, не -ға/-ге
+- LOC → -нда/-нде
+- ABL → -нан/-нен
+
+---
+
+## 26. Обработка переключения кодов (code-switching)
+
+~75–77% городских казахоязычных носителей смешивают языки. Для MT это означает:
+
+- **RU→KK:** Источник уже может содержать казахские слова — обнаруживать и пропускать, не переводить повторно
+- **EN→KK:** Источник может содержать казахские имена/термины — обрабатывать как имена собственные
+- **Нормализация вывода:** Чистый казахский вывод для формального регистра; допускать принятые русские заимствования (компьютер, телефон) в неформальном регистре
+
+**Избегание шала қазақ:** Обеспечить, что система не производит скованный «аударма қазақша» (казахский с русскими синтаксическими паттернами):
+- Нативные казахские синтаксические паттерны (цепочки конвербов, порядок SOV)
+- Избегать избыточного использования союзов в русском стиле
+- Использовать традиционные казахские дискурсивные маркеры
+
+---
+
+## 27. Работа со скриптами
+
+**Текущий статус (2026):** Кириллица — основная для всего официального вывода.
+
+**Рекомендуемая архитектура:**
+- Основная: вывод кириллицей
+- Вторичный модуль: транслитерация кириллица↔латиница (2021 Qazaq Latin)
+- Опциональная: кириллица→арабица (для казахской диаспоры в Китае)
+
+**Сопоставление латинского алфавита (вариант 2021) для ключевых казахских звуков:**
+
+| Звук | Кириллица | Латиница (2021) |
+|------|-----------|----------------|
 | [æ] | ə/Ə | Ä ä |
 | [ʏ] | ү | Ü ü |
 | [ɣ] | ғ | Ğ ğ |
@@ -868,98 +1618,91 @@ Kazakhstan is predominantly Sunni Muslim (Hanafi school), but Islamic practice i
 | [q] | қ | Q q |
 | [χ] | х | H h |
 | [ʃ] | ш | Ş ş |
-| [ʒ] | ж | J j or Zh zh |
-
-### 7.7 Idiom and Phraseme Handling
-
-**Build a Kazakh phraseme lexicon** including:
-- Мақал-мәтел (proverbs) with their pragmatic meanings
-- Body-based idioms (жүрек/heart, аузы/mouth, қол/hand idioms)
-- Pastoral idioms (animal, nomadic life references)
-- Source: Kenesbayev's phraseological dictionary (available on Sozdikqor.kz)
-
-**MT approach for idioms:**
-- Detect fixed expressions using n-gram comparison against phraseme lexicon
-- Do not translate component-by-component
-- Provide cultural equivalent from Sozdikqor.kz phraseological database when available
-
-### 7.8 Islamic and Cultural Sensitivity
-
-**General policy:**
-- "Қазақ" for ethnic Kazakh context; "Қазақстандық" for civic/national context
-- Never use ethnic terms when source says "citizens" or "people of Kazakhstan"
-- Islamic greetings: **Ассалаумалайкүм** (formal Islamic greeting) vs. **Сәлем** (informal everyday); context-dependent
-- Common Islamic terms: always use accepted Kazakh forms (Алла not Allah; Намаз not Salat; Ораза not Sawm)
-- Modern Islamic revival vocabulary: build a lexicon of reactivated Arabic religious terms
-
-**Soviet-era naming:**
-- Recognize both Russian-suffixed (Ахметов) and Kazakh patronymic (Ахметұлы) forms as the same entity
-- Recognize both Soviet-era and modern place names
-- Handle Нур-Султан/Астана ambiguity (city was Нур-Султан 2019–2022, now Астана again)
-
-### 7.9 Evaluation Recommendations
-
-**Beyond BLEU:** BLEU significantly underestimates Kazakh MT quality due to agglutination. Use:
-- **ChrF**: Character n-gram F-score — more appropriate for morphologically rich languages
-- **COMET**: Neural-based MT evaluation with reference — better semantic assessment
-- **Human evaluation**: Native speaker fluency/adequacy judgment remains essential
-- **KazBench-KK**: Cultural knowledge benchmark for evaluating broader Kazakh understanding
-
-**Recommended test sets:**
-1. KazParC test set (human-translated, multi-domain)
-2. FLoRes-200 Kazakh test set (standard multilingual benchmark)
-3. Custom legal/administrative test set (given legal is 41% of KazParC tokens)
-4. Colloquial/social media test set (currently under-represented)
+| [ʒ] | ж | J j |
 
 ---
 
-## Summary of Critical Findings
+## 28. Обработка идиом и фразем
 
-| Issue | Priority | MT Impact |
-|---|---|---|
-| Agglutination with long affix chains | Critical | 25-34% of morphological errors |
-| Vowel harmony exceptions for loanwords | High | 18% of tokens are borrowings |
-| Nom. vs Acc. for definite/indefinite DO | High | Consistent category of error |
-| SOV reordering from SVO source | Critical | Fundamental structural mismatch |
-| Converb/auxiliary form selection | High | Aspect/modality nuance lost |
-| сіз vs сен register consistency | Medium | Social register violations |
-| Termincom vocabulary for official texts | High | Compliance and naturalness |
-| Қазақ vs Қазақстандық distinction | Medium | Cultural/political sensitivity |
-| Code-switching input handling | Medium | Especially for RU→KK |
-| Idiom/phraseme non-compositionality | Medium | Translation failures for set phrases |
-| Script: Cyrillic primary + Latin support | High | 2031 transition ongoing |
-| Date/number localization | Medium | Format differences from source |
+**Построить казахский лексикон фразем** включающий:
+- Мақал-мәтел (пословицы) с их прагматическими значениями
+- Идиомы на основе тела (жүрек/сердце, аузы/рот, қол/рука)
+- Пастбищные идиомы (ссылки на животных, кочевой образ жизни)
+- Источник: Фразеологический словарь Кенесбаева (доступен на Sozdikqor.kz)
+
+**Подход MT к идиомам:**
+- Обнаруживать фиксированные выражения через n-граммное сопоставление с лексиконом фразем
+- Не переводить компонент за компонентом
+- Предоставлять культурный эквивалент из фразеологической базы Sozdikqor.kz
 
 ---
 
-## Key Sources
+## 29. Оценка качества MT
 
-- **KazParC corpus and Tilmash MT system** (ISSAI, 2024): https://aclanthology.org/2024.lrec-main.842/
-- **KazMorphCorpus-2025 hybrid analyzer** (Baitenova et al., 2025): https://pmc.ncbi.nlm.nih.gov/articles/PMC12741073/
-- **LDC Kazakh Language Specific Peculiarities** (LDC, 2018): https://catalog.ldc.upenn.edu/docs/LDC2018S13/LSP_302_final.pdf
-- **A Grammar of Kazakh** (Dotton & Wagner, Duke): https://slaviccenters.duke.edu/sites/slaviccenters.duke.edu/files/file-attachments/kazakh-grammar.pdf
-- **Kazakh dialects regional variations** (Talkpal): https://talkpal.ai/culture/how-do-distinct-dialects-vary-across-the-different-regions-of-kazakhstan/
-- **Kazakh alphabets history** (Wikipedia): https://en.wikipedia.org/wiki/Kazakh_alphabets
-- **Code-switching patterns** (RUDN Journal, 2021): https://rudn.tlcjournal.org/issues/8(2)-01.html
-- **Modern and Traditional Kazakh Speech** (ERIC): https://files.eric.ed.gov/fulltext/EJ1475214.pdf
-- **Error analysis EN→KK MT** (ASLING TC44): https://asling.org/tc44/slides/TC44-Akmurzina-Error_Analysis_for_Machine_Translated_Text_from_English_into_Kazakh(v2-25nov).pdf
-- **Vowel harmony exceptions** (McCollum, Dartmouth): https://journals.dartmouth.edu/cgi-bin/WebObjects/Journals.woa/xmlpage/1/document/1133
-- **Law on Languages (1997, as amended 2025)**: https://adilet.zan.kz/eng/docs/Z970000151_
-- **Termincom.kz** (Republican Terminology Commission): https://termincom.kz
-- **Sozdikqor.kz** (Universal Kazakh dictionary): https://sozdikqor.kz
-- **Qazcorpora.kz** (National Kazakh corpus): https://qazcorpora.kz
-- **Apertium-kaz** (morphological analyzer): https://github.com/apertium/apertium-kaz
-- **KazRoBERTa** (language model): https://huggingface.co/kz-transformers/kaz-roberta-conversational
-- **SozKZ** (small Kazakh LM, 2026): https://arxiv.org/html/2603.20854v1
-- **KazBench-KK** (cultural benchmark): https://aclanthology.org/2025.fieldmatters-1.4.pdf
-- **TurkicNLP toolkit**: https://arxiv.org/html/2602.19174v4
-- **Arabic-Iranian borrowings in Kazakh** (RUDN, 2023): https://journals.rudn.ru/semiotics-semantics/article/view/34172
-- **Kazakh language policy** (Kazakhstan government): https://egov.kz/cms/en/articles/culture/kurs_kazakhskogo_yazika
-- **Dialect variations NUW study**: https://nur.nu.edu.kz/bitstreams/9c909a49-b298-444c-b0e1-962db6cd7e22/download
-- **Language policy 2023–2029 concept** (Eurasianet, 2024): https://eurasianet.org/kazakhstan-government-taking-action-to-promote-kazakh-language
-- **Cyrillic-Latin decolonization** (CABAR Asia, 2023): https://cabar.asia/en/the-role-of-transition-of-kazakh-language-from-cyrillic-alphabet-in-decolonisation
-- **Kazakh Future Tense Forms** (KazNU Philology): https://philart.kaznu.kz/index.php/1-FIL/article/download/3364/2776
-- **Kazakh idioms and English equivalents**: http://www.rusnauka.cz/pdf/286047.pdf
-- **Kazakh language policy thesis** (USC): https://scholarcommons.sc.edu/cgi/viewcontent.cgi?article=1689&context=senior_theses
-- **2026 Kazakh constitution language debate** (RFE/RL): https://www.rferl.org/a/kazakhstan-constitutional-referendum-toqaev-power-language-russian-status/33675122.html
-- **Kazakh proverbs cultural context** (Astana Times, 2025): https://astanatimes.com/2025/03/wisdom-in-words-enduring-power-of-kazakh-proverbs/
+**Помимо BLEU:** BLEU существенно недооценивает качество казахского MT из-за агглютинации. Использовать:
+- **ChrF**: F-оценка по символьным n-граммам — более подходящая для морфологически богатых языков
+- **COMET**: Нейронная оценка MT со ссылкой — лучшая семантическая оценка
+- **Оценка людьми**: Суждение носителей о беглости/адекватности остаётся необходимым
+- **KazBench-KK**: Культурный бенчмарк для оценки более широкого понимания казахского
+
+**Рекомендуемые тестовые наборы:**
+1. Тестовый набор KazParC (переведённый людьми, мультидоменный)
+2. Тестовый набор FLoRes-200 Kazakh (стандартный многоязычный бенчмарк)
+3. Пользовательский юридический/административный тестовый набор (юридический составляет 41% токенов KazParC)
+4. Разговорный/социальные медиа тестовый набор (в настоящее время недопредставлен)
+
+---
+
+## Сводная таблица критических выводов
+
+| Проблема | Приоритет | Влияние на MT |
+|---------|-----------|--------------|
+| Агглютинация с длинными цепочками аффиксов | Критический | 25–34% морфологических ошибок |
+| Исключения сингармонизма для заимствований | Высокий | ~18% токенов — заимствования |
+| Именительный vs винительный для определённых/неопределённых | Высокий | Постоянная категория ошибок |
+| Реорганизация SOV из источника SVO | Критический | Фундаментальное структурное несоответствие |
+| Выбор конверба/вспомогательного | Высокий | Потеря нюансов аспекта/модальности |
+| Специальные формы после 3SG POSS | Высокий | Систематические ошибки падежного оформления |
+| Последовательность сіз vs сен в регистре | Средний | Нарушения социального регистра |
+| Лексика Termincom для официальных текстов | Высокий | Соответствие и естественность |
+| Қазақ vs Қазақстандық | Средний | Культурно-политическая чувствительность |
+| Обработка переключения кодов на входе | Средний | Особенно для RU→KK |
+| Несоставность идиом/фразем | Средний | Ошибки перевода устойчивых выражений |
+| Скрипт: кириллица основная + поддержка латиницы | Высокий | Продолжается переход 2031 |
+| Локализация дат/чисел | Средний | Форматные различия с источником |
+| Причастные конструкции вместо «который» | Высокий | Частый и заметный тип ошибки |
+
+---
+
+## Источники
+
+- **Корпус KazParC и система MT Tilmash** (ISSAI, 2024): https://aclanthology.org/2024.lrec-main.842/
+- **Гибридный анализатор KazMorphCorpus-2025** (Байтенова и др., 2025): https://pmc.ncbi.nlm.nih.gov/articles/PMC12741073/
+- **LDC Казахские языковые особенности** (LDC, 2018): https://catalog.ldc.upenn.edu/docs/LDC2018S13/LSP_302_final.pdf
+- **Грамматика казахского языка** (Dotton & Wagner, Duke): https://slaviccenters.duke.edu/sites/slaviccenters.duke.edu/files/file-attachments/kazakh-grammar.pdf
+- **Диалектные вариации казахского** (Talkpal): https://talkpal.ai/culture/how-do-distinct-dialects-vary-across-the-different-regions-of-kazakhstan/
+- **Алфавиты казахского языка** (Википедия): https://en.wikipedia.org/wiki/Kazakh_alphabets
+- **Паттерны переключения кодов** (RUDN Journal, 2021): https://rudn.tlcjournal.org/issues/8(2)-01.html
+- **Современная и традиционная казахская речь** (ERIC): https://files.eric.ed.gov/fulltext/EJ1475214.pdf
+- **Анализ ошибок MT EN→KK** (ASLING TC44): https://asling.org/tc44/slides/TC44-Akmurzina-Error_Analysis_for_Machine_Translated_Text_from_English_into_Kazakh(v2-25nov).pdf
+- **Исключения сингармонизма** (McCollum, Dartmouth): https://journals.dartmouth.edu/cgi-bin/WebObjects/Journals.woa/xmlpage/1/document/1133
+- **Закон о языках (1997, с поправками 2025)**: https://adilet.zan.kz/eng/docs/Z970000151_
+- **Termincom.kz** (Республиканская терминологическая комиссия): https://termincom.kz
+- **Sozdikqor.kz** (Универсальный казахский словарь): https://sozdikqor.kz
+- **Qazcorpora.kz** (Национальный казахский корпус): https://qazcorpora.kz
+- **Apertium-kaz** (Морфологический анализатор): https://github.com/apertium/apertium-kaz
+- **KazRoBERTa** (Языковая модель): https://huggingface.co/kz-transformers/kaz-roberta-conversational
+- **SozKZ** (Малая казахская языковая модель, 2026): https://arxiv.org/html/2603.20854v1
+- **KazBench-KK** (Культурный бенчмарк): https://aclanthology.org/2025.fieldmatters-1.4.pdf
+- **Инструментарий TurkicNLP**: https://arxiv.org/html/2602.19174v4
+- **Арабско-иранские заимствования в казахском** (RUDN, 2023): https://journals.rudn.ru/semiotics-semantics/article/view/34172
+- **Языковая политика Казахстана** (egov.kz): https://egov.kz/cms/en/articles/culture/kurs_kazakhskogo_yazika
+- **Диалектные вариации** (NUW): https://nur.nu.edu.kz/bitstreams/9c909a49-b298-444c-b0e1-962db6cd7e22/download
+- **Концепция языковой политики 2023–2029** (Eurasianet): https://eurasianet.org/kazakhstan-government-taking-action-to-promote-kazakh-language
+- **Переход казахского на латиницу** (CABAR Asia, 2023): https://cabar.asia/en/the-role-of-transition-of-kazakh-language-from-cyrillic-alphabet-in-decolonisation
+- **Формы будущего времени казахского** (КазНУ Филология): https://philart.kaznu.kz/index.php/1-FIL/article/download/3364/2776
+- **Казахские идиомы и английские эквиваленты**: http://www.rusnauka.cz/pdf/286047.pdf
+- **Языковая политика Казахстана** (USC): https://scholarcommons.sc.edu/cgi/viewcontent.cgi?article=1689&context=senior_theses
+- **Конституционный референдум 2026 г.** (RFE/RL): https://www.rferl.org/a/kazakhstan-constitutional-referendum-toqaev-power-language-russian-status/33675122.html
+- **Казахские пословицы** (Astana Times, 2025): https://astanatimes.com/2025/03/wisdom-in-words-enduring-power-of-kazakh-proverbs/
+- **Kaztilshi Space и исследовательский тред** (Perplexity AI, 2026): https://www.perplexity.ai/search/prompt-dlia-uglublennogo-issle-pA3Q39QoTKKRq6rpOP6EGQ
