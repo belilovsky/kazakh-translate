@@ -157,46 +157,9 @@ export function getLastRun(): TestRunSummary | null {
 async function runSingleTest(tc: TestCase): Promise<TestResult> {
   const start = Date.now();
 
-  // Run individual engines
+  // Run the full pipeline once — engine results are available in `results`.
+  // This avoids calling all engines twice (separate loop + translateWithAll).
   const engineResults: EngineTestResult[] = [];
-  const settled = await Promise.allSettled(
-    engines.map((engine) => engine.translate(tc.text, tc.sourceLang, "kk"))
-  );
-
-  for (let i = 0; i < settled.length; i++) {
-    const outcome = settled[i];
-    const engineName = engines[i].name;
-
-    if (outcome.status === "fulfilled") {
-      const r = outcome.value;
-      const frags = tc.expectedFragments ?? [];
-      const found = frags.filter((f) =>
-        r.text?.toLowerCase().includes(f.toLowerCase())
-      ).length;
-
-      engineResults.push({
-        engine: engineName,
-        available: !r.error,
-        latencyMs: r.latencyMs,
-        text: r.text ?? "",
-        error: r.error,
-        fragmentsFound: found,
-        fragmentsTotal: frags.length,
-      });
-    } else {
-      engineResults.push({
-        engine: engineName,
-        available: false,
-        latencyMs: 0,
-        text: "",
-        error: outcome.reason?.message ?? "Engine threw",
-        fragmentsFound: 0,
-        fragmentsTotal: tc.expectedFragments?.length ?? 0,
-      });
-    }
-  }
-
-  // Run full pipeline (ensemble + self-eval)
   let ensembleText = "";
   let evalScore: number | null = null;
   let evalIssues: string[] = [];
@@ -204,18 +167,41 @@ async function runSingleTest(tc: TestCase): Promise<TestResult> {
   try {
     const { results, meta } = await translateWithAll(tc.text, tc.sourceLang, "kk");
     const best = selectBest(results);
-    ensembleText = best.text;
-    evalScore = meta.evalScore ?? null;
+    ensembleText = best?.text ?? "";
+    // Treat score -1 as "evaluation failed" (sentinel from self-eval.ts)
+    const rawScore = meta.evalScore ?? null;
+    evalScore = (rawScore !== null && rawScore >= 0) ? rawScore : null;
     evalIssues = meta.evalIssues ?? [];
+
+    const frags = tc.expectedFragments ?? [];
+
+    // Build per-engine results from allResults returned by translateWithAll
+    for (const r of results) {
+      if (r.engine === "ensemble") continue; // skip the ensemble entry
+      const found = frags.filter((f) =>
+        r.text?.toLowerCase().includes(f.toLowerCase())
+      ).length;
+      engineResults.push({
+        engine: r.engine,
+        available: !r.error && !!r.text,
+        latencyMs: r.latencyMs,
+        text: r.text ?? "",
+        error: r.error,
+        fragmentsFound: found,
+        fragmentsTotal: frags.length,
+      });
+    }
   } catch (err: any) {
     console.error(`Self-test pipeline error for ${tc.id}:`, err?.message);
   }
 
   const totalMs = Date.now() - start;
 
-  // A test passes if: at least 2 engines returned text AND eval score >= 7
+  // A test passes if: at least 2 engines returned text AND eval score is a real
+  // measurement (not null) AND score >= 7. evalScore=null means eval was unavailable
+  // so we cannot confirm quality — do not count as passed.
   const availableCount = engineResults.filter((r) => r.available).length;
-  const passed = availableCount >= 2 && (evalScore === null || evalScore >= 7);
+  const passed = availableCount >= 2 && evalScore !== null && evalScore >= 7;
 
   return {
     testId: tc.id,

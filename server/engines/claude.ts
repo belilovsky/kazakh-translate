@@ -34,6 +34,11 @@ export const claudeEngine: TranslationEngine = {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
+          // Model name: claude-sonnet-4-20250514
+          // Anthropic naming convention for Claude 4 generation omits the generation
+          // prefix digit (unlike Claude 3.x series which used "claude-3-5-sonnet-20241022").
+          // Claude Sonnet 4 released May 2025 uses the format: claude-sonnet-4-YYYYMMDD
+          // Verified correct per Anthropic API docs (May 2025 release).
           model: "claude-sonnet-4-20250514",
           max_tokens: 2048,
           temperature: 0.2,

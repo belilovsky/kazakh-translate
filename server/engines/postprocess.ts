@@ -31,10 +31,10 @@ async function getCritique(
     .map((v, i) => `[${v.engine}]: ${v.text}`)
     .join("\n");
 
-  try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), CRITIC_TIMEOUT_MS);
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), CRITIC_TIMEOUT_MS);
 
+  try {
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${geminiKey}`,
       {
@@ -71,7 +71,6 @@ async function getCritique(
       }
     );
 
-    clearTimeout(timeoutId);
     if (!response.ok) return null;
 
     const data = (await response.json()) as any;
@@ -84,6 +83,10 @@ async function getCritique(
     return text;
   } catch {
     return null; // Critic failure is non-fatal
+  } finally {
+    // Always clear the timeout to avoid resource leaks, whether fetch succeeds,
+    // returns !response.ok, or throws an exception (e.g. AbortError)
+    clearTimeout(timeoutId);
   }
 }
 

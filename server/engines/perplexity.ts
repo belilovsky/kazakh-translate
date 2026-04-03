@@ -21,7 +21,9 @@ export const perplexityEngine: TranslationEngine = {
 
     try {
       const srcLabel = sourceLang === "ru" ? "Russian" : "English";
-      const systemPrompt = getSystemPrompt(sourceLang, "concise");
+      // Use "detailed" to include the full 13-section KAZAKH_GRAMMAR_RULES block,
+      // consistent with all other LLM engines (openai, claude, gemini, etc.)
+      const systemPrompt = getSystemPrompt(sourceLang, "detailed");
 
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), TIMEOUT_MS);

@@ -16,11 +16,20 @@ export interface EngineStatus {
 }
 export interface PipelinePhase { id: string; label: string; }
 
+interface MQMError {
+  category: string;
+  type: string;
+  severity: string;
+  description: string;
+}
+
 interface EvalDetails {
   score?: number;
   issues?: string[];
   improved?: boolean;
   text?: string;
+  mqmScore?: number;
+  mqmErrors?: MQMError[];
 }
 
 interface PipelineVizProps {
@@ -343,16 +352,21 @@ export default function PipelineViz({
             <StageArrow label="Самооценка и улучшение" num={3} />
             <div className="mb-3">
               <Sec
-                title="Контроль качества (GPT-4o)"
+                title="MQM Контроль качества (GPT-4o)"
                 icon={<ShieldCheck className="h-3 w-3 text-emerald-500" />}
                 open={true}
                 accent={evalDetails.score >= 8 ? "emerald" : evalDetails.score >= 6 ? "amber" : "red"}
                 badge={
-                  <span className={`text-[10px] font-bold font-mono tabular-nums ${
-                    evalDetails.score >= 8 ? "text-emerald-500" : evalDetails.score >= 6 ? "text-amber-500" : "text-red-500"
-                  }`}>
-                    {evalDetails.score}/10
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className={`text-[10px] font-bold font-mono tabular-nums ${
+                      evalDetails.score >= 8 ? "text-emerald-500" : evalDetails.score >= 6 ? "text-amber-500" : "text-red-500"
+                    }`}>
+                      {evalDetails.score}/10
+                    </span>
+                    {evalDetails.mqmScore !== undefined && (
+                      <span className="text-[8px] text-muted-foreground/60 font-mono">MQM {evalDetails.mqmScore.toFixed(1)}</span>
+                    )}
+                  </div>
                 }
               >
                 <div className="space-y-2">
@@ -403,7 +417,27 @@ export default function PipelineViz({
                     </div>
                   )}
 
-                  {!selfEvalChanged && (
+                  {/* MQM Error breakdown */}
+                  {evalDetails.mqmErrors && evalDetails.mqmErrors.length > 0 && (
+                    <div className="rounded-md bg-muted/10 border border-border/20 px-2.5 py-2">
+                      <div className="text-[8px] font-bold text-muted-foreground uppercase tracking-wider mb-1.5">MQM ошибки</div>
+                      <div className="space-y-1">
+                        {evalDetails.mqmErrors.map((err, i) => {
+                          const sevColor = err.severity === "critical" ? "text-red-500 bg-red-500/10" : err.severity === "major" ? "text-amber-500 bg-amber-500/10" : "text-muted-foreground bg-muted/20";
+                          const catLabel: Record<string, string> = { accuracy: "Дәлдік", fluency: "Тіл", terminology: "Термин", style: "Стиль" };
+                          return (
+                            <div key={i} className="flex items-start gap-1.5 text-[9px]">
+                              <span className={`px-1 py-0.5 rounded text-[7px] font-bold uppercase ${sevColor} shrink-0`}>{err.severity}</span>
+                              <span className="text-muted-foreground shrink-0">{catLabel[err.category] ?? err.category}/{err.type}</span>
+                              <span className="text-foreground/70">{err.description}</span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+                  {!selfEvalChanged && (!evalDetails.mqmErrors || evalDetails.mqmErrors.length === 0) && (
                     <p className="text-[10px] text-muted-foreground/70 italic">Текст не требовал изменений – ensemble дал качественный результат</p>
                   )}
                 </div>

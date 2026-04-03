@@ -23,11 +23,14 @@ const allEngines: TranslationEngine[] = [
   tilmashEngine,
   mistralEngine,
   perplexityEngine,
-  deeplEngine,
+  // deeplEngine removed: DeepL does not support Kazakh (KK) as a target language
   yandexEngine,
 ];
 
 const ENGINE_ENV_KEYS: Record<string, string> = {
+  openai: "OPENAI_API_KEY",
+  gemini: "GEMINI_API_KEY",
+  tilmash: "HUGGINGFACE_API_KEY",
   deepl: "DEEPL_API_KEY",
   yandex: "YANDEX_API_KEY",
   claude: "CLAUDE_API_KEY",
@@ -76,6 +79,9 @@ export type ProgressCallback = (event: {
   evalImproved?: boolean;
   inputCount?: number;
   outputLength?: number;
+  /** MQM quality metrics */
+  mqmScore?: number;
+  mqmErrors?: Array<{ category: string; type: string; severity: string; description: string }>;
 }) => void;
 
 export async function translateWithAll(
@@ -125,15 +131,17 @@ export async function translateWithAll(
   const successCount = rawResults.filter(r => !r.error && r.text).length;
 
   // Phase 2: Critic + Ensemble
+  // Emit critic phase start; ensemble event is emitted AFTER critic resolves (see below)
   emit({ phase: "critic", detail: "Критик Gemini анализирует варианты...", inputCount: successCount });
-  emit({ phase: "ensemble", detail: "Ensemble GPT-4o синтезирует лучший перевод...", inputCount: successCount });
   const { result: ensembleRes, critique: critiqueText } = await postEditTranslation(text, sourceLang, rawResults, emit);
   let ensembleResult = ensembleRes;
 
-  // Emit critic result
+  // Emit critic result (critic has now resolved)
   if (critiqueText) {
     emit({ phase: "critic", detail: "Критик завершил анализ", critique: critiqueText });
   }
+  // Emit ensemble event AFTER critic resolves (Fix 11: correct SSE event sequencing)
+  emit({ phase: "ensemble", detail: "Ensemble GPT-4o синтезирует лучший перевод...", inputCount: successCount });
   // Emit ensemble result
   if (ensembleResult) {
     emit({
@@ -171,7 +179,7 @@ export async function translateWithAll(
         };
       }
 
-      // Emit self-eval details
+      // Emit self-eval details with MQM data
       emit({
         phase: "selfeval",
         detail: wasImproved ? "Текст улучшен" : "Текст не изменён",
@@ -179,6 +187,8 @@ export async function translateWithAll(
         evalIssues: evalResult.issues,
         evalImproved: wasImproved,
         text: wasImproved ? evalResult.finalText : undefined,
+        mqmScore: evalResult.mqmScore,
+        mqmErrors: evalResult.mqmErrors,
       });
     } catch (err: any) {
       console.error("Self-evaluation failed:", err?.message);
@@ -220,11 +230,13 @@ export async function translateWithAll(
 
 /**
  * Select the best result: ensemble first, then by priority order.
+ * Returns null if no results are available (all engines failed).
  */
-export function selectBest(results: TranslationResult[]): TranslationResult {
+export function selectBest(results: TranslationResult[]): TranslationResult | null {
   for (const engineName of PRIORITY_ORDER) {
     const result = results.find((r) => r.engine === engineName && !r.error && r.text);
     if (result) return result;
   }
-  return results[0];
+  // Fallback: any result with text, then first result, then null
+  return results.find(r => !r.error && r.text) ?? results[0] ?? null;
 }

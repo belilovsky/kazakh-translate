@@ -153,7 +153,7 @@ export default function TranslatePage() {
   const [engineTexts, setEngineTexts] = useState<Record<string, string>>({});
   const [critiqueText, setCritiqueText] = useState<string>("");
   const [ensembleText, setEnsembleText] = useState<string>("");
-  const [evalDetails, setEvalDetails] = useState<{ score?: number; issues?: string[]; improved?: boolean; text?: string }>({});
+  const [evalDetails, setEvalDetails] = useState<{ score?: number; issues?: string[]; improved?: boolean; text?: string; mqmScore?: number; mqmErrors?: Array<{ category: string; type: string; severity: string; description: string }> }>({});
 
   // Voice input
   const [isListening, setIsListening] = useState(false);
@@ -306,6 +306,8 @@ export default function TranslatePage() {
                   issues: data.evalIssues,
                   improved: data.evalImproved,
                   text: data.text,
+                  mqmScore: data.mqmScore,
+                  mqmErrors: data.mqmErrors,
                 });
               }
             } else if (eventType === "result") {

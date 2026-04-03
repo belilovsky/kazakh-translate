@@ -45,16 +45,31 @@ export async function registerRoutes(
     });
 
     const send = (event: string, data: any) => {
-      res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
+      // Guard against write-after-end to prevent exception storms on client disconnect
+      if (!res.writableEnded) {
+        res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
+      }
     };
 
     const onProgress: ProgressCallback = (evt) => {
       send("progress", evt);
     };
 
+    // SSE heartbeat: send a comment line every 10s to keep the connection alive
+    // through proxies/load-balancers that have idle timeout < pipeline duration
+    const heartbeat = setInterval(() => {
+      if (!res.writableEnded) res.write(": heartbeat\n\n");
+    }, 10000);
+
     try {
       const { results: allResults, meta } = await translateWithAll(text, sourceLang, targetLang, onProgress);
       const best = selectBest(allResults);
+
+      // Guard: if all engines failed and postprocess returned null, best will be null
+      if (!best || !best.text) {
+        send("error", { message: "Все движки вернули ошибки. Нет доступного перевода." });
+        return res.end();
+      }
 
       const saved = await storage.saveTranslation({
         sourceText: text,
@@ -77,6 +92,8 @@ export async function registerRoutes(
       });
     } catch (err: any) {
       send("error", { message: err?.message ?? "Internal server error" });
+    } finally {
+      clearInterval(heartbeat);
     }
 
     res.end();
@@ -101,6 +118,11 @@ export async function registerRoutes(
     try {
       const { results: allResults, meta } = await translateWithAll(text, sourceLang, targetLang);
       const best = selectBest(allResults);
+
+      // Guard: if all engines failed and postprocess returned null, best will be null
+      if (!best || !best.text) {
+        return res.status(503).json({ message: "Все движки вернули ошибки. Нет доступного перевода." });
+      }
 
       const saved = await storage.saveTranslation({
         sourceText: text,
@@ -376,8 +398,11 @@ export async function registerRoutes(
     return res.json(TEST_CASES);
   });
 
-  // Start periodic testing (every 6 hours)
-  startPeriodicTesting(6);
+  // Start periodic testing (every 6 hours) — only in production to avoid
+  // exhausting API rate limits during development with hot-reload
+  if (process.env.NODE_ENV === "production") {
+    startPeriodicTesting(6);
+  }
 
   return httpServer;
 }
