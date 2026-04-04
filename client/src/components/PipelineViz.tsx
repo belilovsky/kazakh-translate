@@ -114,16 +114,36 @@ function Sec({
 }
 
 /* ── Stage label with arrow ─────────────────────────────── */
-function StageArrow({ label, num }: { label: string; num: number }) {
+function StageArrow({ label, num, rules }: { label: string; num: number; rules?: string[] }) {
+  const [showRules, setShowRules] = useState(false);
   return (
-    <div className="flex items-center gap-2 my-3">
-      <div className="flex items-center gap-1.5">
-        <div className="w-5 h-5 rounded-md bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center ring-1 ring-primary/15">
-          <span className="text-[9px] font-bold font-display text-primary">{num}</span>
+    <div className="my-3">
+      <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5">
+          <div className="w-5 h-5 rounded-md bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center ring-1 ring-primary/15">
+            <span className="text-[9px] font-bold font-display text-primary">{num}</span>
+          </div>
+          <span className="text-[10px] font-display font-bold text-primary uppercase tracking-wider">{label}</span>
         </div>
-        <span className="text-[10px] font-display font-bold text-primary uppercase tracking-wider">{label}</span>
+        {rules && rules.length > 0 && (
+          <button
+            onClick={() => setShowRules(!showRules)}
+            className="text-[8px] text-primary/50 hover:text-primary transition-colors flex items-center gap-0.5"
+          >
+            <Zap className="h-2.5 w-2.5" />
+            {rules.length} правил
+            {showRules ? <ChevronUp className="h-2.5 w-2.5" /> : <ChevronDown className="h-2.5 w-2.5" />}
+          </button>
+        )}
+        <div className="flex-1 h-px bg-gradient-to-r from-primary/15 to-transparent" />
       </div>
-      <div className="flex-1 h-px bg-gradient-to-r from-primary/15 to-transparent" />
+      {showRules && rules && (
+        <div className="mt-1.5 ml-7 flex flex-wrap gap-1">
+          {rules.map((r, i) => (
+            <span key={i} className="text-[7px] px-1.5 py-0.5 rounded-full bg-primary/8 text-primary/70 border border-primary/10 whitespace-nowrap">{r}</span>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -249,7 +269,22 @@ export default function PipelineViz({
         {/* ═══════════════════════════════════════════════════════ */}
         {/* STAGE 1: ENGINES                                       */}
         {/* ═══════════════════════════════════════════════════════ */}
-        <StageArrow label="Параллельный перевод" num={1} />
+        <StageArrow label="Параллельный перевод" num={1} rules={[
+          "§1 Жалғамалы морфология",
+          "§2 Сингармонизм",
+          "§3 Дыбыс үндесімі",
+          "§4 SOV сөз тәртібі",
+          "§5 Антикалька",
+          "§6 Қазақ құрылымдар",
+          "§7 Регистр/стиль",
+          "§8 3SG POSS+септік",
+          "§9 Сан+жекеше",
+          "§10 Болымсыздық тәртібі",
+          "§11 Конверб паттерндер",
+          "§12 Есімше құрылымдар",
+          "§13 Топ-5 MT қателер",
+          "5 үлгі аударма",
+        ]} />
 
         {/* Engine grid */}
         <div className="mb-2">
@@ -313,7 +348,19 @@ export default function PipelineViz({
         {/* ═══════════════════════════════════════════════════════ */}
         {(critiqueText || ensembleText) && (
           <>
-            <StageArrow label="Анализ и синтез" num={2} />
+            <StageArrow label="Анализ и синтез" num={2} rules={[
+              "Критик: сингармонизм",
+              "Критик: калька",
+              "Критик: SOV тәртібі",
+              "Критик: септік/тәуелдік",
+              "Критик: ең жақсы нұсқа",
+              "Критик: 3SG POSS+септік",
+              "Критик: сан+жекеше",
+              "Критик: конвербтер",
+              "Критик: «который»→есімше",
+              "Критик: болымсыздық",
+              "Ensemble: синтез лучшего",
+            ]} />
             <div className="space-y-2 mb-3">
 
               {/* Critic */}
@@ -349,7 +396,18 @@ export default function PipelineViz({
         {/* ═══════════════════════════════════════════════════════ */}
         {evalDetails.score !== undefined && (
           <>
-            <StageArrow label="Самооценка и улучшение" num={3} />
+            <StageArrow label="Самооценка и улучшение" num={3} rules={[
+              "MQM: Accuracy (дәлдік)",
+              "MQM: Fluency (тіл)",
+              "MQM: Terminology",
+              "MQM: Style",
+              "3SG POSS+септік",
+              "Сан+жекеше",
+              "Конверб/есімше",
+              "Залог тәртібі",
+              "Болымсыздық",
+              "critical/major/minor",
+            ]} />
             <div className="mb-3">
               <Sec
                 title="MQM Контроль качества (GPT-4o)"
