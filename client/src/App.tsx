@@ -18,8 +18,8 @@ import AdminSettings from "@/pages/admin/Settings";
 function AppRouter() {
   return (
     <Switch>
-      <Route path="/" component={TranslatePage} />
-      <Route path="/v2" component={TranslateV2Page} />
+      <Route path="/" component={TranslateV2Page} />
+      <Route path="/v1" component={TranslatePage} />
       <Route path="/history" component={HistoryPage} />
       <Route path="/admin" component={AdminDashboard} />
       <Route path="/admin/translations" component={AdminTranslations} />
