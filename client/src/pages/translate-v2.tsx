@@ -466,9 +466,9 @@ export default function TranslateV2Page() {
   const charCount = sourceText.length;
   const maxChars = 5000;
 
-  const langOptions: { value: SourceLang; label: string; flag: string }[] = [
-    { value: "ru", label: "Русский", flag: "🇷🇺" },
-    { value: "en", label: "English", flag: "🇺🇸" },
+  const langOptions: { value: SourceLang; label: string }[] = [
+    { value: "ru", label: "Русский" },
+    { value: "en", label: "English" },
   ];
 
   const engineResults = result?.allResults?.filter((r) => r.engine !== "ensemble") ?? [];
@@ -563,7 +563,6 @@ export default function TranslateV2Page() {
                   }
                 `}
               >
-                <span className="text-base leading-none">{opt.flag}</span>
                 <span>{opt.label}</span>
                 {sourceLang === opt.value && (
                   <span className="absolute -bottom-[1px] left-3 right-3 h-[2px] bg-primary rounded-full" />
@@ -592,7 +591,6 @@ export default function TranslateV2Page() {
                 bg-primary/10 text-primary cursor-default"
               data-testid="lang-v2-kk"
             >
-              <span className="text-base leading-none">🇰🇿</span>
               <span>Қазақша</span>
               <span className="absolute -bottom-[1px] left-3 right-3 h-[2px] bg-primary rounded-full" />
             </button>
