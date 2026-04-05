@@ -7,6 +7,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/components/theme-provider";
 import NotFound from "@/pages/not-found";
 import TranslatePage from "@/pages/translate";
+import TranslateV2Page from "@/pages/translate-v2";
 import HistoryPage from "@/pages/history";
 import AdminDashboard from "@/pages/admin/Dashboard";
 import AdminTranslations from "@/pages/admin/Translations";
@@ -18,6 +19,7 @@ function AppRouter() {
   return (
     <Switch>
       <Route path="/" component={TranslatePage} />
+      <Route path="/v2" component={TranslateV2Page} />
       <Route path="/history" component={HistoryPage} />
       <Route path="/admin" component={AdminDashboard} />
       <Route path="/admin/translations" component={AdminTranslations} />
